@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   TALYNT LABS — DESIGN SYSTEM
+   Foundation: warm near-black + warm off-white.
+   One accent: Signal (vermillion). Used for interaction, highlights,
+   selected data and emphasis only. Never decoration.
+   ========================================================================== */
+
+@theme {
+  /* --- Ink: warm near-black scale (the system) --- */
+  --color-ink-950: #08080a;
+  --color-ink-900: #0b0b0d;
+  --color-ink-850: #101013;
+  --color-ink-800: #16161a;
+  --color-ink-700: #1e1e23;
+  --color-ink-600: #2a2a31;
+  --color-ink-500: #3b3b44;
+  --color-ink-400: #585863;
+  --color-ink-300: #82828f;
+  --color-ink-200: #aeaeba;
+  --color-ink-100: #d5d5dd;
+
+  /* --- Paper: warm off-white scale (the human) --- */
+  --color-paper-50: #fbf9f5;
+  --color-paper-100: #f5f2ea;
+  --color-paper-200: #ece7db;
+  --color-paper-300: #ddd6c6;
+  --color-paper-400: #c3bbaa;
+
+  /* --- Signal: the one accent --- */
+  --color-signal-300: #ff9370;
+  --color-signal-400: #ff6b3d;
+  --color-signal: #ff4d1c;
+  --color-signal-600: #e03d10;
+  --color-signal-700: #b52f08;
+
+  /* --- Type --- */
+  --font-display: var(--font-newsreader), "Times New Roman", serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* --- Editorial type scale (fluid) --- */
+  --text-micro: 0.6875rem;
+  --text-label: 0.75rem;
+  --text-body: 1.0625rem;
+  --text-lede: clamp(1.15rem, 0.95rem + 0.85vw, 1.6rem);
+  --text-h3: clamp(1.35rem, 1.1rem + 1.1vw, 2rem);
+  --text-h2: clamp(2.1rem, 1.35rem + 3.2vw, 4.4rem);
+  --text-h1: clamp(2.6rem, 1.3rem + 5.6vw, 7rem);
+  --text-mega: clamp(3rem, 0.8rem + 9vw, 10.5rem);
+
+  /* --- Motion --- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+
+  /* --- Rhythm --- */
+  --spacing-gutter: clamp(1.25rem, 4vw, 4rem);
+  --spacing-section: clamp(6rem, 12vh, 11rem);
+}
+
+:root {
+  --hairline-ink: color-mix(in oklab, var(--color-paper-100) 12%, transparent);
+  --hairline-paper: color-mix(in oklab, var(--color-ink-900) 14%, transparent);
+  color-scheme: dark;
+}
+
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  border-color: currentColor;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ink-900);
+  color: var(--color-paper-100);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.55;
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-signal);
+  color: var(--color-paper-50);
+}
+
+/* Visible, branded focus. Never removed. */
+:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   Utilities
+   -------------------------------------------------------------------------- */
+
+@utility wrap {
+  width: 100%;
+  max-width: 88rem;
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility wrap-narrow {
+  width: 100%;
+  max-width: 62rem;
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* Editorial display setting: large, tight, optically balanced. */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.028em;
+  font-variation-settings: "opsz" 48;
+}
+
+@utility display-sans {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+/* Machine voice: labels, signals, coordinates, indices. */
+@utility mono-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 450;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@utility mono-micro {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: 450;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@utility hairline {
+  border-color: var(--hairline-ink);
+}
+
+@utility tone-paper {
+  --hairline: var(--hairline-paper);
+  background-color: var(--color-paper-100);
+  color: var(--color-ink-900);
+}
+
+@utility tone-ink {
+  --hairline: var(--hairline-ink);
+  background-color: var(--color-ink-900);
+  color: var(--color-paper-100);
+}
+
+/* The signal marker: a literal highlight over what matters. */
+@utility marked {
+  background-image: linear-gradient(
+    to bottom,
+    transparent 58%,
+    color-mix(in oklab, var(--color-signal) 28%, transparent) 58%
+  );
+  padding-inline: 0.08em;
+}
+
+@utility grain {
+  position: relative;
+}
+
+@utility grain-layer {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 260 260' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion: honour it completely.
+   Every scroll-driven visual has a composed, static end-state.
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
