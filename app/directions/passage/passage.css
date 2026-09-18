@@ -1,0 +1,161 @@
+/* ==========================================================================
+   DIRECTION B — "PASSAGE"
+   A photography-led, cinematic alternative to the instrument-led direction A.
+   Tokens are scoped to .passage so this direction can live beside the other
+   without either one leaking into the shared design system.
+   ========================================================================== */
+
+.passage {
+  --pg-bone: #eae5da;
+  --pg-bone-deep: #ded7c7;
+  --pg-char: #14130f;
+  --pg-moss: #1b201a;
+  --pg-signal: #ff4d1c;
+  --pg-rule: rgba(20, 19, 15, 0.16);
+  --pg-rule-inv: rgba(234, 229, 218, 0.2);
+
+  --pg-display: var(--font-fraunces), Georgia, serif;
+  --pg-ui: var(--font-inter-tight), Helvetica, Arial, sans-serif;
+
+  background-color: var(--pg-bone);
+  color: var(--pg-char);
+  font-family: var(--pg-ui);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  letter-spacing: -0.011em;
+}
+
+.passage ::selection {
+  background: var(--pg-signal);
+  color: var(--pg-bone);
+}
+
+/* --- Type ---------------------------------------------------------------- */
+
+.pg-display {
+  font-family: var(--pg-display);
+  font-weight: 400;
+  font-variation-settings: "SOFT" 0, "WONK" 0;
+  line-height: 0.94;
+  letter-spacing: -0.026em;
+}
+
+.pg-kicker {
+  font-family: var(--pg-ui);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.pg-h1 {
+  font-size: clamp(2.9rem, 1.1rem + 7.2vw, 9rem);
+}
+.pg-h2 {
+  font-size: clamp(2.2rem, 1.2rem + 4vw, 5.5rem);
+}
+.pg-h3 {
+  font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.6rem);
+}
+.pg-lede {
+  font-size: clamp(1.1rem, 0.98rem + 0.6vw, 1.45rem);
+  line-height: 1.42;
+}
+
+/* --- Scene placeholders --------------------------------------------------
+   No photography is available in this environment, so every scene renders a
+   designed, art-directed stand-in carrying the shot it is briefing. Pass a
+   real `src` and the same component renders the photograph instead.
+   ------------------------------------------------------------------------- */
+
+.pg-scene {
+  /* No `position` here: it would override the Tailwind position utility the
+     call site passes, because this stylesheet loads after the utility layer. */
+  overflow: hidden;
+  background-color: var(--pg-bone-deep);
+  isolation: isolate;
+}
+
+.pg-scene-fill {
+  position: absolute;
+  inset: 0;
+}
+
+.pg-scene--dawn .pg-scene-fill {
+  background:
+    linear-gradient(104deg, transparent 26%, rgba(255, 246, 232, 0.22) 44%, transparent 60%),
+    radial-gradient(78% 60% at 16% 10%, #fbf2de 0%, transparent 58%),
+    radial-gradient(85% 100% at 86% 88%, rgba(255, 77, 28, 0.5) 0%, transparent 60%),
+    linear-gradient(158deg, #d5c8ac 0%, #8b7d62 46%, #2f2a1f 100%);
+}
+
+.pg-scene--dusk .pg-scene-fill {
+  background:
+    linear-gradient(96deg, transparent 32%, rgba(255, 200, 165, 0.16) 48%, transparent 62%),
+    radial-gradient(90% 65% at 76% 14%, rgba(255, 138, 88, 0.62) 0%, transparent 58%),
+    linear-gradient(200deg, #4a463a 0%, #262a20 46%, #0f0f0c 100%);
+}
+
+.pg-scene--room .pg-scene-fill {
+  background:
+    linear-gradient(100deg, transparent 28%, rgba(255, 255, 255, 0.2) 44%, transparent 58%),
+    radial-gradient(70% 55% at 26% 16%, #fcf7ea 0%, transparent 58%),
+    linear-gradient(168deg, #cdc2a8 0%, #8a7f65 46%, #3d372a 100%);
+}
+
+.pg-scene--field .pg-scene-fill {
+  background:
+    linear-gradient(112deg, transparent 30%, rgba(240, 244, 228, 0.16) 46%, transparent 60%),
+    radial-gradient(95% 85% at 82% 82%, rgba(44, 68, 48, 0.72) 0%, transparent 60%),
+    linear-gradient(145deg, #c9c2a8 0%, #7e8268 48%, #232a1f 100%);
+}
+
+.pg-scene-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 240 240' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+.pg-scene-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 42%, rgba(15, 14, 11, 0.55) 100%);
+}
+
+/* --- Marquee -------------------------------------------------------------- */
+
+.pg-marquee {
+  display: flex;
+  width: max-content;
+  animation: pg-slide 38s linear infinite;
+}
+
+@keyframes pg-slide {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-marquee {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* --- Rules and details ---------------------------------------------------- */
+
+.pg-rule {
+  border-color: var(--pg-rule);
+}
+
+.pg-card {
+  border-radius: 18px;
+  overflow: hidden;
+}

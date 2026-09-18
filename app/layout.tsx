@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
-import { Navigation } from "@/components/chrome/Navigation";
 import { Footer } from "@/components/chrome/Footer";
-import { ScrollProgress } from "@/components/chrome/ScrollProgress";
+import { SiteChrome } from "@/components/chrome/SiteChrome";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -99,16 +98,7 @@ export default function RootLayout({
           // Structured data is static, author-controlled content.
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-signal focus:px-5 focus:py-2.5 focus:text-sm focus:font-medium focus:text-paper-50"
-        >
-          Skip to content
-        </a>
-        <ScrollProgress />
-        <Navigation />
-        <main id="main">{children}</main>
-        <Footer />
+        <SiteChrome footer={<Footer />}>{children}</SiteChrome>
       </body>
     </html>
   );
