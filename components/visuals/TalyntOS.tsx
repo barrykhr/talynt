@@ -128,9 +128,9 @@ export function TalyntOS() {
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="display text-(length:--text-h3)">
+                  <h3 className="display text-(length:--text-h3)">
                     {candidate.ref}
-                  </p>
+                  </h3>
                   <p className="mt-1.5 text-[0.9rem] opacity-55">
                     {candidate.headline}
                   </p>
@@ -160,6 +160,22 @@ export function TalyntOS() {
 
                 <ReasoningPanel candidate={candidate} />
               </div>
+
+              <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-paper-100/10 pt-6 sm:grid-cols-4">
+                {[
+                  { label: "Last conversation", value: "3 days ago" },
+                  { label: "Evaluated by", value: "Search lead" },
+                  { label: "Shared with client", value: "Yes" },
+                  { label: "Next step", value: "Client review" },
+                ].map((item) => (
+                  <div key={item.label}>
+                    <dt className="mono-micro opacity-30">{item.label}</dt>
+                    <dd className="mt-1.5 text-[0.82rem] opacity-70">
+                      {item.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </motion.div>
           </AnimatePresence>
         </div>

@@ -81,7 +81,7 @@ export function CompatibilityGrid() {
         </div>
       </div>
 
-      <ul className="flex flex-col gap-8">
+      <ul className="flex flex-col gap-7">
         {DIMENSIONS.map((dimension, i) => {
           const gap = Math.abs(dimension.environment - dimension.candidate);
           const wide = gap > 20;
@@ -151,7 +151,9 @@ export function CompatibilityGrid() {
               <p
                 className={cx(
                   "mt-3 max-w-2xl text-[0.86rem] leading-[1.6] transition-opacity duration-500",
-                  wide ? "text-signal-300 opacity-90" : "opacity-0 group-hover:opacity-55",
+                  wide
+                    ? "text-signal-300 opacity-90"
+                    : "opacity-45 group-hover:opacity-70",
                 )}
               >
                 {dimension.note}

@@ -27,7 +27,8 @@ export function CTAButton({
   className,
   trailing = "arrow",
 }: CTAButtonProps) {
-  const isAnchor = href.startsWith("#") || href.startsWith("/#");
+  // In-page anchors stay plain anchors; anything that changes route uses Link.
+  const isAnchor = href.startsWith("#");
 
   const content = (
     <>

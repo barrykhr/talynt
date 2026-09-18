@@ -84,6 +84,15 @@ export function TalentUniverse({
   const inView = useInView(ref, { once: false, amount: 0.45 });
   const reduced = useReducedMotion();
   const [paused, setPaused] = useState(false);
+  const settled = useRef(false);
+
+  // With reduced motion we don't animate the reduction — we show where it ends,
+  // so the point still lands. Stepping back through it stays available.
+  useEffect(() => {
+    if (!reduced || !inView || settled.current) return;
+    settled.current = true;
+    onStageChange(SOURCING_STAGES.length - 1);
+  }, [reduced, inView, onStageChange]);
 
   // Runs through the reduction once, then rests. It does not loop forever.
   useEffect(() => {
@@ -101,7 +110,7 @@ export function TalentUniverse({
       ref={ref}
       onPointerEnter={() => setPaused(true)}
       onPointerLeave={() => setPaused(false)}
-      className="relative aspect-4/3 w-full rounded-lg border border-current/12 bg-ink-850/50 p-6 sm:aspect-16/11"
+      className="relative aspect-4/3 w-full overflow-hidden rounded-lg border border-current/12 bg-ink-850/50 p-6 sm:aspect-16/11"
     >
       <div className="absolute inset-x-6 top-5 flex items-baseline justify-between">
         <span className="mono-micro opacity-40">Sourcing field</span>
@@ -110,7 +119,8 @@ export function TalentUniverse({
         </span>
       </div>
 
-      <div className="absolute inset-0" aria-hidden="true">
+      {/* Inset so the field never crosses the panel's own labels. */}
+      <div className="absolute inset-x-6 top-14 bottom-16" aria-hidden="true">
         {Array.from({ length: TOTAL }).map((_, i) => {
           const survives = i < active.dots;
           const base = basePosition(i);

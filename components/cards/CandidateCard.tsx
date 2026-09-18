@@ -30,9 +30,15 @@ export function CandidateCard({
           : "border-current/12 hover:border-current/30 hover:bg-paper-100/[0.03]",
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <span className="font-mono text-[0.8rem] tracking-wide tabular-nums">
-          {candidate.ref}
+      <span className="block font-mono text-[0.8rem] tracking-wide tabular-nums">
+        {candidate.ref}
+      </span>
+      <span className="mt-2.5 block text-[0.9rem] leading-snug opacity-75">
+        {candidate.headline}
+      </span>
+      <span className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <span className="mono-micro opacity-35">
+          {candidate.location} · {candidate.tenure}
         </span>
         <span
           className={cx(
@@ -42,13 +48,7 @@ export function CandidateCard({
         >
           {candidate.status}
         </span>
-      </div>
-      <p className="mt-2.5 text-[0.9rem] leading-snug opacity-75">
-        {candidate.headline}
-      </p>
-      <p className="mono-micro mt-3 opacity-35">
-        {candidate.location} · {candidate.tenure}
-      </p>
+      </span>
     </button>
   );
 }

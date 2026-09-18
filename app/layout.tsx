@@ -86,6 +86,13 @@ export default function RootLayout({
       lang="en"
       className={`${geist.variable} ${geistMono.variable} ${newsreader.variable}`}
     >
+      <head>
+        {/* Without JavaScript the scroll-reveal never fires, so make sure the
+            content is still there for readers and crawlers that don't run it. */}
+        <noscript>
+          <style>{`[style*="opacity:0"],[style*="opacity: 0"]{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
+      </head>
       <body>
         <script
           type="application/ld+json"

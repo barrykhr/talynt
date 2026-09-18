@@ -77,12 +77,12 @@ export function Navigation() {
           </ul>
 
           <div className="flex items-center gap-3">
-            <a
+            <Link
               href="/#contact"
               className="hidden rounded-full bg-paper-100 px-5 py-2.5 text-[0.88rem] font-medium text-ink-900 transition-colors duration-300 hover:bg-signal hover:text-paper-50 sm:inline-flex"
             >
               Build your team
-            </a>
+            </Link>
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
@@ -140,13 +140,13 @@ export function Navigation() {
               ))}
             </ul>
             <div className="flex flex-col gap-6">
-              <a
+              <Link
                 href="/#contact"
                 onClick={() => setOpen(false)}
                 className="inline-flex w-full items-center justify-center gap-3 rounded-full bg-signal px-7 py-4 font-medium text-paper-50"
               >
                 Build your team <span aria-hidden="true">→</span>
-              </a>
+              </Link>
               <p className="mono-micro text-paper-100/40">
                 Talent intelligence, built for hiring.
               </p>

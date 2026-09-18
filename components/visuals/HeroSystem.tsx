@@ -58,7 +58,7 @@ function spawn(i: number, fromLeft = true): Particle {
     speed: 0.00055 + Math.random() * 0.0012,
     drift: (Math.random() - 0.5) * 0.28,
     phase: Math.random() * Math.PI * 2,
-    size: 0.9 + Math.random() * 1.7,
+    size: 1 + Math.random() * 1.9,
     name: i % SIGNAL_NAMES.length,
     state: "noise",
     alpha: 0,
@@ -91,7 +91,7 @@ export function HeroSystem() {
     let lastLog = 0;
     let nodePulse = 0;
 
-    const particles: Particle[] = Array.from({ length: 78 }, (_, i) =>
+    const particles: Particle[] = Array.from({ length: 108 }, (_, i) =>
       spawn(i, false),
     );
 
@@ -195,9 +195,13 @@ export function HeroSystem() {
             }
           }
         } else if (p.state === "resolved") {
-          // Converge toward the decision node.
+          // Converge toward the decision node, and end there.
           p.y += (0.5 - p.y) * 0.03;
           p.trail = Math.min(1, p.trail + 0.06);
+          if (p.x >= NODE_X) {
+            p.state = "absorbed";
+            nodePulse = 1;
+          }
         } else {
           p.alpha -= 0.05;
         }
@@ -218,7 +222,8 @@ export function HeroSystem() {
           if (dist < 130) boost = (1 - dist / 130) ** 2;
         }
 
-        if (p.state === "resolved") {
+        // A signal that has reached the node keeps its colour as it dissolves.
+        if (p.state === "resolved" || (p.state === "absorbed" && p.trail > 0)) {
           if (p.trail > 0) {
             const tail = ctx.createLinearGradient(cx - 60, cy, cx, cy);
             tail.addColorStop(0, "rgba(255,77,28,0)");
@@ -235,7 +240,7 @@ export function HeroSystem() {
           ctx.arc(cx, cy, 2.4, 0, Math.PI * 2);
           ctx.fill();
         } else {
-          const base = p.state === "absorbed" ? 0.12 : 0.3;
+          const base = p.state === "absorbed" ? 0.14 : 0.38;
           ctx.fillStyle = `rgba(245,242,234,${Math.max(0, (base + boost * 0.65) * p.alpha)})`;
           ctx.beginPath();
           ctx.arc(cx, cy, p.size + boost * 1.6, 0, Math.PI * 2);
@@ -321,16 +326,16 @@ export function HeroSystem() {
 
       {/* Instrument annotations — the DOM keeps the typography crisp. */}
       <div className="pointer-events-none absolute inset-0 select-none">
-        <span className="mono-micro absolute top-0 left-0 opacity-35">
+        <span className="mono-micro absolute top-0 left-0 hidden opacity-35 sm:block">
           Talent market
         </span>
-        <span className="mono-micro absolute bottom-0 left-0 opacity-35">
+        <span className="mono-micro absolute bottom-0 left-0 hidden opacity-35 sm:block">
           Noise
         </span>
-        <span className="mono-micro absolute top-0 left-[46%] -translate-x-1/2 text-center whitespace-nowrap text-signal">
+        <span className="mono-micro absolute top-0 left-0 whitespace-nowrap text-signal sm:left-[46%] sm:-translate-x-1/2 sm:text-center">
           Intelligence
         </span>
-        <span className="mono-micro absolute top-0 right-0 opacity-35">
+        <span className="mono-micro absolute top-0 right-0 hidden opacity-35 sm:block">
           Decision
         </span>
         <div className="absolute right-0 bottom-0 text-right">

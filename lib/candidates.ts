@@ -103,6 +103,7 @@ export const CANDIDATES: Candidate[] = [
     skills: ["React", "Node", "GraphQL", "AWS"],
     reasoning: [
       "Technically the closest match to the current stack and the fastest likely ramp.",
+      "Has worked under a VP Engineering with a similar operating style, which is the relationship this role lives or dies on.",
     ],
     watchFor:
       "Compensation expectation sits above the band as written. We have raised it rather than waiting for offer stage.",
