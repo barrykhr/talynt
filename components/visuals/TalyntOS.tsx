@@ -49,7 +49,7 @@ export function TalyntOS() {
         <span className="mono-micro opacity-35">Recruiter workspace</span>
       </div>
 
-      <div className="grid lg:grid-cols-[13rem_minmax(0,17rem)_minmax(0,1fr)]">
+      <div className="grid min-w-0 lg:grid-cols-[13rem_minmax(0,17rem)_minmax(0,1fr)]">
         {/* Sidebar */}
         <nav
           aria-label="TALYNT OS navigation"
@@ -80,7 +80,7 @@ export function TalyntOS() {
         </nav>
 
         {/* Shortlist column */}
-        <div className="border-b border-paper-100/10 lg:border-r lg:border-b-0">
+        <div className="min-w-0 border-b border-paper-100/10 lg:border-r lg:border-b-0">
           <div className="border-b border-paper-100/10 px-4 py-4">
             <p className="mono-micro text-signal">{ROLE_CONTEXT.title}</p>
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
@@ -117,7 +117,7 @@ export function TalyntOS() {
         </div>
 
         {/* Candidate intelligence */}
-        <div className="p-5 sm:p-7">
+        <div className="min-w-0 p-5 sm:p-7">
           <AnimatePresence mode="wait">
             <motion.div
               key={candidate.id}

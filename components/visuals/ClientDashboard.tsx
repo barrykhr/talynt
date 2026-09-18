@@ -83,8 +83,8 @@ export function ClientDashboard() {
         </span>
       </div>
 
-      <div className="grid lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]">
-        <div className="border-b border-paper-100/10 p-5 sm:p-7 lg:border-r lg:border-b-0">
+      <div className="grid min-w-0 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]">
+        <div className="min-w-0 border-b border-paper-100/10 p-5 sm:p-7 lg:border-r lg:border-b-0">
           <div className="mb-5 flex items-baseline justify-between">
             <span className="mono-micro opacity-40">Open roles</span>
             <span className="font-mono text-[1.6rem] leading-none tabular-nums opacity-85">
@@ -129,7 +129,7 @@ export function ClientDashboard() {
           </ul>
         </div>
 
-        <div className="p-5 sm:p-7">
+        <div className="min-w-0 p-5 sm:p-7">
           <AnimatePresence mode="wait">
             <motion.div
               key={role.id}
