@@ -2,6 +2,7 @@ import { Section } from "@/components/primitives/Section";
 import { SectionHeader } from "@/components/primitives/SectionHeader";
 import { Reveal } from "@/components/primitives/Reveal";
 import { TalyntOS } from "@/components/visuals/TalyntOS";
+import { Clip } from "@/components/primitives/Clip";
 
 const CAPABILITIES = [
   { label: "Sourcing", note: "Search across the market, not just the inbox." },
@@ -45,7 +46,25 @@ export function Intelligence() {
           </Reveal>
         </div>
 
-        <Reveal delay={0.1} className="mt-16">
+        {/* The product being written, immediately before the product itself. */}
+        <Reveal delay={0.08} className="mt-16">
+          <div className="overflow-hidden rounded-lg border border-paper-100/12 bg-ink-900">
+            <div className="flex items-center justify-between gap-4 border-b border-paper-100/10 px-5 py-3">
+              <span className="mono-micro text-signal">Built in-house</span>
+              <span className="mono-micro opacity-30">Used on every search</span>
+            </div>
+            <div className="h-[clamp(8rem,13vw,13rem)] w-full">
+              <Clip
+                src="/media/os-typing"
+                poster="/media/os-typing-poster.jpg"
+                fit="contain"
+                label="An editor window with a line of code being typed out."
+              />
+            </div>
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.1} className="mt-4">
           <TalyntOS />
         </Reveal>
 
