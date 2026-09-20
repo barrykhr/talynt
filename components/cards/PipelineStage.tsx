@@ -21,7 +21,7 @@ export function PipelineStage({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="mono-micro opacity-40">{stage}</span>
+        <span className="mono-micro text-fg-40">{stage}</span>
       </div>
       <span
         className={cx(
@@ -58,11 +58,11 @@ export function DashboardMetric({
 }) {
   return (
     <div className="rounded-md border border-current/12 p-5">
-      <p className="mono-micro opacity-40">{label}</p>
+      <p className="mono-micro text-fg-40">{label}</p>
       <p className="mt-3 font-mono text-[clamp(1.7rem,3vw,2.4rem)] leading-none tabular-nums">
         {value}
       </p>
-      {hint && <p className="mt-3 text-[0.82rem] leading-snug opacity-50">{hint}</p>}
+      {hint && <p className="mt-3 text-[0.82rem] leading-snug text-fg-50">{hint}</p>}
     </div>
   );
 }

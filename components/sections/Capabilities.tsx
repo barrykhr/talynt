@@ -105,12 +105,12 @@ export function Capabilities() {
                         <div className="grid gap-8 pb-9 md:grid-cols-[1fr_1fr] md:pl-[4.5rem]">
                           <ul className="flex flex-wrap gap-x-8 gap-y-3">
                             {area.items.map((item) => (
-                              <li key={item} className="text-[1.05rem] opacity-80">
+                              <li key={item} className="text-[1.05rem] text-fg-80">
                                 {item}
                               </li>
                             ))}
                           </ul>
-                          <p className="max-w-md text-[0.94rem] leading-[1.6] opacity-50">
+                          <p className="max-w-md text-[0.94rem] leading-[1.6] text-fg-50">
                             {area.note}
                           </p>
                         </div>

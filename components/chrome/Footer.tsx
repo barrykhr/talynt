@@ -44,7 +44,7 @@ export function Footer() {
                 <p className="mono-micro mt-2 text-signal">Labs</p>
               </div>
             </div>
-            <p className="display mt-8 max-w-sm text-(length:--text-h3) opacity-80">
+            <p className="display mt-8 max-w-sm text-(length:--text-h3) text-fg-80">
               Talent intelligence, built for hiring.
             </p>
           </div>
@@ -52,7 +52,7 @@ export function Footer() {
           <div className="grid grid-cols-2 gap-10 sm:grid-cols-3">
             {COLUMNS.map((column) => (
               <nav key={column.title} aria-label={column.title}>
-                <p className="mono-micro mb-5 opacity-40">{column.title}</p>
+                <p className="mono-micro mb-5 text-fg-40">{column.title}</p>
                 <ul className="flex flex-col gap-3">
                   {column.links.map((link) => (
                     <li key={link.label}>
@@ -71,7 +71,7 @@ export function Footer() {
         </div>
 
         <div className="mt-20 flex flex-col gap-6 border-t border-paper-100/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="mono-micro opacity-40">
+          <p className="mono-micro text-fg-40">
             © {new Date().getFullYear()} TALYNT LABS. All rights reserved.
           </p>
           <div className="flex items-center gap-7">
@@ -79,7 +79,7 @@ export function Footer() {
               href="https://www.linkedin.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="mono-micro opacity-65 transition-opacity duration-300 hover:opacity-100"
+              className="mono-micro text-fg-65 transition-opacity duration-300 hover:opacity-100"
             >
               LinkedIn ↗
             </a>

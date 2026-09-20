@@ -24,13 +24,13 @@ export function HiringContextCard({
       )}
     >
       <div className="flex items-baseline justify-between gap-4">
-        <span className="mono-micro opacity-45">{label}</span>
+        <span className="mono-micro text-fg-45">{label}</span>
         <span className="mono-micro text-signal tabular-nums opacity-0 transition-opacity duration-500 group-hover:opacity-100">
           {index}
         </span>
       </div>
       <p className="mt-6 text-[1.02rem] leading-[1.45]">{question}</p>
-      <p className="mt-4 text-[0.86rem] leading-[1.6] opacity-55">{detail}</p>
+      <p className="mt-4 text-[0.86rem] leading-[1.6] text-fg-55">{detail}</p>
     </article>
   );
 }

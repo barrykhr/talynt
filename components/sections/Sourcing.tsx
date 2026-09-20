@@ -59,13 +59,13 @@ export function Sourcing() {
                         <span className="text-(length:--text-h3) font-display leading-tight">
                           {item.label}
                         </span>
-                        <span className="font-mono text-[0.85rem] tabular-nums opacity-70">
+                        <span className="font-mono text-[0.85rem] tabular-nums text-fg-70">
                           {item.count}
                         </span>
                       </span>
                       <span
                         className={cx(
-                          "mt-2 block max-w-md text-[0.9rem] leading-[1.55] opacity-60 transition-all duration-500",
+                          "mt-2 block max-w-md text-[0.9rem] leading-[1.55] text-fg-60 transition-all duration-500",
                           isActive
                             ? "max-h-24 opacity-60"
                             : "max-h-0 overflow-hidden opacity-0",
@@ -82,7 +82,7 @@ export function Sourcing() {
 
           <div className="lg:sticky lg:top-32 lg:self-start">
             <TalentUniverse stage={stage} onStageChange={onStageChange} />
-            <p className="mono-micro mt-5 opacity-40">
+            <p className="mono-micro mt-5 text-fg-40">
               Illustrative. Volumes vary by role, market and mandate.
             </p>
           </div>

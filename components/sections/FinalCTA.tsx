@@ -76,7 +76,7 @@ export function FinalCTA() {
         <div>
           <Reveal className="mb-10 flex items-baseline gap-4">
             <span className="mono-micro text-signal">16</span>
-            <span className="mono-micro opacity-50">Start a search</span>
+            <span className="mono-micro text-fg-50">Start a search</span>
           </Reveal>
           <Reveal delay={0.05}>
             <h2 id="contact-heading" className="display text-(length:--text-h2)">
@@ -85,14 +85,14 @@ export function FinalCTA() {
             </h2>
           </Reveal>
           <Reveal delay={0.12}>
-            <p className="mt-9 max-w-md text-(length:--text-lede) leading-[1.45] opacity-65">
+            <p className="mt-9 max-w-md text-(length:--text-lede) leading-[1.45] text-fg-65">
               Tell us what you&rsquo;re building, what you&rsquo;re hiring for and
               where you need help.
             </p>
           </Reveal>
           <Reveal delay={0.2}>
             <div className="mt-12 border-t border-ink-900/15 pt-8">
-              <p className="mono-micro mb-3 opacity-45">Or write to us directly</p>
+              <p className="mono-micro mb-3 text-fg-45">Or write to us directly</p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
                 className="display text-(length:--text-h3) underline decoration-signal decoration-1 underline-offset-8 transition-colors duration-300 hover:text-signal"
@@ -118,7 +118,7 @@ export function FinalCTA() {
                 <div key={field.name} className="flex flex-col gap-2.5">
                   <label
                     htmlFor={field.name}
-                    className="mono-micro flex items-center gap-2 opacity-50"
+                    className="mono-micro flex items-center gap-2 text-fg-50"
                   >
                     {field.label}
                     {field.required && (
@@ -139,7 +139,7 @@ export function FinalCTA() {
               ))}
 
               <div className="flex flex-col gap-2.5">
-                <label htmlFor="message" className="mono-micro opacity-50">
+                <label htmlFor="message" className="mono-micro text-fg-50">
                   Message
                 </label>
                 <textarea
@@ -169,7 +169,7 @@ export function FinalCTA() {
                     →
                   </span>
                 </button>
-                <p className="mono-micro max-w-[18rem] opacity-40">
+                <p className="mono-micro max-w-[18rem] text-fg-40">
                   We reply to every enquiry, including the ones we can&rsquo;t help
                   with.
                 </p>

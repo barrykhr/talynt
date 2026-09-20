@@ -60,7 +60,7 @@ export default function AboutPage() {
                   <h2 className="display mt-6 text-(length:--text-h3) text-balance">
                     {belief.title}
                   </h2>
-                  <p className="mt-5 max-w-2xl text-[1rem] leading-[1.65] opacity-60">
+                  <p className="mt-5 max-w-2xl text-[1rem] leading-[1.65] text-fg-60">
                     {belief.body}
                   </p>
                 </article>
@@ -80,7 +80,7 @@ export default function AboutPage() {
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="mx-auto mt-8 max-w-xl text-(length:--text-lede) leading-[1.45] opacity-60">
+            <p className="mx-auto mt-8 max-w-xl text-(length:--text-lede) leading-[1.45] text-fg-60">
               The service is the product. The technology is the engine that makes
               the service different — and it is ours, so it changes as fast as
               what we learn.

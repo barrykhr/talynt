@@ -66,11 +66,11 @@ export function CompatibilityGrid() {
   return (
     <div className="rounded-lg border border-current/12 bg-ink-850/50 p-6 sm:p-9">
       <div className="mb-9 flex flex-wrap items-center justify-between gap-4">
-        <span className="mono-micro opacity-45">
+        <span className="mono-micro text-fg-45">
           Compatibility reading · Illustrative
         </span>
         <div className="flex items-center gap-6">
-          <span className="mono-micro flex items-center gap-2 opacity-60">
+          <span className="mono-micro flex items-center gap-2 text-fg-60">
             <span className="h-2.5 w-2.5 rounded-full border border-paper-100/70" />
             The environment
           </span>
@@ -95,7 +95,7 @@ export function CompatibilityGrid() {
               className="group"
             >
               <div className="mb-3 flex items-baseline justify-between gap-4">
-                <span className="mono-label text-[0.7rem] opacity-80">
+                <span className="mono-label text-[0.7rem] text-fg-80">
                   {dimension.label}
                 </span>
                 <span
@@ -144,8 +144,8 @@ export function CompatibilityGrid() {
               </div>
 
               <div className="flex items-baseline justify-between gap-6">
-                <span className="mono-micro opacity-30">{dimension.poles[0]}</span>
-                <span className="mono-micro opacity-30">{dimension.poles[1]}</span>
+                <span className="mono-micro text-fg-30">{dimension.poles[0]}</span>
+                <span className="mono-micro text-fg-30">{dimension.poles[1]}</span>
               </div>
 
               <p

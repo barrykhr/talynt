@@ -15,8 +15,8 @@ export function SignalPanel({
   return (
     <div className="rounded-lg border border-current/12 bg-ink-850/60">
       <div className="flex items-center justify-between border-b border-current/10 px-6 py-4">
-        <span className="mono-micro opacity-45">Signals surfaced</span>
-        <span className="mono-micro opacity-30">06</span>
+        <span className="mono-micro text-fg-45">Signals surfaced</span>
+        <span className="mono-micro text-fg-30">06</span>
       </div>
 
       <ul>
@@ -62,7 +62,7 @@ export function SignalPanel({
         })}
       </ul>
 
-      <p className="border-t border-current/10 px-6 py-4 text-[0.82rem] leading-relaxed opacity-45">
+      <p className="border-t border-current/10 px-6 py-4 text-[0.82rem] leading-relaxed text-fg-45">
         Every reading traces back to something the candidate said. We don&rsquo;t
         infer personality, and we don&rsquo;t score people.
       </p>

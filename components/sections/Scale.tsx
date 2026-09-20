@@ -59,11 +59,11 @@ export function Scale() {
                   <h3 className="display text-(length:--text-h2) leading-[0.95]">
                     {stage.name}
                   </h3>
-                  <p className="mt-4 max-w-sm text-[1.02rem] leading-[1.45] opacity-70">
+                  <p className="mt-4 max-w-sm text-[1.02rem] leading-[1.45] text-fg-70">
                     {stage.thesis}
                   </p>
                 </div>
-                <p className="max-w-xl text-[0.98rem] leading-[1.65] opacity-55 md:pt-2">
+                <p className="max-w-xl text-[0.98rem] leading-[1.65] text-fg-55 md:pt-2">
                   {stage.body}
                 </p>
               </article>
@@ -73,7 +73,7 @@ export function Scale() {
 
         <Reveal delay={0.1}>
           <div className="mt-6 border-t border-ink-900/15 pt-12">
-            <p className="mono-micro mb-7 opacity-45">
+            <p className="mono-micro mb-7 text-fg-45">
               What doesn&rsquo;t change, at any size
             </p>
             <ul className="grid gap-x-10 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -83,7 +83,7 @@ export function Scale() {
                     aria-hidden="true"
                     className="h-1.5 w-1.5 shrink-0 translate-y-[-0.15em] rounded-full bg-signal"
                   />
-                  <span className="text-[0.95rem] leading-snug opacity-75">
+                  <span className="text-[0.95rem] leading-snug text-fg-75">
                     {constant}
                   </span>
                 </li>

@@ -113,7 +113,7 @@ export function TalentUniverse({
       className="relative aspect-4/3 w-full overflow-hidden rounded-lg border border-current/12 bg-ink-850/50 p-6 sm:aspect-16/11"
     >
       <div className="absolute inset-x-6 top-5 flex items-baseline justify-between">
-        <span className="mono-micro opacity-40">Sourcing field</span>
+        <span className="mono-micro text-fg-40">Sourcing field</span>
         <span className="mono-micro text-signal tabular-nums">
           {active.count}
         </span>
@@ -167,7 +167,7 @@ export function TalentUniverse({
             />
           ))}
         </div>
-        <p className="mono-micro opacity-55">{active.label}</p>
+        <p className="mono-micro text-fg-55">{active.label}</p>
       </div>
     </div>
   );

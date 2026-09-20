@@ -16,7 +16,7 @@ export function LegalBody({
 }) {
   return (
     <div className="wrap-narrow pb-(--spacing-section)">
-      <p className="mono-micro mb-16 border-b border-paper-100/10 pb-6 opacity-40">
+      <p className="mono-micro mb-16 border-b border-paper-100/10 pb-6 text-fg-40">
         Last updated {updated}
       </p>
 
@@ -28,7 +28,7 @@ export function LegalBody({
               {section.paragraphs?.map((paragraph) => (
                 <p
                   key={paragraph.slice(0, 40)}
-                  className="mt-5 text-[1rem] leading-[1.7] opacity-65"
+                  className="mt-5 text-[1rem] leading-[1.7] text-fg-65"
                 >
                   {paragraph}
                 </p>
@@ -41,7 +41,7 @@ export function LegalBody({
                         aria-hidden="true"
                         className="mt-2.5 h-1 w-1 shrink-0 rounded-full bg-signal"
                       />
-                      <span className="text-[1rem] leading-[1.7] opacity-65">
+                      <span className="text-[1rem] leading-[1.7] text-fg-65">
                         {item}
                       </span>
                     </li>

@@ -99,7 +99,7 @@ export function HowWeWork() {
                 </span>
                 <div className="pt-1">
                   <h3 className="display text-(length:--text-h3)">{layer.title}</h3>
-                  <p className="mt-3 max-w-lg text-[0.98rem] leading-[1.6] opacity-60">
+                  <p className="mt-3 max-w-lg text-[0.98rem] leading-[1.6] text-fg-60">
                     {layer.body}
                   </p>
                 </div>

@@ -60,6 +60,18 @@
 }
 
 :root {
+  --fg-30: #51504f;
+  --fg-35: #5d5c5a;
+  --fg-40: #696765;
+  --fg-45: #747370;
+  --fg-50: #807e7c;
+  --fg-55: #8c8a87;
+  --fg-60: #979692;
+  --fg-65: #a3a19d;
+  --fg-70: #afada8;
+  --fg-75: #bab8b3;
+  --fg-80: #c6c4be;
+  --fg-85: #d2cfc9;
   --hairline-ink: color-mix(in oklab, var(--color-paper-100) 12%, transparent);
   --hairline-paper: color-mix(in oklab, var(--color-ink-900) 14%, transparent);
   color-scheme: dark;
@@ -87,9 +99,10 @@ body {
   font-size: var(--text-body);
   line-height: 1.55;
   font-synthesis-weight: none;
-  text-rendering: optimizeLegibility;
+  letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
   overflow-x: hidden;
 }
 
@@ -167,14 +180,88 @@ a {
 
 @utility tone-paper {
   --hairline: var(--hairline-paper);
+  --fg-30: #afada8;
+  --fg-35: #a3a19d;
+  --fg-40: #979692;
+  --fg-45: #8c8a87;
+  --fg-50: #807e7c;
+  --fg-55: #747370;
+  --fg-60: #696765;
+  --fg-65: #5d5c5a;
+  --fg-70: #51504f;
+  --fg-75: #464544;
+  --fg-80: #3a3939;
+  --fg-85: #2e2e2e;
   background-color: var(--color-paper-100);
   color: var(--color-ink-900);
 }
 
 @utility tone-ink {
   --hairline: var(--hairline-ink);
+  --fg-30: #51504f;
+  --fg-35: #5d5c5a;
+  --fg-40: #696765;
+  --fg-45: #747370;
+  --fg-50: #807e7c;
+  --fg-55: #8c8a87;
+  --fg-60: #979692;
+  --fg-65: #a3a19d;
+  --fg-70: #afada8;
+  --fg-75: #bab8b3;
+  --fg-80: #c6c4be;
+  --fg-85: #d2cfc9;
   background-color: var(--color-ink-900);
   color: var(--color-paper-100);
+}
+
+/* Solid text tones. Same colour as the old opacity steps, full-strength glyphs. */
+
+@utility text-fg-30 {
+  color: var(--fg-30);
+}
+
+@utility text-fg-35 {
+  color: var(--fg-35);
+}
+
+@utility text-fg-40 {
+  color: var(--fg-40);
+}
+
+@utility text-fg-45 {
+  color: var(--fg-45);
+}
+
+@utility text-fg-50 {
+  color: var(--fg-50);
+}
+
+@utility text-fg-55 {
+  color: var(--fg-55);
+}
+
+@utility text-fg-60 {
+  color: var(--fg-60);
+}
+
+@utility text-fg-65 {
+  color: var(--fg-65);
+}
+
+@utility text-fg-70 {
+  color: var(--fg-70);
+}
+
+@utility text-fg-75 {
+  color: var(--fg-75);
+}
+
+@utility text-fg-80 {
+  color: var(--fg-80);
+}
+
+@utility text-fg-85 {
+  color: var(--fg-85);
 }
 
 /* The signal marker: a literal highlight over what matters. */

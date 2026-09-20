@@ -38,7 +38,7 @@ export function SectionHeader({
             <span className="mono-micro text-signal tabular-nums">{index}</span>
           )}
           {eyebrow && (
-            <span className="mono-micro opacity-55">{eyebrow}</span>
+            <span className="mono-micro text-fg-55">{eyebrow}</span>
           )}
         </Reveal>
       )}
@@ -56,7 +56,7 @@ export function SectionHeader({
         <Reveal delay={0.12}>
           <p
             className={cx(
-              "mt-7 max-w-2xl text-(length:--text-lede) leading-[1.4] opacity-65",
+              "mt-7 max-w-2xl text-(length:--text-lede) leading-[1.4] text-fg-65",
               align === "center" && "mx-auto",
             )}
           >

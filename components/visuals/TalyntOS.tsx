@@ -37,7 +37,7 @@ export function TalyntOS() {
             <span className="h-2.5 w-2.5 rounded-full bg-paper-100/15" />
             <span className="h-2.5 w-2.5 rounded-full bg-signal/70" />
           </span>
-          <span className="mono-micro ml-2 opacity-60">
+          <span className="mono-micro ml-2 text-fg-60">
             Talynt<span className="text-signal"> OS</span>
           </span>
         </div>
@@ -46,7 +46,7 @@ export function TalyntOS() {
             Search talent, roles, conversations
           </span>
         </div>
-        <span className="mono-micro opacity-35">Recruiter workspace</span>
+        <span className="mono-micro text-fg-35">Recruiter workspace</span>
       </div>
 
       <div className="grid min-w-0 lg:grid-cols-[13rem_minmax(0,17rem)_minmax(0,1fr)]">
@@ -65,14 +65,14 @@ export function TalyntOS() {
                   : "text-paper-100/40",
               )}
             >
-              <span aria-hidden="true" className="text-[0.75rem] opacity-70">
+              <span aria-hidden="true" className="text-[0.75rem] text-fg-70">
                 {item.icon}
               </span>
               {item.label}
             </span>
           ))}
           <div className="mt-auto rounded-md border border-paper-100/10 p-3">
-            <p className="mono-micro opacity-35">Active searches</p>
+            <p className="mono-micro text-fg-35">Active searches</p>
             <p className="mt-1.5 font-mono text-[1.4rem] leading-none tabular-nums">
               07
             </p>
@@ -86,16 +86,16 @@ export function TalyntOS() {
             <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
               {ROLE_CONTEXT.facts.map((fact) => (
                 <div key={fact.label}>
-                  <dt className="mono-micro opacity-30">{fact.label}</dt>
-                  <dd className="mt-0.5 text-[0.8rem] opacity-70">{fact.value}</dd>
+                  <dt className="mono-micro text-fg-30">{fact.label}</dt>
+                  <dd className="mt-0.5 text-[0.8rem] text-fg-70">{fact.value}</dd>
                 </div>
               ))}
             </dl>
           </div>
 
           <div className="flex items-center justify-between px-4 pt-4 pb-2">
-            <span className="mono-micro opacity-40">Shortlist</span>
-            <span className="mono-micro tabular-nums opacity-40">
+            <span className="mono-micro text-fg-40">Shortlist</span>
+            <span className="mono-micro tabular-nums text-fg-40">
               {CANDIDATES.length}
             </span>
           </div>
@@ -131,7 +131,7 @@ export function TalyntOS() {
                   <h3 className="display text-(length:--text-h3)">
                     {candidate.ref}
                   </h3>
-                  <p className="mt-1.5 text-[0.9rem] opacity-55">
+                  <p className="mt-1.5 text-[0.9rem] text-fg-55">
                     {candidate.headline}
                   </p>
                 </div>
@@ -144,7 +144,7 @@ export function TalyntOS() {
 
               <div className="mt-8 grid gap-7 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
                 <div>
-                  <p className="mono-micro mb-3 opacity-40">
+                  <p className="mono-micro mb-3 text-fg-40">
                     Candidate intelligence
                   </p>
                   <div>
@@ -169,8 +169,8 @@ export function TalyntOS() {
                   { label: "Next step", value: "Client review" },
                 ].map((item) => (
                   <div key={item.label}>
-                    <dt className="mono-micro opacity-30">{item.label}</dt>
-                    <dd className="mt-1.5 text-[0.82rem] opacity-70">
+                    <dt className="mono-micro text-fg-30">{item.label}</dt>
+                    <dd className="mt-1.5 text-[0.82rem] text-fg-70">
                       {item.value}
                     </dd>
                   </div>

@@ -47,7 +47,7 @@ export function Philosophy() {
           <div>
             <Reveal className="mb-10 flex items-baseline gap-4">
               <span className="mono-micro text-signal">02</span>
-              <span className="mono-micro opacity-50">The TALYNT philosophy</span>
+              <span className="mono-micro text-fg-50">The TALYNT philosophy</span>
             </Reveal>
             <Reveal delay={0.05}>
               <h2
@@ -63,7 +63,7 @@ export function Philosophy() {
 
           <Reveal delay={0.15} className="lg:pb-4">
             <SignalInNoise />
-            <p className="mono-micro mt-5 opacity-45">
+            <p className="mono-micro mt-5 text-fg-45">
               Sixty-four profiles. One worth your afternoon.
             </p>
           </Reveal>
@@ -83,7 +83,7 @@ export function Philosophy() {
               <h3 className="display mt-7 text-(length:--text-h3)">
                 {principle.title}
               </h3>
-              <p className="mt-5 text-[0.98rem] leading-[1.6] opacity-65">
+              <p className="mt-5 text-[0.98rem] leading-[1.6] text-fg-65">
                 {principle.body}
               </p>
             </Reveal>

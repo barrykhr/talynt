@@ -53,7 +53,7 @@ function Swatch({
           className="w-auto max-w-full"
         />
       </div>
-      <figcaption className="mono-micro mt-3 flex items-center justify-between opacity-45">
+      <figcaption className="mono-micro mt-3 flex items-center justify-between text-fg-45">
         <span>{WAY_LABEL[way]}</span>
         <a
           href={src}
@@ -94,23 +94,23 @@ export default function BrandPage() {
                   <h2 className="display mt-6 text-(length:--text-h3)">
                     {variant.name}
                   </h2>
-                  <p className="mono-micro mt-3 opacity-45">{variant.role}</p>
+                  <p className="mono-micro mt-3 text-fg-45">{variant.role}</p>
 
                   <dl className="mt-7 flex flex-col gap-5">
                     <div>
-                      <dt className="mono-micro mb-2 opacity-35">Use it for</dt>
-                      <dd className="text-[0.92rem] leading-[1.6] opacity-70">
+                      <dt className="mono-micro mb-2 text-fg-35">Use it for</dt>
+                      <dd className="text-[0.92rem] leading-[1.6] text-fg-70">
                         {variant.use}
                       </dd>
                     </div>
                     <div>
-                      <dt className="mono-micro mb-2 opacity-35">Don&rsquo;t</dt>
-                      <dd className="text-[0.92rem] leading-[1.6] opacity-70">
+                      <dt className="mono-micro mb-2 text-fg-35">Don&rsquo;t</dt>
+                      <dd className="text-[0.92rem] leading-[1.6] text-fg-70">
                         {variant.avoid}
                       </dd>
                     </div>
                     <div>
-                      <dt className="mono-micro mb-2 opacity-35">Minimum size</dt>
+                      <dt className="mono-micro mb-2 text-fg-35">Minimum size</dt>
                       <dd className="font-mono text-[0.92rem] text-signal">
                         {variant.minimum}
                       </dd>
@@ -143,8 +143,8 @@ export default function BrandPage() {
                 <h2 className="display mt-6 text-(length:--text-h3)">
                   {FAVICON.name}
                 </h2>
-                <p className="mono-micro mt-3 opacity-45">{FAVICON.role}</p>
-                <p className="mt-7 text-[0.92rem] leading-[1.6] opacity-70">
+                <p className="mono-micro mt-3 text-fg-45">{FAVICON.role}</p>
+                <p className="mt-7 text-[0.92rem] leading-[1.6] text-fg-70">
                   {FAVICON.use} The strokes are thickened and the node enlarged
                   against the submark, because a mark that is merely scaled down
                   turns to mud at tab size.
@@ -175,7 +175,7 @@ export default function BrandPage() {
         <div className="wrap grid gap-16 lg:grid-cols-3">
           <Reveal>
             <h2 className="display text-(length:--text-h3)">Clear space</h2>
-            <p className="mt-5 text-[0.95rem] leading-[1.65] opacity-65">
+            <p className="mt-5 text-[0.95rem] leading-[1.65] text-fg-65">
               Keep free space on every side equal to a quarter of the mark&rsquo;s
               height. Nothing sets inside it — no type, no rule, no edge of a
               photograph.
@@ -192,7 +192,7 @@ export default function BrandPage() {
 
           <Reveal delay={0.08}>
             <h2 className="display text-(length:--text-h3)">Palette</h2>
-            <p className="mt-5 text-[0.95rem] leading-[1.65] opacity-65">
+            <p className="mt-5 text-[0.95rem] leading-[1.65] text-fg-65">
               Three values carry the mark. Signal appears once — on the node —
               and never on the frame.
             </p>
@@ -209,9 +209,9 @@ export default function BrandPage() {
                   />
                   <span className="flex-1">
                     <span className="block text-[0.92rem]">{colour.name}</span>
-                    <span className="mono-micro opacity-45">{colour.note}</span>
+                    <span className="mono-micro text-fg-45">{colour.note}</span>
                   </span>
-                  <span className="font-mono text-[0.8rem] opacity-60">
+                  <span className="font-mono text-[0.8rem] text-fg-60">
                     {colour.hex}
                   </span>
                 </li>
@@ -221,7 +221,7 @@ export default function BrandPage() {
 
           <Reveal delay={0.16}>
             <h2 className="display text-(length:--text-h3)">Misuse</h2>
-            <p className="mt-5 text-[0.95rem] leading-[1.65] opacity-65">
+            <p className="mt-5 text-[0.95rem] leading-[1.65] text-fg-65">
               The mark is fixed artwork. If a use needs something it can&rsquo;t
               do, the answer is a different variation, not a redrawn one.
             </p>
@@ -240,7 +240,7 @@ export default function BrandPage() {
                   <span aria-hidden="true" className="text-signal">
                     ✕
                   </span>
-                  <span className="text-[0.92rem] leading-snug opacity-70">
+                  <span className="text-[0.92rem] leading-snug text-fg-70">
                     {rule}
                   </span>
                 </li>

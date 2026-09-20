@@ -74,7 +74,7 @@ export function ClientDashboard() {
     <div className="overflow-hidden rounded-xl border border-paper-100/12 bg-ink-850">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-paper-100/10 px-5 py-4 sm:px-7">
         <div className="flex items-baseline gap-4">
-          <span className="mono-micro opacity-55">Client view</span>
+          <span className="mono-micro text-fg-55">Client view</span>
           <span className="mono-micro opacity-25">Northwind Systems</span>
         </div>
         <span className="mono-micro flex items-center gap-2 text-signal">
@@ -86,8 +86,8 @@ export function ClientDashboard() {
       <div className="grid min-w-0 lg:grid-cols-[minmax(0,19rem)_minmax(0,1fr)]">
         <div className="min-w-0 border-b border-paper-100/10 p-5 sm:p-7 lg:border-r lg:border-b-0">
           <div className="mb-5 flex items-baseline justify-between">
-            <span className="mono-micro opacity-40">Open roles</span>
-            <span className="font-mono text-[1.6rem] leading-none tabular-nums opacity-85">
+            <span className="mono-micro text-fg-40">Open roles</span>
+            <span className="font-mono text-[1.6rem] leading-none tabular-nums text-fg-85">
               07
             </span>
           </div>
@@ -117,7 +117,7 @@ export function ClientDashboard() {
                       {r.status}
                     </span>
                   </span>
-                  <span className="mono-micro mt-2 block opacity-30">
+                  <span className="mono-micro mt-2 block text-fg-30">
                     Opened {r.opened}
                   </span>
                 </button>
@@ -156,7 +156,7 @@ export function ClientDashboard() {
               <div className="mt-9 grid gap-4 sm:grid-cols-[1.4fr_1fr]">
                 <div className="rounded-md border border-signal/25 bg-signal/[0.06] p-5">
                   <p className="mono-micro text-signal">What happens next</p>
-                  <p className="mt-3 text-[0.92rem] leading-[1.6] opacity-80">
+                  <p className="mt-3 text-[0.92rem] leading-[1.6] text-fg-80">
                     {role.next}
                   </p>
                 </div>

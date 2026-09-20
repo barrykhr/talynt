@@ -58,13 +58,13 @@ export function Quality() {
               <p className="display mt-7 text-(length:--text-h3) text-balance">
                 A long search is not a free search.
               </p>
-              <p className="mt-6 max-w-md text-[0.98rem] leading-[1.65] opacity-60">
+              <p className="mt-6 max-w-md text-[0.98rem] leading-[1.65] text-fg-60">
                 Every extra week a role stays open has a price: work that
                 doesn&rsquo;t happen, a team carrying the gap, and interview hours
                 spent discovering what one good conversation would have surfaced
                 in the first week.
               </p>
-              <p className="mono-micro mt-8 opacity-35">
+              <p className="mono-micro mt-8 text-fg-35">
                 Illustrative footage. The figures shown are an example, not TALYNT
                 data.
               </p>
@@ -153,7 +153,7 @@ export function Quality() {
           })}
         </div>
 
-        <p className="mono-micro mt-8 opacity-40">
+        <p className="mono-micro mt-8 text-fg-40">
           Illustrative figures. Volumes vary by role, market and mandate.
         </p>
       </div>

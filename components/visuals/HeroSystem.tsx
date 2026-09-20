@@ -326,20 +326,20 @@ export function HeroSystem() {
 
       {/* Instrument annotations — the DOM keeps the typography crisp. */}
       <div className="pointer-events-none absolute inset-0 select-none">
-        <span className="mono-micro absolute top-0 left-0 hidden opacity-35 sm:block">
+        <span className="mono-micro absolute top-0 left-0 hidden text-fg-35 sm:block">
           Talent market
         </span>
-        <span className="mono-micro absolute bottom-0 left-0 hidden opacity-35 sm:block">
+        <span className="mono-micro absolute bottom-0 left-0 hidden text-fg-35 sm:block">
           Noise
         </span>
         <span className="mono-micro absolute top-0 left-0 whitespace-nowrap text-signal sm:left-[46%] sm:-translate-x-1/2 sm:text-center">
           Intelligence
         </span>
-        <span className="mono-micro absolute top-0 right-0 hidden opacity-35 sm:block">
+        <span className="mono-micro absolute top-0 right-0 hidden text-fg-35 sm:block">
           Decision
         </span>
         <div className="absolute right-0 bottom-0 text-right">
-          <span className="mono-micro opacity-35">Resolved</span>
+          <span className="mono-micro text-fg-35">Resolved</span>
           <p className="mono-micro mt-1.5 text-signal-300 tabular-nums">
             {resolvedLog.filter(Boolean).slice(0, 3).join(" · ")}
           </p>

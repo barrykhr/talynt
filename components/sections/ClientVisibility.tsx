@@ -39,7 +39,7 @@ export function ClientVisibility() {
                   <span className="mono-micro text-signal tabular-nums">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="text-[0.98rem] opacity-70">{answer}</span>
+                  <span className="text-[0.98rem] text-fg-70">{answer}</span>
                 </li>
               ))}
             </ul>
@@ -50,7 +50,7 @@ export function ClientVisibility() {
           <ClientDashboard />
         </Reveal>
 
-        <p className="mono-micro mt-6 opacity-35">
+        <p className="mono-micro mt-6 text-fg-35">
           Illustrative interface representing the current client-visibility
           direction. Company and figures are fictional.
         </p>

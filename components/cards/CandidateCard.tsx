@@ -33,11 +33,11 @@ export function CandidateCard({
       <span className="block font-mono text-[0.8rem] tracking-wide tabular-nums">
         {candidate.ref}
       </span>
-      <span className="mt-2.5 block text-[0.9rem] leading-snug opacity-75">
+      <span className="mt-2.5 block text-[0.9rem] leading-snug text-fg-75">
         {candidate.headline}
       </span>
       <span className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <span className="mono-micro opacity-35">
+        <span className="mono-micro text-fg-35">
           {candidate.location} · {candidate.tenure}
         </span>
         <span

@@ -88,7 +88,7 @@ export function GlobalNetwork() {
           style={{ left: `${node.x}%`, top: `${node.y}%` }}
         >
           <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-signal" />
-          <span className="mono-micro whitespace-nowrap opacity-65">
+          <span className="mono-micro whitespace-nowrap text-fg-65">
             {node.label}
           </span>
         </motion.div>

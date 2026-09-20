@@ -157,7 +157,7 @@ export function Convergence() {
       <div className="sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden">
         <div className="wrap absolute inset-x-0 top-24 flex items-center justify-between">
           <span className="mono-micro text-signal">The TALYNT sequence</span>
-          <span className="mono-micro opacity-30">Fragments → Decision</span>
+          <span className="mono-micro text-fg-30">Fragments → Decision</span>
         </div>
 
         <div className="relative mx-auto h-[62vh] w-full max-w-5xl px-(--spacing-gutter)">

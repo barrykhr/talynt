@@ -41,7 +41,7 @@ export function MatchIndicator({
           />
         ))}
       </span>
-      <span className="mono-micro whitespace-nowrap opacity-80">
+      <span className="mono-micro whitespace-nowrap text-fg-80">
         {LABEL[strength]}
       </span>
     </span>
@@ -83,7 +83,7 @@ export function SignalRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-6 border-t border-current/10 py-2.5 first:border-t-0">
-      <span className="text-[0.82rem] opacity-70">{label}</span>
+      <span className="text-[0.82rem] text-fg-70">{label}</span>
       <MatchIndicator strength={strength} />
     </div>
   );

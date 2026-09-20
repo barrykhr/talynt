@@ -63,13 +63,13 @@ export function ForTalent() {
 
           <div className="lg:pt-6">
             <Reveal>
-              <p className="mono-micro mb-8 opacity-45">What you can expect</p>
+              <p className="mono-micro mb-8 text-fg-45">What you can expect</p>
             </Reveal>
             <ul className="flex flex-col gap-7">
               {COMMITMENTS.map((commitment, i) => (
                 <Reveal as="li" key={commitment.title} delay={0.1 + i * 0.08}>
                   <p className="text-[1.05rem] leading-snug">{commitment.title}</p>
-                  <p className="mt-2 text-[0.92rem] leading-[1.6] opacity-55">
+                  <p className="mt-2 text-[0.92rem] leading-[1.6] text-fg-55">
                     {commitment.body}
                   </p>
                 </Reveal>

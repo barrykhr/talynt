@@ -19,7 +19,7 @@ export function ConversationTranscript({
   return (
     <div className="rounded-lg border border-current/12 bg-ink-850/60">
       <div className="flex items-center justify-between border-b border-current/10 px-6 py-4">
-        <span className="mono-micro opacity-45">
+        <span className="mono-micro text-fg-45">
           Structured conversation · Illustrative
         </span>
         <span className="mono-micro flex items-center gap-2 text-signal">
@@ -42,7 +42,7 @@ export function ConversationTranscript({
                 >
                   {exchange.speaker}
                 </span>
-                <span className="font-mono text-[0.68rem] tabular-nums opacity-30">
+                <span className="font-mono text-[0.68rem] tabular-nums text-fg-30">
                   {exchange.timestamp}
                 </span>
               </div>
@@ -83,7 +83,7 @@ export function ConversationTranscript({
         })}
       </div>
 
-      <p className="border-t border-current/10 px-6 py-4 text-[0.82rem] leading-relaxed opacity-45">
+      <p className="border-t border-current/10 px-6 py-4 text-[0.82rem] leading-relaxed text-fg-45">
         Sample content. Real conversations are confidential and are never shared
         without the candidate&rsquo;s consent.
       </p>

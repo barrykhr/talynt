@@ -23,7 +23,7 @@ export function Global() {
 
         <Reveal delay={0.15}>
           <GlobalNetwork />
-          <p className="mono-micro mt-6 opacity-35">
+          <p className="mono-micro mt-6 text-fg-35">
             Markets we are built to search across. Coverage on a given mandate is
             agreed before the search begins.
           </p>

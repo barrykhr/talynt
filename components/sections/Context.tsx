@@ -84,7 +84,7 @@ export function Context() {
           {/* The input: flat, literal, and quietly insufficient. */}
           <Reveal className="lg:sticky lg:top-32 lg:self-start">
             <div className="rounded-md border border-ink-900/15 bg-paper-50 p-6">
-              <p className="mono-micro mb-6 opacity-45">Input · Job description</p>
+              <p className="mono-micro mb-6 text-fg-45">Input · Job description</p>
               <ul className="flex flex-col gap-3">
                 {JD_LINES.map((line, i) => (
                   <motion.li
@@ -99,7 +99,7 @@ export function Context() {
                   </motion.li>
                 ))}
               </ul>
-              <p className="mt-8 border-t border-ink-900/12 pt-5 text-[0.86rem] leading-[1.6] opacity-60">
+              <p className="mt-8 border-t border-ink-900/12 pt-5 text-[0.86rem] leading-[1.6] text-fg-60">
                 Everything above is true. None of it tells you who will do well
                 here.
               </p>
