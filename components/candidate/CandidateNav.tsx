@@ -1,22 +1,32 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
 import { Mark, Wordmark } from "@/components/primitives/Wordmark";
-import { ModeSwitch } from "@/components/candidate/ModeSwitch";
+import { ModeSwitch } from "./ModeSwitch";
 import { transition } from "@/lib/motion";
 import { cx } from "@/lib/utils";
 
+/**
+ * The same navigation, pointed at a different set of destinations.
+ *
+ * Structure, height, lift threshold, underline behaviour and the mobile
+ * overlay are the client navigation's — deliberately, so a person moving
+ * between the two never feels a seam.
+ */
+
 const LINKS = [
-  { label: "How we work", href: "/#how-we-work" },
-  { label: "Talent intelligence", href: "/#intelligence" },
-  { label: "For companies", href: "/#companies" },
-  { label: "For talent", href: "/#for-talent" },
+  { label: "Explore roles", href: "/candidates/roles" },
+  { label: "Career Passport", href: "/candidates/passport" },
+  { label: "How we evaluate", href: "/candidates/how-we-evaluate" },
+  { label: "Saved roles", href: "/candidates/saved" },
 ];
 
-export function Navigation() {
+export function CandidateNav() {
   const { scrollY } = useScroll();
+  const pathname = usePathname();
   const [lifted, setLifted] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -50,14 +60,14 @@ export function Navigation() {
         )}
       >
         <nav
-          aria-label="Primary"
+          aria-label="Candidate"
           className="wrap flex h-[4.5rem] items-center justify-between gap-6"
         >
           <div className="flex items-center gap-5">
             <Link
-              href="/"
+              href="/candidates"
               className="flex items-center gap-3 text-paper-100"
-              aria-label="TALYNT LABS — home"
+              aria-label="TALYNT LABS — for candidates"
               onClick={() => setOpen(false)}
             >
               <Mark className="h-7 w-7" />
@@ -71,32 +81,47 @@ export function Navigation() {
             </span>
           </div>
 
-          <ul className="hidden items-center gap-9 lg:flex">
-            {LINKS.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className="group relative text-[0.9rem] text-paper-100/65 transition-colors duration-300 hover:text-paper-100"
-                >
-                  {link.label}
-                  <span className="absolute -bottom-1.5 left-0 h-px w-0 bg-signal transition-[width] duration-400 ease-(--ease-out-expo) group-hover:w-full" />
-                </Link>
-              </li>
-            ))}
+          <ul className="hidden items-center gap-8 lg:flex">
+            {LINKS.map((link) => {
+              const active =
+                link.href === "/candidates"
+                  ? pathname === link.href
+                  : pathname?.startsWith(link.href);
+              return (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cx(
+                      "group relative text-[0.9rem] transition-colors duration-300 hover:text-paper-100",
+                      active ? "text-paper-100" : "text-paper-100/65",
+                    )}
+                  >
+                    {link.label}
+                    <span
+                      className={cx(
+                        "absolute -bottom-1.5 left-0 h-px bg-signal transition-[width] duration-400 ease-(--ease-out-expo) group-hover:w-full",
+                        active ? "w-full" : "w-0",
+                      )}
+                    />
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="flex items-center gap-3">
             <Link
-              href="/#contact"
+              href="/candidates/passport"
               className="hidden rounded-full bg-paper-100 px-5 py-2.5 text-[0.88rem] font-medium text-ink-900 transition-colors duration-300 hover:bg-signal hover:text-paper-50 sm:inline-flex"
             >
-              Build your team
+              Create your Career Passport
             </Link>
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
-              aria-controls="mobile-menu"
+              aria-controls="candidate-menu"
               className="relative z-50 flex h-10 w-10 items-center justify-center rounded-full border border-paper-100/20 text-paper-100 lg:hidden"
             >
               <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
@@ -122,12 +147,12 @@ export function Navigation() {
       <AnimatePresence>
         {open && (
           <motion.div
-            id="mobile-menu"
+            id="candidate-menu"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={transition.fast}
-            className="fixed inset-0 z-40 flex flex-col justify-between bg-ink-950 px-(--spacing-gutter) pt-28 pb-12 lg:hidden"
+            className="fixed inset-0 z-40 flex flex-col justify-between overflow-y-auto bg-ink-950 px-(--spacing-gutter) pt-28 pb-12 lg:hidden"
           >
             <ul className="flex flex-col gap-1">
               {LINKS.map((link, i) => (
@@ -148,16 +173,16 @@ export function Navigation() {
                 </motion.li>
               ))}
             </ul>
-            <div className="flex flex-col gap-6">
+            <div className="mt-10 flex flex-col gap-6">
               <Link
-                href="/#contact"
+                href="/candidates/passport"
                 onClick={() => setOpen(false)}
                 className="inline-flex w-full items-center justify-center gap-3 rounded-full bg-signal px-7 py-4 font-medium text-paper-50"
               >
-                Build your team <span aria-hidden="true">→</span>
+                Create your Career Passport <span aria-hidden="true">→</span>
               </Link>
               <div className="flex items-center justify-between gap-4">
-                <p className="mono-micro text-paper-100/40">Looking for a role?</p>
+                <p className="mono-micro text-paper-100/40">Hiring instead?</p>
                 <ModeSwitch className="text-paper-100" />
               </div>
             </div>

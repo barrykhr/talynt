@@ -4,11 +4,16 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { Navigation } from "./Navigation";
 import { ScrollProgress } from "./ScrollProgress";
+import { CandidateNav } from "@/components/candidate/CandidateNav";
+import { CandidateFooter } from "@/components/candidate/CandidateFooter";
 
 /**
  * Design directions under /directions are self-contained alternatives — they
  * bring their own navigation, footer and type system, so the shared site chrome
  * steps out of the way for them.
+ *
+ * /candidates keeps the chrome and swaps its destinations: the same header
+ * geometry and the same footer composition, pointed at the candidate's routes.
  */
 export function SiteChrome({
   children,
@@ -23,6 +28,8 @@ export function SiteChrome({
     return <>{children}</>;
   }
 
+  const candidate = pathname?.startsWith("/candidates") ?? false;
+
   return (
     <>
       <a
@@ -32,9 +39,9 @@ export function SiteChrome({
         Skip to content
       </a>
       <ScrollProgress />
-      <Navigation />
+      {candidate ? <CandidateNav /> : <Navigation />}
       <main id="main">{children}</main>
-      {footer}
+      {candidate ? <CandidateFooter /> : footer}
     </>
   );
 }
