@@ -1,0 +1,763 @@
+/* ==========================================================================
+   DIRECTION C — "CONTOUR"
+   A light, editorial, instrument-led alternative.
+
+   The idea the whole system is drawn from: a person is never a dot. They sit
+   inside context — team, role, leadership, expectations — the way a point on
+   a map sits inside contour lines. TALYNT reads the terrain, not the dot.
+
+   Everything is scoped to .ct so this direction lives beside the approved site
+   and direction B without leaking into either. Utilities from Tailwind are used
+   for layout; colour, type and motion come from the tokens below.
+   ========================================================================== */
+
+/* Layer order matches the one Tailwind declares, so utilities passed alongside
+   these classes (spacing, display, size) always win over the component styles. */
+@layer theme, base, components, utilities;
+
+/* --------------------------------------------------------------------------
+   Unlayered on purpose: these must outrank the approved global stylesheet's
+   own unlayered rules (border-color, focus ring, selection, body colours).
+   -------------------------------------------------------------------------- */
+
+/* The approved global stylesheet sets an unlayered `* { border-color:
+   currentColor }`, which outranks every layered Tailwind border-colour utility.
+   Here the default is a hairline instead, and border colours come from the
+   explicit classes below rather than utilities that would silently lose. */
+@property --ct-bc {
+  syntax: "*";
+  inherits: false;
+}
+
+.ct *,
+.ct *::before,
+.ct *::after {
+  border-color: var(--ct-bc, var(--ct-line));
+}
+
+.ct-b2 {
+  --ct-bc: var(--ct-line-2);
+}
+
+.ct-b-ink {
+  --ct-bc: var(--ct-ink);
+}
+
+.ct-b-mute {
+  --ct-bc: var(--ct-mute);
+}
+
+.ct-b-green {
+  --ct-bc: var(--ct-green);
+}
+
+.ct-b-violet {
+  --ct-bc: var(--ct-violet);
+}
+
+.ct-b-none {
+  --ct-bc: transparent;
+}
+
+.ct-hb-ink:hover {
+  --ct-bc: var(--ct-ink);
+}
+
+.ct-hb-green:hover {
+  --ct-bc: var(--ct-green);
+}
+
+html:has(.ct) {
+  background-color: #fafaf7;
+  color-scheme: light;
+}
+
+html:has(.ct) body {
+  background-color: #fafaf7;
+  color: #202321;
+}
+
+.ct ::selection {
+  background: var(--ct-lime);
+  color: var(--ct-ink);
+}
+
+.ct :focus-visible {
+  outline: 2px solid var(--ct-green);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Headings and panels that receive focus from script (a new step, a result)
+   are announcement targets, not controls — no ring. */
+.ct [tabindex="-1"]:focus {
+  outline: none;
+}
+
+@layer base {
+  /* A grid with no column utility gets one column that is allowed to shrink.
+     Without this, the implicit track grows to its widest item's min-content
+     (a scrolling step rail, a long tag) and pushes the page sideways. Column
+     utilities live in the utilities layer and always win over this. */
+  .ct .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ct {
+    /* --- Ground ------------------------------------------------------------ */
+    --ct-bg: #fafaf7;
+    --ct-bg-2: #f1f2ee;
+    --ct-bg-3: #e7e9e3;
+    --ct-surface: #ffffff;
+
+    /* --- Ink (text) --------------------------------------------------------
+       ink-2 and mute both clear WCAG AA on bg and bg-2. faint is reserved for
+       decoration and large text only. */
+    --ct-ink: #202321;
+    --ct-ink-2: #3f4440;
+    --ct-mute: #5f6560;
+    --ct-faint: #8a8f89;
+
+    /* --- Lines ------------------------------------------------------------- */
+    --ct-line: #dde1db;
+    --ct-line-2: #c6ccc4;
+
+    /* --- Accents. Used deliberately, never all at once ---------------------
+       green  — the system: connections, interaction, focus, employer journey
+       violet — pathways: the candidate journey and career graphics
+       lime   — the highlighter: what the reader should notice
+       signal — the brand node from the logo. Only ever the person. */
+    /* The brief proposed #287c68; it measures 4.47:1 on the tinted ground, a
+     hair under AA, so the system uses this slightly deeper step of it. */
+  --ct-green: #257461;
+    --ct-green-deep: #1d5e4f;
+    --ct-green-wash: #e2ede8;
+    --ct-violet: #8589d9;
+    --ct-violet-ink: #4f53a6;
+    --ct-violet-wash: #ecedf9;
+    --ct-lime: #dceb9b;
+    --ct-lime-soft: #eef5cf;
+    --ct-signal: #ff4d1c;
+
+    /* --- Type -------------------------------------------------------------- */
+    --ct-serif: var(--font-ct-serif), "Iowan Old Style", Georgia, serif;
+    --ct-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+    --ct-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+
+    /* --- Rhythm ------------------------------------------------------------ */
+    --ct-gutter: clamp(1rem, 4vw, 3.5rem);
+    --ct-section: clamp(4.5rem, 10vw, 9rem);
+    --ct-nav-h: 4.25rem;
+
+    /* --- Radius: echoes the logo's frame, never balloons ------------------- */
+    --ct-r-s: 6px;
+    --ct-r-m: 10px;
+    --ct-r-l: 14px;
+
+    /* --- Motion ------------------------------------------------------------ */
+    --ct-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --ct-ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+    --ct-fast: 200ms;
+    --ct-base: 450ms;
+    --ct-slow: 900ms;
+
+    /* --- Layers ------------------------------------------------------------ */
+    --ct-z-raised: 10;
+    --ct-z-sticky: 30;
+    --ct-z-float: 40;
+    --ct-z-nav: 50;
+    --ct-z-sheet: 60;
+
+    background-color: var(--ct-bg);
+    color: var(--ct-ink);
+    font-family: var(--ct-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+    color-scheme: light;
+    min-height: 100svh;
+  }
+
+  /* The approved site paints the document dark. On this direction's pages only,
+     the canvas behind overscroll and short pages matches the ground instead. */
+
+  :where(.ct) a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@layer components {
+  /* --------------------------------------------------------------------------
+     Layout
+     -------------------------------------------------------------------------- */
+
+  .ct-wrap {
+    width: 100%;
+    max-width: 90rem;
+    margin-inline: auto;
+    padding-inline: var(--ct-gutter);
+  }
+
+  .ct-wrap-narrow {
+    width: 100%;
+    max-width: 60rem;
+    margin-inline: auto;
+    padding-inline: var(--ct-gutter);
+  }
+
+  .ct-section {
+    padding-block: var(--ct-section);
+  }
+
+  .ct-tint {
+    background-color: var(--ct-bg-2);
+  }
+
+  .ct-rule {
+    border-top: 1px solid;
+    --ct-bc: var(--ct-line);
+  }
+
+  .ct-rule-strong {
+    border-top: 1px solid;
+    --ct-bc: var(--ct-line-2);
+  }
+
+  /* --------------------------------------------------------------------------
+     Type
+     -------------------------------------------------------------------------- */
+
+  .ct-display {
+    font-family: var(--ct-serif);
+    font-weight: 380;
+    font-optical-sizing: auto;
+    letter-spacing: -0.022em;
+    text-wrap: balance;
+  }
+
+  .ct-xl {
+    font-size: clamp(2.55rem, 1.3rem + 4.1vw, 5.25rem);
+    line-height: 1.01;
+  }
+
+  .ct-l {
+    font-size: clamp(2.05rem, 1.35rem + 2.7vw, 3.85rem);
+    line-height: 1.05;
+  }
+
+  .ct-m {
+    font-size: clamp(1.55rem, 1.2rem + 1.3vw, 2.35rem);
+    line-height: 1.12;
+  }
+
+  .ct-s {
+    font-size: clamp(1.25rem, 1.1rem + 0.55vw, 1.6rem);
+    line-height: 1.22;
+    letter-spacing: -0.015em;
+  }
+
+  .ct-lede {
+    font-size: clamp(1.08rem, 0.98rem + 0.42vw, 1.32rem);
+    line-height: 1.5;
+    color: var(--ct-ink-2);
+    text-wrap: pretty;
+  }
+
+  .ct-body {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--ct-ink-2);
+    text-wrap: pretty;
+  }
+
+  .ct-small {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--ct-mute);
+  }
+
+  /* Machine voice: indices, signals, metadata. */
+  .ct-meta {
+    font-family: var(--ct-mono);
+    font-size: 0.72rem;
+    font-weight: 450;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  .ct-italic {
+    font-style: italic;
+  }
+
+  .ct-mute {
+    color: var(--ct-mute);
+  }
+
+  .ct-ink2 {
+    color: var(--ct-ink-2);
+  }
+
+  .ct-green {
+    color: var(--ct-green);
+  }
+
+  .ct-violet {
+    color: var(--ct-violet-ink);
+  }
+
+  /* The highlighter: drawn on, not printed. Marks what the reader should notice. */
+  .ct-mark {
+    background-image: linear-gradient(var(--ct-lime), var(--ct-lime));
+    background-repeat: no-repeat;
+    background-position: 0 88%;
+    background-size: 100% 0.42em;
+    padding-inline: 0.06em;
+    margin-inline: -0.06em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .ct-mark-draw {
+    background-size: 0% 0.42em;
+    transition: background-size 900ms var(--ct-ease) 350ms;
+  }
+
+  .ct-mark-draw[data-on="true"] {
+    background-size: 100% 0.42em;
+  }
+
+  @media (scripting: none) {
+    .ct-mark-draw {
+      background-size: 100% 0.42em;
+    }
+  }
+
+  .ct-link {
+    color: var(--ct-green);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: color-mix(in oklab, var(--ct-green) 45%, transparent);
+    transition: text-decoration-color var(--ct-fast) ease;
+  }
+
+  .ct-link:hover {
+    text-decoration-color: var(--ct-green);
+  }
+
+  /* --------------------------------------------------------------------------
+     Controls
+     -------------------------------------------------------------------------- */
+
+  .ct-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 2.875rem;
+    padding: 0 1.3rem;
+    border-radius: var(--ct-r-m);
+    border: 1px solid;
+    --ct-bc: transparent;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--ct-fast) ease,
+      border-color var(--ct-fast) ease,
+      color var(--ct-fast) ease,
+      transform var(--ct-fast) var(--ct-ease);
+  }
+
+  .ct-btn:active {
+    transform: translateY(1px);
+  }
+
+  .ct-btn-primary {
+    background-color: var(--ct-ink);
+    color: var(--ct-bg);
+  }
+
+  .ct-btn-primary:hover {
+    background-color: var(--ct-green-deep);
+  }
+
+  .ct-btn-secondary {
+    background-color: transparent;
+    --ct-bc: var(--ct-line-2);
+    color: var(--ct-ink);
+  }
+
+  .ct-btn-secondary:hover {
+    background-color: var(--ct-bg-2);
+    --ct-bc: var(--ct-ink);
+  }
+
+  .ct-btn-quiet {
+    padding-inline: 0.25rem;
+    min-height: 2.75rem;
+    color: var(--ct-ink);
+  }
+
+  .ct-btn-quiet:hover {
+    color: var(--ct-green);
+  }
+
+  .ct-btn[disabled],
+  .ct-btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .ct-btn-arrow {
+    display: inline-block;
+    transition: transform var(--ct-base) var(--ct-ease);
+  }
+
+  .ct-btn:hover .ct-btn-arrow,
+  a:hover .ct-btn-arrow {
+    transform: translateX(3px);
+  }
+
+  /* Tags: small, mono, the same shape as a node label in the graphics. */
+  .ct-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: 1px solid;
+    --ct-bc: var(--ct-line-2);
+    border-radius: 999px;
+    padding: 0.3rem 0.65rem;
+    font-family: var(--ct-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    color: var(--ct-ink-2);
+    background: var(--ct-surface);
+    white-space: nowrap;
+  }
+
+  /* Form controls */
+  .ct-input,
+  .ct-textarea,
+  .ct-select {
+    width: 100%;
+    border: 1px solid;
+    --ct-bc: var(--ct-line-2);
+    border-radius: var(--ct-r-s);
+    background: var(--ct-surface);
+    color: var(--ct-ink);
+    padding: 0.75rem 0.9rem;
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1.45;
+    transition:
+      border-color var(--ct-fast) ease,
+      box-shadow var(--ct-fast) ease;
+  }
+
+  .ct-textarea {
+    resize: vertical;
+    min-height: 7rem;
+  }
+
+  .ct-input::placeholder,
+  .ct-textarea::placeholder {
+    color: var(--ct-faint);
+  }
+
+  .ct-input:hover,
+  .ct-textarea:hover,
+  .ct-select:hover {
+    --ct-bc: var(--ct-mute);
+  }
+
+  .ct-input:focus,
+  .ct-textarea:focus,
+  .ct-select:focus {
+    outline: none;
+    --ct-bc: var(--ct-green);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ct-green) 18%, transparent);
+  }
+
+  .ct-input:focus-within {
+    --ct-bc: var(--ct-green);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ct-green) 18%, transparent);
+  }
+
+  .ct-input[aria-invalid="true"],
+  .ct-textarea[aria-invalid="true"] {
+    --ct-bc: #b3401f;
+  }
+
+  .ct-error {
+    color: #a83a1b;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  /* Choice chips: real checkboxes and radios underneath, so the browser does the
+     accessibility work. The visual is a hairline pill that fills when chosen. */
+  .ct-choice {
+    position: relative;
+    display: inline-flex;
+  }
+
+  .ct-choice input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .ct-choice span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.5rem;
+    border: 1px solid;
+    --ct-bc: var(--ct-line-2);
+    border-radius: 999px;
+    padding: 0.45rem 0.95rem;
+    font-size: 0.9rem;
+    line-height: 1.2;
+    background: var(--ct-surface);
+    color: var(--ct-ink-2);
+    transition:
+      background-color var(--ct-fast) ease,
+      border-color var(--ct-fast) ease,
+      color var(--ct-fast) ease;
+  }
+
+  .ct-choice:hover span {
+    --ct-bc: var(--ct-ink);
+    color: var(--ct-ink);
+  }
+
+  .ct-choice input:checked + span {
+    background: var(--ct-green-wash);
+    --ct-bc: var(--ct-green);
+    color: var(--ct-green-deep);
+  }
+
+  .ct-choice input:focus-visible + span {
+    outline: 2px solid var(--ct-green);
+    outline-offset: 2px;
+  }
+
+  .ct-choice input:disabled + span {
+    opacity: 0.45;
+  }
+
+  /* Square checkboxes used in filters and consent. */
+  .ct-check {
+    appearance: none;
+    flex-shrink: 0;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin: 0.15rem 0 0;
+    border: 1.5px solid;
+    --ct-bc: var(--ct-mute);
+    border-radius: 4px;
+    background: var(--ct-surface);
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+    transition:
+      background-color var(--ct-fast) ease,
+      border-color var(--ct-fast) ease;
+  }
+
+  .ct-check::after {
+    content: "";
+    width: 0.55rem;
+    height: 0.3rem;
+    border-left: 2px solid var(--ct-bg);
+    border-bottom: 2px solid;
+    --ct-bc: var(--ct-bg);
+    transform: rotate(-45deg) translate(1px, -1px) scale(0);
+    transition: transform var(--ct-fast) var(--ct-ease);
+  }
+
+  .ct-check:checked {
+    background: var(--ct-green);
+    --ct-bc: var(--ct-green);
+  }
+
+  .ct-check:checked::after {
+    transform: rotate(-45deg) translate(1px, -1px) scale(1);
+  }
+
+  /* --------------------------------------------------------------------------
+     Surfaces
+     -------------------------------------------------------------------------- */
+
+  .ct-panel {
+    background: var(--ct-surface);
+    border: 1px solid;
+    --ct-bc: var(--ct-line);
+    border-radius: var(--ct-r-l);
+  }
+
+  /* A product window: the frame every interface demonstration sits in. */
+  .ct-window {
+    background: var(--ct-surface);
+    border: 1px solid;
+    --ct-bc: var(--ct-line-2);
+    border-radius: var(--ct-r-l);
+    box-shadow:
+      0 1px 0 rgba(32, 35, 33, 0.04),
+      0 24px 60px -32px rgba(32, 35, 33, 0.28);
+    overflow: hidden;
+  }
+
+  .ct-window-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid;
+    --ct-bc: var(--ct-line);
+    background: var(--ct-bg);
+  }
+
+  /* Dot grid: the faint coordinate field graphics are plotted on. */
+  .ct-field {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      color-mix(in oklab, var(--ct-ink) 13%, transparent) 1px,
+      transparent 0
+    );
+    background-size: 22px 22px;
+  }
+
+  /* --------------------------------------------------------------------------
+     Graphics
+     -------------------------------------------------------------------------- */
+
+  .ct-graphic text {
+    font-family: var(--ct-mono);
+  }
+
+  /* A label pinned to a coordinate inside a graphic. HTML, not SVG text, so it
+     stays readable at every width instead of scaling down with the drawing. */
+  .ct-pin {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* The focal node's ring: one slow ripple, the only idle motion on the page. */
+  @keyframes ct-ripple {
+    0% {
+      transform: scale(1);
+      opacity: 0.55;
+    }
+    70%,
+    100% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+
+  .ct-ripple {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: ct-ripple 5.5s var(--ct-ease) infinite;
+  }
+
+  /* Accordion: grid-rows trick, so height animates without measuring. */
+  .ct-collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--ct-base) var(--ct-ease);
+  }
+
+  .ct-collapse[data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+
+  .ct-collapse > * {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  /* One sweep of a search signal across a field. */
+  @keyframes ct-sweep {
+    0% {
+      transform: translateX(0);
+      opacity: 0;
+    }
+    12%,
+    85% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(390px);
+      opacity: 0;
+    }
+  }
+
+  .ct-sweep {
+    animation: ct-sweep 1.6s var(--ct-ease-io) forwards;
+  }
+
+  /* Hide scrollbars on horizontally scrolling rails without hiding the scroll. */
+  .ct-rail {
+    scrollbar-width: none;
+  }
+
+  .ct-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Skip link */
+  .ct-skip {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    z-index: 100;
+    background: var(--ct-ink);
+    color: var(--ct-bg);
+    padding: 0.7rem 1rem;
+    border-radius: var(--ct-r-s);
+    font-size: 0.9rem;
+  }
+
+  .ct-skip:focus {
+    top: 1rem;
+  }
+
+  /* --------------------------------------------------------------------------
+     Reduced motion: everything has a composed, static end state.
+     -------------------------------------------------------------------------- */
+
+  @media (prefers-reduced-motion: reduce) {
+    .ct-ripple {
+      animation: none;
+      opacity: 0;
+    }
+
+    .ct-mark-draw {
+      transition: none;
+      background-size: 100% 0.42em;
+    }
+
+    .ct-collapse {
+      transition: none;
+    }
+
+    .ct-btn,
+    .ct-btn-arrow {
+      transition: none;
+    }
+  }
+}

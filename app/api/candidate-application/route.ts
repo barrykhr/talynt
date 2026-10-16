@@ -18,6 +18,52 @@ function asString(value: unknown, max = 300): string {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 }
 
+function asStringList(value: unknown, maxItems: number, max = 80): string[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => asString(item, max))
+    .filter(Boolean)
+    .slice(0, maxItems);
+}
+
+/**
+ * The Career Passport, when the person chose to send it with this application.
+ *
+ * Optional and additive: callers that don't send `profile` produce exactly the
+ * payload they always did. Every field is bounded and anything unexpected is
+ * dropped, so the shape forwarded downstream is the shape documented here.
+ */
+function profileFrom(raw: unknown) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const p = raw as Record<string, unknown>;
+  const experience = Array.isArray(p.experience)
+    ? p.experience.slice(0, 12).map((entry) => {
+        const e = (entry ?? {}) as Record<string, unknown>;
+        return {
+          title: asString(e.title, 160),
+          organisation: asString(e.organisation, 160),
+          from: asString(e.from, 40),
+          to: asString(e.to, 40),
+          summary: asString(e.summary, 1200),
+        };
+      })
+    : [];
+  return {
+    functionIds: asStringList(p.functionIds, 12),
+    skills: asStringList(p.skills, 40, 60),
+    experience: experience.filter((e) => e.title || e.organisation || e.summary),
+    directionIds: asStringList(p.directionIds, 12),
+    directionNote: asString(p.directionNote, 2000),
+    workModelIds: asStringList(p.workModelIds, 8),
+    preferredLocationIds: asStringList(p.preferredLocationIds, 30),
+    preferredRegions: asStringList(p.preferredRegions, 12),
+    stageIds: asStringList(p.stageIds, 8),
+    compensationExpectation: asString(p.compensationExpectation, 120),
+    valueIds: asStringList(p.valueIds, 12),
+    valuesNote: asString(p.valuesNote, 2000),
+  };
+}
+
 export async function POST(request: Request) {
   let body: Record<string, unknown>;
 
@@ -40,6 +86,8 @@ export async function POST(request: Request) {
     questions: asString(body.questions, MAX_LENGTH),
     resumeName: asString(body.resumeName, 300),
   };
+
+  const profile = profileFrom(body.profile);
 
   if (!application.roleSlug) {
     return NextResponse.json(
@@ -90,6 +138,7 @@ export async function POST(request: Request) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...application,
+        ...(profile ? { profile } : {}),
         kind: "candidate-application",
         source: "talyntlabs.com/candidates",
         receivedAt: new Date().toISOString(),

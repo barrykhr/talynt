@@ -66,6 +66,15 @@ and figures. They demonstrate how the work is presented; they are not client
 data and they are not outcome claims. `app/terms/page.tsx` says so publicly.
 Keep it that way unless real, approved figures are supplied.
 
+## Design directions
+
+Alternatives for review live under `/directions` with their own chrome, so the
+approved site is untouched by them:
+
+- `/directions/passage` — direction B, photography-led.
+- `/directions/contour` — direction C, light and editorial, with the full
+  employer and candidate journeys. See `app/directions/contour/README.md`.
+
 ## Contact form
 
 `POST /api/contact` forwards enquiries to `CONTACT_WEBHOOK_URL`. **If that
