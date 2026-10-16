@@ -2,8 +2,8 @@
  * Direction C — "Contour": routes and contact destinations.
  *
  * Every route in this direction lives under BASE so it sits beside the approved
- * site rather than replacing any of it. Legal pages are shared: the approved
- * privacy and terms text is the only version, so this direction links to it.
+ * site rather than replacing any of it. The legal text is shared: privacy and
+ * terms render from lib/legal.ts here and on the approved site alike.
  */
 
 export const BASE = "/directions/contour";
@@ -25,11 +25,10 @@ export const ROUTES = {
   faq: to("/faq"),
   contact: to("/contact"),
   enquiry: to("/contact#enquiry"),
-  /* Shared with the approved site — one source of legal truth. */
-  privacy: "/privacy",
-  terms: "/terms",
-  about: "/about",
-  howWeEvaluate: "/candidates/how-we-evaluate",
+  about: to("/about"),
+  howWeEvaluate: to("/candidates/how-we-evaluate"),
+  privacy: to("/privacy"),
+  terms: to("/terms"),
 } as const;
 
 /** Candidate-side routes switch the navigation's primary action. */

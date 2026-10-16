@@ -44,9 +44,9 @@ Optional configuration (nothing renders, and nothing is guessed, when unset):
 | `/dashboard` | Career Passport (past · present · future), applications sent from this device, saved roles, data controls |
 | `/faq` | Searchable, categorised, deep-linkable (`/faq#question-id`) |
 | `/contact` | Enquiry form, candidate routes, addresses |
-
-Privacy, Terms, About and How we evaluate are shared with the approved site, so
-there is one version of each.
+| `/about` | The approved About page: position, the four beliefs, the partnership |
+| `/candidates/how-we-evaluate` | Five signals and where each comes from, the four readings, both directions of fit, what a client sees, what we never look at |
+| `/privacy`, `/terms` | The approved legal text, read from `lib/legal.ts` — the same source the approved pages render — so there is still only one version of it |
 
 ## Design system
 
@@ -100,6 +100,23 @@ One additive change: `POST /api/candidate-application` now accepts an optional
 `profile` object (the Career Passport) and forwards it, bounded and sanitised,
 only when the candidate chose to include it. Callers that don't send it produce
 exactly the payload they always did. The no-silent-success behaviour is unchanged.
+
+## Static copy
+
+`scripts/export-static-site.mjs` builds this design as a self-contained static
+site — every page a flat `.html` file, assets under `./assets`, links relative —
+for hosting anywhere that serves plain files:
+
+```bash
+node scripts/export-static-site.mjs . /tmp/talynt-work /tmp/talynt-site
+```
+
+It works on a copy and never edits the repository. In the copy the design
+becomes the whole site, links are plain anchors, and the review-only labels
+(the footer's direction line, the FAQ's "proposed" note) are left out. With no
+server behind it, both forms take their existing "delivery is not configured"
+path: nothing a visitor types is sent anywhere, and they are given the email
+address instead.
 
 ## Known limitations
 

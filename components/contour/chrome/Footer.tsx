@@ -4,7 +4,7 @@ import { EMAIL, LINKEDIN, ROUTES, whatsappHref } from "@/lib/contour/site";
 import { Meeting } from "@/components/contour/graphics/Meeting";
 import { LinkedInIcon, WhatsAppIcon } from "./Icons";
 
-const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string; shared?: boolean }> }> = [
+const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
   {
     title: "Employers",
     links: [
@@ -28,15 +28,15 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string
     links: [
       { label: "FAQ", href: ROUTES.faq },
       { label: "Contact", href: ROUTES.contact },
-      { label: "About", href: ROUTES.about, shared: true },
-      { label: "How we evaluate", href: ROUTES.howWeEvaluate, shared: true },
+      { label: "About", href: ROUTES.about },
+      { label: "How we evaluate", href: ROUTES.howWeEvaluate },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Privacy", href: ROUTES.privacy, shared: true },
-      { label: "Terms", href: ROUTES.terms, shared: true },
+      { label: "Privacy", href: ROUTES.privacy },
+      { label: "Terms", href: ROUTES.terms },
     ],
   },
 ];

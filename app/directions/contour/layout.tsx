@@ -31,7 +31,8 @@ const serif = Source_Serif_4({
 
 export const metadata: Metadata = {
   title: {
-    default: "TALYNT LABS — Talent intelligence, built for hiring · Direction C",
+    // Absolute, so the root layout's "%s — TALYNT LABS" isn't appended to the home page title.
+    absolute: "TALYNT LABS — Talent intelligence, built for hiring · Direction C",
     template: "%s — TALYNT LABS · Direction C",
   },
   description:

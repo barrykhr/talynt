@@ -479,6 +479,10 @@ export const ABOUT = {
   partnership: "TALYNT is the partnership.",
   partnershipItalic: "LABS is how we keep improving it.",
   partnershipBody: "The service is the product. The technology is the engine that makes the service different — and it is ours, so it changes as fast as what we learn.",
+  eyebrow: "About",
+  description: "TALYNT LABS is a talent intelligence company. We combine deep sourcing, human conversations and technology built in-house to help companies make better hiring decisions.",
+  primary: "Build your team",
+  secondary: "See how we work",
 } as const;
 
 /* ===========================================================================
@@ -612,11 +616,11 @@ export const EVALUATE = {
   signalsTitleItalic: "Each one explainable.",
   signalsLede: "A signal is a reading with its reasoning attached. If we cannot say where one came from, it does not get written down.",
   signals: [
-    { name: "Technical alignment", what: "Whether the work you’ve done maps onto the work this role needs." },
-    { name: "Role motivation", what: "Whether you want this role specifically, or a role." },
-    { name: "Team alignment", what: "Whether how you work fits how this team already works." },
-    { name: "Communication", what: "Whether you can make yourself understood to people who don’t share your context." },
-    { name: "Compensation alignment", what: "Whether the band and your expectation can meet." },
+    { name: "Technical alignment", what: "Whether the work you’ve done maps onto the work this role needs.", from: "Your own account of what you built and decided — not a keyword match against a CV." },
+    { name: "Role motivation", what: "Whether you want this role specifically, or a role.", from: "The conversation. It is the single strongest predictor of whether a hire stays, and the hardest to fake in either direction." },
+    { name: "Team alignment", what: "Whether how you work fits how this team already works.", from: "Both sides described separately, then compared. Not a personality test." },
+    { name: "Communication", what: "Whether you can make yourself understood to people who don’t share your context.", from: "How you explain your own work, in your own words." },
+    { name: "Compensation alignment", what: "Whether the band and your expectation can meet.", from: "Asked directly, early, because finding out at offer stage wastes everybody’s month." },
   ],
   readings: [
     { strength: "emerging", body: "We’ve seen something, and not enough of it to lean on." },
@@ -648,6 +652,30 @@ export const EVALUATE = {
   reservationItalic: "before",
   reservationTail: "the client does.",
   modelLine: "Nothing about you is decided by a model. The technology finds candidates and organises evidence. A person reads it, and a person is accountable for what we tell the client.",
+  description: "What TALYNT looks at, what we write down, what a client sees, and why there is no candidate score.",
+  fromLabel: "Where it comes from",
+  readingsLabel: "The four readings",
+  readingsNote: "Four steps, deliberately coarse. A resolution we could not defend would be theatre — and a candidate whose every signal reads “strong” is a candidate nobody looked at properly.",
+  twoSidedEyebrow: "Both directions",
+  twoSidedTitle: "Fit isn’t about being similar.",
+  twoSidedTurn: "It’s about being",
+  twoSidedTurnItalic: "compatible.",
+  twoSidedLede: "We write down what the company needs and what you’re looking for as two separate things, then compare them. Where they disagree, both sides are told.",
+  clientsEyebrow: "What the client sees",
+  clientsTitle: "The same signals,",
+  clientsTitleItalic: "and one thing more.",
+  clientsLede: "A client sees your signals, the reasoning behind each one, and a section called “what to watch for” — the honest caveat on you, written before they meet you.",
+  clientsSeeLabel: "They see",
+  clientsDontSeeLabel: "They don’t see",
+  ignoredTitle: "Signals, not",
+  ignoredTitleItalic: "proxies for signals.",
+  ignoredLede: "Each of these is a shortcut that correlates with something real and predicts almost nothing on its own. They are the reason good people get filtered out before anybody reads their work.",
+  ignoredNote: "We will ask about a gap or a short tenure if it is relevant to this role. We will not treat either as a finding on its own, and a client asking us to screen on one gets the same answer.",
+  ignoredLink: "Read the open roles",
+  closeTitle: "AI finds signals.",
+  closeTitleItalic: "People understand them.",
+  closePrimary: "Create your Career Passport",
+  closeSecondary: "Explore roles",
 } as const;
 
 /** app/candidates/roles/page.tsx */
@@ -764,6 +792,26 @@ export const PASSPORT = {
   savedLede: "Saved roles and sent applications live in this browser. Nothing here has been shared with a company, and saving a role tells nobody anything.",
   savedEmpty: "Saving is a bookmark on this device and nothing more — no company is notified, and it does not start a process. It is there so you can read a role properly later rather than deciding in a hurry.",
   sentNote: "This is a record of what this browser sent, not a live status. We don’t show an interview or offer stage here because nothing reports one back to this page — the honest place for that is the conversation you’ll be having with a person.",
+} as const;
+
+/**
+ * app/privacy/page.tsx and app/terms/page.tsx — the page headers. The legal text
+ * itself is not copied: both sites render it from lib/legal.ts.
+ */
+export const LEGAL = {
+  privacy: {
+    eyebrow: "Privacy",
+    title: "What we hold, and why.",
+    lede: "We ask candidates to trust us with their career, and clients to trust us with their hiring. This page explains what happens to the information that changes hands.",
+    description: "How TALYNT LABS handles personal information belonging to candidates, clients and visitors to this website.",
+  },
+  terms: {
+    eyebrow: "Terms",
+    title: "The terms of this site.",
+    lede: "Short, and worth reading if you are looking at the interfaces on the homepage and wondering what is real.",
+    description: "The terms on which TALYNT LABS makes this website available, including how to read the illustrative interface content shown on it.",
+  },
+  updatedLabel: "Last updated",
 } as const;
 
 /** app/layout.tsx — the tagline itself */

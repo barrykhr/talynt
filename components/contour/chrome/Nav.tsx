@@ -83,14 +83,19 @@ export function Nav() {
 
   return (
     <header
-      className={cx(
-        "sticky top-0 transition-[background-color,border-color] duration-300",
-        lifted || open
-          ? "border-b bg-[color-mix(in_oklab,var(--ct-bg)_88%,transparent)] backdrop-blur-md"
-          : "border-b ct-b-none",
-      )}
+      className={cx("sticky top-0 transition-[border-color] duration-300", lifted || open ? "border-b" : "border-b ct-b-none")}
       style={{ zIndex: "var(--ct-z-nav)" }}
     >
+      {/* The frosted ground sits on its own layer: a backdrop-filter on the
+          header itself would become the containing block for the fixed menu
+          panel below and collapse it to the header's height. */}
+      <div
+        aria-hidden="true"
+        className={cx(
+          "pointer-events-none absolute inset-0 -z-10 transition-[background-color] duration-300",
+          (lifted || open) && "bg-[color-mix(in_oklab,var(--ct-bg)_88%,transparent)] backdrop-blur-md",
+        )}
+      />
       <nav aria-label="Primary" className="ct-wrap flex h-[var(--ct-nav-h)] items-center justify-between gap-6">
         <Link href={ROUTES.home} className="shrink-0" aria-label="TALYNT LABS — home">
           {/* The approved lockup, as drawn. 36px tall keeps it above its 120px minimum width. */}
