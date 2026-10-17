@@ -4,7 +4,7 @@ import { Meeting } from "@/components/contour/graphics/Meeting";
 
 export default function ContourNotFound() {
   return (
-    <section className="ct-wrap grid gap-10 py-24 md:grid-cols-2 md:items-center">
+    <main id="ct-main" className="ct-wrap grid gap-10 py-24 md:grid-cols-2 md:items-center">
       <div>
         <p className="ct-meta ct-mute">Not found</p>
         <h1 className="ct-display ct-l mt-5">
@@ -21,6 +21,6 @@ export default function ContourNotFound() {
         </div>
       </div>
       <Meeting className="w-full max-w-md" decorative />
-    </section>
+    </main>
   );
 }

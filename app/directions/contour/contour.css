@@ -737,6 +737,66 @@ html:has(.ct) body {
   }
 
   /* --------------------------------------------------------------------------
+     Drawn graphics: a path draws, a part appears, once the parent says so with
+     data-drawn="true". Without script, or with reduced motion, the drawing is
+     simply there — never stuck at its first frame.
+     -------------------------------------------------------------------------- */
+
+  .ct-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1100ms var(--ct-ease) var(--d, 0ms);
+  }
+
+  [data-drawn="true"] .ct-draw {
+    stroke-dashoffset: 0;
+  }
+
+  .ct-appear {
+    opacity: 0;
+    transition: opacity 600ms ease var(--d, 0ms);
+  }
+
+  [data-drawn="true"] .ct-appear {
+    opacity: 1;
+  }
+
+  @media (scripting: none) {
+    .ct-draw {
+      stroke-dashoffset: 0;
+    }
+
+    .ct-appear {
+      opacity: 1;
+    }
+  }
+
+  /* The entry choice: the whole option is the link. */
+  .ct-option {
+    --ct-bc: var(--ct-line);
+    transition:
+      border-color var(--ct-fast) var(--ct-ease),
+      transform var(--ct-fast) var(--ct-ease),
+      box-shadow var(--ct-fast) var(--ct-ease);
+  }
+
+  .ct-option:hover,
+  .ct-option:focus-visible {
+    --ct-bc: var(--ct-accent);
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px -30px rgba(32, 35, 33, 0.45);
+  }
+
+  .ct-option .ct-btn-arrow {
+    transition: transform var(--ct-fast) var(--ct-ease);
+  }
+
+  .ct-option:hover .ct-btn-arrow,
+  .ct-option:focus-visible .ct-btn-arrow {
+    transform: translateX(3px);
+  }
+
+  /* --------------------------------------------------------------------------
      Reduced motion: everything has a composed, static end state.
      -------------------------------------------------------------------------- */
 
@@ -758,6 +818,23 @@ html:has(.ct) body {
     .ct-btn,
     .ct-btn-arrow {
       transition: none;
+    }
+
+    .ct-draw {
+      stroke-dashoffset: 0;
+      transition: none;
+    }
+
+    .ct-appear {
+      opacity: 1;
+      transition: none;
+    }
+
+    .ct-option,
+    .ct-option:hover,
+    .ct-option:focus-visible {
+      transform: none;
+      transition: border-color var(--ct-fast) linear;
     }
   }
 }

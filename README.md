@@ -23,6 +23,7 @@ npm run dev      # http://localhost:3000
 npm run build    # production build
 npm run lint     # eslint
 npm run typecheck
+npm test         # unit and route tests (Node's built-in test runner)
 ```
 
 ## Design system
@@ -72,8 +73,10 @@ Alternatives for review live under `/directions` with their own chrome, so the
 approved site is untouched by them:
 
 - `/directions/passage` — direction B, photography-led.
-- `/directions/contour` — direction C, light and editorial, with the full
-  employer and candidate journeys. See `app/directions/contour/README.md`.
+- `/directions/contour` — direction C, light and editorial: an entry screen
+  that splits employers from candidates, a reusable candidate profile, and
+  role-specific assessments. See `app/directions/contour/README.md` and
+  `lib/assessment/README.md`.
 
 ## Contact form
 

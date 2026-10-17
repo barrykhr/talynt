@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import "./contour.css";
-import { Nav } from "@/components/contour/chrome/Nav";
-import { Footer } from "@/components/contour/chrome/Footer";
-import { WhatsAppButton } from "@/components/contour/chrome/WhatsAppButton";
 import { MotionProvider } from "@/components/contour/MotionProvider";
 
 /**
@@ -19,6 +16,10 @@ import { MotionProvider } from "@/components/contour/MotionProvider";
  *
  * The approved site's chrome steps aside for /directions (see SiteChrome), so
  * nothing here touches it.
+ *
+ * Two kinds of page sit under this layout: the entry screen (./page.tsx), which
+ * is the opening choice and carries no navigation, and everything else in
+ * (main), which shares the navigation and footer.
  */
 
 const serif = Source_Serif_4({
@@ -47,17 +48,7 @@ export const viewport: Viewport = {
 export default function ContourLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={`ct ${serif.variable}`}>
-      <MotionProvider>
-        <a href="#ct-main" className="ct-skip">
-          Skip to content
-        </a>
-        <Nav />
-        <main id="ct-main" tabIndex={-1} className="outline-none">
-          {children}
-        </main>
-        <Footer />
-        <WhatsAppButton />
-      </MotionProvider>
+      <MotionProvider>{children}</MotionProvider>
     </div>
   );
 }

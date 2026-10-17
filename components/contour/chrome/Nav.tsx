@@ -4,28 +4,75 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ROUTES, isCandidatePath } from "@/lib/contour/site";
-import { useSavedRoles } from "@/lib/candidate/saved";
+import { ROUTES } from "@/lib/contour/site";
+import { AUDIENCE_HOME, audienceOf, useAudience, type Audience } from "@/lib/contour/audience";
+import { SWITCH } from "@/lib/contour/proposed";
+import { useCandidateApplications } from "@/lib/candidate/applications";
 import { cx } from "@/lib/utils";
 
-const LINKS = [
-  { label: "For employers", href: ROUTES.employers, audience: "employer" },
-  { label: "For candidates", href: ROUTES.candidates, audience: "candidate" },
-  { label: "Opportunities", href: ROUTES.opportunities, audience: "candidate" },
-  { label: "FAQ", href: ROUTES.faq, audience: "both" },
-] as const;
+/**
+ * Two sides of one company. The links and the primary action follow the side
+ * the page belongs to; on shared pages (FAQ, contact, legal) they follow the
+ * visitor's last choice. The switch is always there, so nobody is trapped on
+ * the side they picked first.
+ */
+const LINKS: Record<Audience, Array<{ label: string; href: string }>> = {
+  employer: [
+    { label: "How it works", href: `${ROUTES.employers}#how-we-work` },
+    { label: "Evaluation", href: `${ROUTES.employers}#evaluation` },
+    { label: "Shortlists", href: `${ROUTES.employers}#shortlist` },
+    { label: "FAQ", href: ROUTES.faq },
+  ],
+  candidate: [
+    { label: "Opportunities", href: ROUTES.opportunities },
+    { label: "Your profile", href: ROUTES.profile },
+    { label: "Applications", href: ROUTES.applications },
+    { label: "FAQ", href: ROUTES.faq },
+  ],
+};
+
+const ACTION: Record<Audience, { label: string; href: string }> = {
+  employer: { label: "Tell us who you’re looking for", href: `${ROUTES.employers}#enquiry` },
+  candidate: { label: "Explore opportunities", href: ROUTES.opportunities },
+};
 
 function isActive(pathname: string | null, href: string) {
-  if (!pathname) return false;
+  if (!pathname || href.includes("#")) return false;
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function AudienceSwitch({ side, onChoose, className }: { side: Audience; onChoose: (a: Audience) => void; className?: string }) {
+  return (
+    <div role="group" aria-label={SWITCH.label} className={cx("items-center rounded-full border ct-b2 p-0.5", className ?? "inline-flex")}>
+      {(["employer", "candidate"] as const).map((a) => (
+        <Link
+          key={a}
+          href={AUDIENCE_HOME[a]}
+          onClick={() => onChoose(a)}
+          aria-current={side === a ? "true" : undefined}
+          className={cx(
+            "flex min-h-9 items-center rounded-full px-3 text-[0.84rem] transition-colors",
+            side === a
+              ? a === "candidate"
+                ? "bg-[var(--ct-violet-wash)] text-[var(--ct-violet-ink)]"
+                : "bg-[var(--ct-green-wash)] text-[var(--ct-green-deep)]"
+              : "text-[var(--ct-mute)] hover:text-[var(--ct-ink)]",
+          )}
+        >
+          {a === "employer" ? SWITCH.employers : SWITCH.candidates}
+        </Link>
+      ))}
+    </div>
+  );
 }
 
 export function Nav() {
   const pathname = usePathname();
-  const candidate = isCandidatePath(pathname);
+  const { audience, choose } = useAudience();
+  const side: Audience = audienceOf(pathname) ?? audience ?? "employer";
   const [lifted, setLifted] = useState(false);
   const [open, setOpen] = useState(false);
-  const { saved, loaded } = useSavedRoles();
+  const { applications, loaded } = useCandidateApplications();
   const toggleRef = useRef<HTMLButtonElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
@@ -79,7 +126,16 @@ export function Nav() {
     };
   }, [open]);
 
-  const savedCount = loaded ? saved.length : 0;
+  const drafts = loaded ? applications.filter((a) => !a.submittedAt).length : 0;
+  const links = LINKS[side];
+  const action = ACTION[side];
+  const home = audienceOf(pathname) || audience ? AUDIENCE_HOME[side] : ROUTES.home;
+
+  // Remember the side of any page the visitor lands on, so shared pages follow it.
+  const pageSide = audienceOf(pathname);
+  useEffect(() => {
+    if (pageSide && pageSide !== audience) choose(pageSide);
+  }, [pageSide, audience, choose]);
 
   return (
     <header
@@ -96,22 +152,14 @@ export function Nav() {
           (lifted || open) && "bg-[color-mix(in_oklab,var(--ct-bg)_88%,transparent)] backdrop-blur-md",
         )}
       />
-      <nav aria-label="Primary" className="ct-wrap flex h-[var(--ct-nav-h)] items-center justify-between gap-6">
-        <Link href={ROUTES.home} className="shrink-0" aria-label="TALYNT LABS — home">
+      <nav aria-label="Primary" className="ct-wrap flex h-[var(--ct-nav-h)] items-center justify-between gap-4">
+        <Link href={home} className="shrink-0" aria-label="TALYNT LABS — home">
           {/* The approved lockup, as drawn. 36px tall keeps it above its 120px minimum width. */}
-          <Image
-            src="/brand/talynt-primary-light.svg"
-            alt=""
-            width={126}
-            height={36}
-            priority
-            unoptimized
-            className="h-9 w-auto"
-          />
+          <Image src="/brand/talynt-primary-light.svg" alt="" width={126} height={36} priority unoptimized className="h-9 w-auto" />
         </Link>
 
-        <ul className="hidden items-center gap-1 lg:flex">
-          {LINKS.map((link) => {
+        <ul className="hidden items-center gap-0.5 xl:flex">
+          {links.map((link) => {
             const active = isActive(pathname, link.href);
             return (
               <li key={link.href}>
@@ -119,18 +167,23 @@ export function Nav() {
                   href={link.href}
                   aria-current={active ? "page" : undefined}
                   className={cx(
-                    "relative flex h-10 items-center rounded-[var(--ct-r-s)] px-3.5 text-[0.92rem] transition-colors duration-200",
+                    "relative flex h-10 items-center gap-1.5 rounded-[var(--ct-r-s)] px-3 text-[0.92rem] transition-colors duration-200",
                     active ? "text-[var(--ct-ink)]" : "text-[var(--ct-mute)] hover:text-[var(--ct-ink)]",
                   )}
                 >
                   {link.label}
+                  {link.href === ROUTES.applications && drafts > 0 && (
+                    <span className="ct-meta rounded-full bg-[var(--ct-violet-wash)] px-1.5 py-0.5 text-[0.62rem] text-[var(--ct-violet-ink)] tabular-nums">
+                      <span className="sr-only">, </span>
+                      {drafts}
+                      <span className="sr-only"> in progress</span>
+                    </span>
+                  )}
                   {active && (
                     <span
                       aria-hidden="true"
-                      className="absolute inset-x-3.5 -bottom-[0.95rem] h-[2px] rounded-full"
-                      style={{
-                        backgroundColor: link.audience === "candidate" ? "var(--ct-violet)" : "var(--ct-green)",
-                      }}
+                      className="absolute inset-x-3 -bottom-[0.95rem] h-[2px] rounded-full"
+                      style={{ backgroundColor: side === "candidate" ? "var(--ct-violet)" : "var(--ct-green)" }}
                     />
                   )}
                 </Link>
@@ -140,36 +193,9 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          {candidate ? (
-            <Link
-              href={ROUTES.dashboard}
-              aria-current={isActive(pathname, ROUTES.dashboard) ? "page" : undefined}
-              className="hidden h-10 items-center gap-2 rounded-[var(--ct-r-s)] px-3 text-[0.92rem] text-[var(--ct-ink-2)] transition-colors hover:text-[var(--ct-ink)] sm:inline-flex"
-            >
-              Your dashboard
-              {savedCount > 0 && (
-                <span className="ct-meta rounded-full bg-[var(--ct-violet-wash)] px-1.5 py-0.5 text-[0.62rem] text-[var(--ct-violet-ink)] tabular-nums">
-                  <span className="sr-only">, </span>
-                  {savedCount}
-                  <span className="sr-only"> saved</span>
-                </span>
-              )}
-            </Link>
-          ) : (
-            <Link
-              href={ROUTES.contact}
-              aria-current={isActive(pathname, ROUTES.contact) ? "page" : undefined}
-              className="hidden h-10 items-center rounded-[var(--ct-r-s)] px-3 text-[0.92rem] text-[var(--ct-ink-2)] transition-colors hover:text-[var(--ct-ink)] sm:inline-flex"
-            >
-              Contact
-            </Link>
-          )}
-
-          <Link
-            href={candidate ? ROUTES.opportunities : ROUTES.enquiry}
-            className="ct-btn ct-btn-primary hidden min-h-10 px-4 text-[0.9rem] sm:inline-flex"
-          >
-            {candidate ? "Explore roles" : "Build your team"}
+          <AudienceSwitch side={side} onChoose={choose} className="hidden md:inline-flex" />
+          <Link href={action.href} className="ct-btn ct-btn-primary hidden min-h-10 px-4 text-[0.9rem] lg:inline-flex">
+            {action.label}
           </Link>
 
           <button
@@ -178,7 +204,7 @@ export function Nav() {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-controls="ct-menu"
-            className="flex h-11 w-11 items-center justify-center rounded-[var(--ct-r-m)] border ct-b2 lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-[var(--ct-r-m)] border ct-b2 xl:hidden"
           >
             <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
             <span aria-hidden="true" className="flex flex-col gap-[5px]">
@@ -206,58 +232,38 @@ export function Nav() {
           role="dialog"
           aria-modal="true"
           aria-label="Menu"
-          className="fixed inset-x-0 bottom-0 top-[var(--ct-nav-h)] overflow-y-auto border-t bg-[var(--ct-bg)] lg:hidden"
+          className="fixed inset-x-0 bottom-0 top-[var(--ct-nav-h)] overflow-y-auto border-t bg-[var(--ct-bg)] xl:hidden"
           style={{ zIndex: "var(--ct-z-sheet)" }}
         >
-          <div className="ct-wrap flex min-h-full flex-col justify-between gap-10 pt-4 pb-[max(2rem,env(safe-area-inset-bottom))]">
-            <ul>
-              {[{ label: "Home", href: ROUTES.home, audience: "both" as const }, ...LINKS].map((link) => (
-                <li key={link.href} className="border-b">
-                  <Link
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    aria-current={pathname === link.href ? "page" : undefined}
-                    className="ct-display flex items-center justify-between py-4 text-[1.75rem] leading-tight"
-                  >
-                    {link.label}
-                    <span aria-hidden="true" className="ct-meta ct-mute">
-                      →
-                    </span>
+          <div className="ct-wrap flex min-h-full flex-col justify-between gap-10 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
+            <div>
+              <AudienceSwitch side={side} onChoose={(a) => { choose(a); setOpen(false); }} />
+              <ul className="mt-4">
+                {[{ label: side === "employer" ? "For employers" : "For candidates", href: AUDIENCE_HOME[side] }, ...links].map((link) => (
+                  <li key={link.href} className="border-b">
+                    <Link
+                      href={link.href}
+                      onClick={() => setOpen(false)}
+                      aria-current={pathname === link.href ? "page" : undefined}
+                      className="ct-display flex items-center justify-between py-4 text-[1.75rem] leading-tight"
+                    >
+                      {link.label}
+                      <span aria-hidden="true" className="ct-meta ct-mute">
+                        →
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+                <li className="border-b">
+                  <Link href={ROUTES.contact} onClick={() => setOpen(false)} className="flex items-center justify-between py-4 text-[1rem] text-[var(--ct-ink-2)]">
+                    Contact
                   </Link>
                 </li>
-              ))}
-              <li className="border-b">
-                <Link
-                  href={ROUTES.dashboard}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between py-4 text-[1rem] text-[var(--ct-ink-2)]"
-                >
-                  Your dashboard
-                  {savedCount > 0 && <span className="ct-meta ct-violet">{savedCount} saved</span>}
-                </Link>
-              </li>
-              <li className="border-b">
-                <Link
-                  href={ROUTES.contact}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between py-4 text-[1rem] text-[var(--ct-ink-2)]"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Link href={ROUTES.enquiry} onClick={() => setOpen(false)} className="ct-btn ct-btn-primary w-full">
-                Build your team <span aria-hidden="true">→</span>
-              </Link>
-              <Link
-                href={ROUTES.opportunities}
-                onClick={() => setOpen(false)}
-                className="ct-btn ct-btn-secondary w-full"
-              >
-                Explore roles <span aria-hidden="true">→</span>
-              </Link>
+              </ul>
             </div>
+            <Link href={action.href} onClick={() => setOpen(false)} className="ct-btn ct-btn-primary w-full">
+              {action.label} <span aria-hidden="true">→</span>
+            </Link>
           </div>
         </div>
       )}

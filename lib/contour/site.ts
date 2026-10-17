@@ -21,7 +21,11 @@ export const ROUTES = {
   opportunities: to("/opportunities"),
   role: (slug: string) => to(`/opportunities/${slug}`),
   profile: to("/profile"),
-  dashboard: to("/dashboard"),
+  applications: to("/applications"),
+  application: (slug: string) => to(`/applications/${slug}`),
+  assessment: (slug: string) => to(`/applications/${slug}/assessment`),
+  review: to("/employers/assessment-review"),
+  approach: to("/employers/approach"),
   faq: to("/faq"),
   contact: to("/contact"),
   enquiry: to("/contact#enquiry"),
@@ -34,7 +38,7 @@ export const ROUTES = {
 /** Candidate-side routes switch the navigation's primary action. */
 export function isCandidatePath(pathname: string | null): boolean {
   if (!pathname) return false;
-  return [ROUTES.candidates, ROUTES.opportunities, ROUTES.profile, ROUTES.dashboard].some(
+  return [ROUTES.candidates, ROUTES.opportunities, ROUTES.profile, ROUTES.applications].some(
     (p) => pathname === p || pathname.startsWith(`${p}/`),
   );
 }

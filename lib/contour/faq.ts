@@ -41,6 +41,10 @@ const SRC = {
   roles: { label: "Explore roles", href: "/candidates/roles" },
   passport: { label: "Career Passport", href: "/candidates/passport" },
   saved: { label: "Saved roles", href: "/candidates/saved" },
+  profile: { label: "Your profile", href: ROUTES.profile },
+  applications: { label: "Your applications", href: ROUTES.applications },
+  employers: { label: "For employers", href: ROUTES.employers },
+  review: { label: "Assessment review", href: ROUTES.review },
 } satisfies Record<string, FaqSource>;
 
 export const FAQS: Faq[] = [
@@ -108,6 +112,25 @@ export const FAQS: Faq[] = [
     sources: [SRC.home],
   },
   {
+    id: "what-assessments-show",
+    category: "employers",
+    question: "What do role-specific assessments show us?",
+    answer: [
+      "For each shortlisted candidate: the competencies drawn from your role’s essential requirements, the questions they answered, their answers in full, and a TALYNT reviewer’s findings — evidence quoted from the answers, kept separate from the reviewer’s reading, with what to ask next.",
+      "There is no overall score, and the hiring decision stays with you.",
+    ],
+    sources: [SRC.employers, SRC.review],
+  },
+  {
+    id: "who-sees-assessments",
+    category: "employers",
+    question: "Can other clients see a candidate’s assessment?",
+    answer: [
+      "No. An application is passed to the one client whose role it is for. It is not added to a database that other clients search, and it is not used for any other role without asking the candidate again. TALYNT’s internal notes are not shared with clients.",
+    ],
+    sources: [SRC.privacy, SRC.review],
+  },
+  {
     id: "which-roles-and-markets",
     category: "employers",
     question: "Which roles and markets do you cover?",
@@ -135,10 +158,10 @@ export const FAQS: Faq[] = [
     featured: true,
     question: "How can I submit my profile?",
     answer: [
-      "Build your Career Passport — where you’ve been, where you are and where this is going — and send it with an application to a specific role. Your profile only ever reaches us with a role you have chosen and confirmed.",
+      "Create your TALYNT profile once — your experience, skills, education and preferences — and it is saved on this device. Then apply to any role: each application uses that profile and adds what is specific to the role, including a short written assessment.",
       "There is no general talent pool on this site yet, and no profile of you reaches a company without you choosing that role and confirming it.",
     ],
-    sources: [SRC.candidates, SRC.passport],
+    sources: [SRC.profile, SRC.candidates],
   },
   {
     id: "how-is-my-information-used",
@@ -155,20 +178,68 @@ export const FAQS: Faq[] = [
     category: "candidates",
     question: "Can I update my profile?",
     answer: [
-      "Yes. Your Career Passport is saved in this browser as you type, and you can change or erase any of it at any time. Because it lives on this device, it is not on your other devices, and clearing your browser data clears it.",
+      "Yes. Your profile is saved in this browser as you type, and you can change or erase any of it at any time. Changes apply to applications you send afterwards; an application you have already sent keeps the profile version it was sent with. Because it lives on this device, it is not on your other devices, and clearing your browser data clears it.",
       `For anything you have already sent us, you can ask us to correct it or delete it by writing to ${EMAIL.privacy}.`,
     ],
-    sources: [SRC.passport, SRC.privacy],
+    sources: [SRC.profile, SRC.privacy],
   },
   {
     id: "application-status",
     category: "candidates",
     question: "How can I check my application status?",
     answer: [
-      "Your dashboard shows what this browser saved and sent, and whether each application was delivered. It is a record, not a live status: there is no interview or offer stage on this site, because nothing reports one back to it.",
+      "Your applications page shows what this browser started and sent, how far each assessment has got, and whether each application was delivered. It is a record, not a live status: there is no interview or offer stage on this site, because nothing reports one back to it.",
       `A person reads every application — not a filter. You’ll hear from us within five working days either way, with a reason. If that doesn’t happen, chase us at ${EMAIL.talent}.`,
     ],
-    sources: [SRC.saved, SRC.candidates],
+    sources: [SRC.applications, SRC.candidates],
+  },
+  {
+    id: "one-profile-many-roles",
+    category: "candidates",
+    question: "Do I need to fill in my details again for each role?",
+    answer: [
+      "No. Your profile is written once and every application reuses it. What changes per role is the part that should: a few sentences on why that role, and an assessment built for it.",
+      "An application never changes your profile, and your answers for one role are never sent with another.",
+    ],
+    sources: [SRC.profile, SRC.applications],
+  },
+  {
+    id: "what-is-the-assessment",
+    category: "candidates",
+    question: "What is the assessment, and how long does it take?",
+    answer: [
+      "A few written questions — usually three — built from that role’s essential requirements, not a generic test. Where your profile shows relevant experience you are asked about it; where it doesn’t, you get a realistic scenario instead, so a gap in your CV isn’t held against you.",
+      "There is no time limit and no timer. Each question shows what a useful answer covers and a suggested length, your answers save on this device as you write, and you review everything before it is sent. How long it takes depends on how much you want to say.",
+    ],
+    sources: [SRC.evaluate, SRC.applications],
+  },
+  {
+    id: "does-the-assessment-decide",
+    category: "candidates",
+    question: "Does the assessment decide whether I get through?",
+    answer: [
+      "No. A person reads your answers against the role’s criteria, alongside everything else in your application. The assessment informs the decision rather than making it, there is no score, and nothing rejects you automatically.",
+    ],
+    sources: [SRC.evaluate, SRC.privacy],
+  },
+  {
+    id: "change-or-retake",
+    category: "candidates",
+    question: "Can I change my answers, or retake an assessment?",
+    answer: [
+      "Before you send an application you can change any answer as often as you like. If the role’s requirements change before you send it, you’ll be asked to refresh the assessment, and answers to questions that are still asked are kept.",
+      `After you send it, the answers stay exactly as they were sent — one application per role. To add something, write to ${EMAIL.talent} with the role in the subject line.`,
+    ],
+    sources: [SRC.applications],
+  },
+  {
+    id: "assessment-adjustments",
+    category: "candidates",
+    question: "What if I need the assessment in a different format?",
+    answer: [
+      `Write to ${EMAIL.talent} and say what would help — another format, more time to respond, or anything else you need to take part on equal terms.`,
+    ],
+    sources: [SRC.applications],
   },
   {
     id: "is-there-a-score",

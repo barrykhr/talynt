@@ -11,13 +11,13 @@ import { cx } from "@/lib/utils";
  * person read through four lenses, so the visitor can see the difference
  * between information and context rather than be told about it.
  */
-export function Problem() {
+export function Problem({ index = "01" }: { index?: string } = {}) {
   return (
     <section id="problem" aria-labelledby="problem-heading" className="ct-section">
       <div className="ct-wrap">
         <div className="grid gap-12 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-6">
-            <Eyebrow index="01">{PROBLEM.eyebrow}</Eyebrow>
+            <Eyebrow index={index}>{PROBLEM.eyebrow}</Eyebrow>
             <Headline
               id="problem-heading"
               lead={PROBLEM.title}
@@ -101,13 +101,13 @@ function SignalInNoise() {
   );
 }
 
-export function Philosophy() {
+export function Philosophy({ index = "02" }: { index?: string } = {}) {
   return (
     <section id="philosophy" aria-labelledby="philosophy-heading" className="ct-section ct-tint">
       <div className="ct-wrap grid gap-14 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-5">
           <div className="lg:sticky lg:top-[calc(var(--ct-nav-h)+3rem)]">
-            <Eyebrow index="02">{PHILOSOPHY.eyebrow}</Eyebrow>
+            <Eyebrow index={index}>{PHILOSOPHY.eyebrow}</Eyebrow>
             <Headline
               id="philosophy-heading"
               lead={PHILOSOPHY.title}

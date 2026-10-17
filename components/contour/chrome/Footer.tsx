@@ -20,7 +20,7 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string
       { label: "For candidates", href: ROUTES.candidates },
       { label: "Explore opportunities", href: ROUTES.opportunities },
       { label: "Submit your profile", href: ROUTES.profile },
-      { label: "Your dashboard", href: ROUTES.dashboard },
+      { label: "Your dashboard", href: ROUTES.applications },
     ],
   },
   {

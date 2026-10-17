@@ -70,9 +70,23 @@ fs.renameSync(path.join(app, "directions/contour"), path.join(app, "(site)"));
 fs.rmSync(path.join(app, "directions"), { recursive: true, force: true });
 fs.rmSync(path.join(app, "(site)/not-found.tsx"), { force: true });
 fs.rmSync(path.join(app, "(site)/README.md"), { force: true });
-// The home page is a file like every other page: home.html.
+// The entry screen is the home page, a file like every other page: home.html.
 fs.mkdirSync(path.join(app, "(site)/home"));
 fs.renameSync(path.join(app, "(site)/page.tsx"), path.join(app, "(site)/home/page.tsx"));
+
+// A static copy has no server to answer a redirect: the old dashboard address
+// becomes a plain page that forwards, with a link for anyone without refresh.
+write("app/(site)/(main)/dashboard/page.tsx", `export default function DashboardPage() {
+  return (
+    <section className="ct-wrap py-24">
+      <meta httpEquiv="refresh" content="0; url=applications.html" />
+      <p className="ct-body">
+        This page has moved to <a href="applications.html" className="ct-link">your applications</a>.
+      </p>
+    </section>
+  );
+}
+`);
 
 write("next.config.ts", `import type { NextConfig } from "next";
 
@@ -118,7 +132,7 @@ export function demoPath(pathname: string | null): string | null {
     ? pathname.slice(pathname.lastIndexOf("/") + 1)
     : to(pathname === "/" ? "/home" : pathname);
   const name = file.slice(0, -5);
-  for (const parent of ["opportunities", "candidates"]) {
+  for (const parent of ["opportunities", "candidates", "applications", "employers"]) {
     if (name.startsWith(\`\${parent}-\`)) return \`\${parent}.html/\${name.slice(parent.length + 1)}\`;
   }
   return file;
@@ -175,11 +189,12 @@ export default function Image({ unoptimized: _u, priority, ...rest }: Props) {
 for (const file of walk(work).filter((f) => /\/(app|components|lib)\//.test(f) && /\.tsx?$/.test(f))) {
   let s = fs.readFileSync(file, "utf8");
   const before = s;
-  s = s.replace(/from "next\/link";/g, 'from "@/lib/demo/link";').replace(/from "next\/image";/g, 'from "@/lib/demo/image";');
+  s = s
+    .replace(/from "next\/link";/g, 'from "@/lib/demo/link";')
+    .replace(/from "next\/image";/g, 'from "@/lib/demo/image";')
+    .replace(/src="\/brand\//g, 'src="brand/');
   if (s !== before) fs.writeFileSync(file, s);
 }
-patch("components/contour/chrome/Footer.tsx", 'src="/brand/', 'src="brand/');
-patch("components/contour/chrome/Nav.tsx", 'src="/brand/', 'src="brand/');
 
 /* 4. Forms: the honest unconfigured path, with nothing transmitted --------- */
 write("lib/demo/fetch.ts", `/**
@@ -199,7 +214,7 @@ export async function unsent(url: string): Promise<Response> {
 `);
 for (const [file, url] of [
   ["components/contour/ContactForm.tsx", "/api/contact"],
-  ["components/contour/candidate/ProfileFlow.tsx", "/api/candidate-application"],
+  ["components/contour/candidate/AssessmentRunner.tsx", "/api/candidate-application"],
 ]) {
   patch(file, `await fetch("${url}", {`, `await unsent("${url}", {`);
   const s = read(file);
@@ -216,8 +231,8 @@ patch(
   /\n\s*<p className="ct-meta ct-mute flex flex-wrap items-center gap-x-4 gap-y-2">\s*<span>Direction C[^]*?<\/p>/,
   "",
 );
-patch("app/(site)/faq/page.tsx", /\n\s*<Illustrative className="mt-6 max-w-2xl">[^]*?<\/Illustrative>/, "");
-patch("app/(site)/faq/page.tsx", "import { Eyebrow, Illustrative } from", "import { Eyebrow } from");
+patch("app/(site)/(main)/faq/page.tsx", /\n\s*<Illustrative className="mt-6 max-w-2xl">[^]*?<\/Illustrative>/, "");
+patch("app/(site)/(main)/faq/page.tsx", "import { Eyebrow, Illustrative } from", "import { Eyebrow } from");
 patch("app/(site)/layout.tsx", /absolute: "[^"]*",\n\s*template: "[^"]*",/, `absolute: "TALYNT LABS — Talent intelligence, built for hiring",
     template: "%s — TALYNT LABS",`);
 patch(
@@ -232,7 +247,7 @@ for (const [from, to] of [
   ['href: "/candidates" }', "href: ROUTES.candidates }"],
   ['href: "/candidates/roles" }', "href: ROUTES.opportunities }"],
   ['href: "/candidates/passport" }', "href: ROUTES.profile }"],
-  ['href: "/candidates/saved" }', "href: ROUTES.dashboard }"],
+  ['href: "/candidates/saved" }', "href: ROUTES.applications }"],
 ]) patch("lib/contour/faq.ts", from, to);
 
 /* 6. Build ----------------------------------------------------------------- */
