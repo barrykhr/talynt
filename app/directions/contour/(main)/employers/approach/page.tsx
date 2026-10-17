@@ -6,12 +6,15 @@ import {
   ENQUIRY,
   FIT,
   GLOBAL,
+  HOW_WE_WORK,
   QUALITY,
   SCALE,
   SOURCING,
   VISIBILITY,
 } from "@/lib/contour/content";
 import { EMAIL } from "@/lib/contour/site";
+import { COMPACT } from "@/lib/contour/proposed";
+import { Philosophy } from "@/components/contour/home/Problem";
 import { ButtonLink, Eyebrow, Headline, Illustrative, SectionHead } from "@/components/contour/ui";
 import { SearchSignals } from "@/components/contour/graphics/SearchSignals";
 import { CompatibilityMap } from "@/components/contour/graphics/RoleToTalent";
@@ -86,10 +89,33 @@ export default function EmployersApproachPage() {
         </div>
       </section>
 
+      {/* --- The philosophy and the six layers, in full ---------------------- */}
+      <Philosophy index="01" />
+      <section id="how-we-work" aria-labelledby="how-heading" className="ct-section scroll-mt-[var(--ct-nav-h)]">
+        <div className="ct-wrap">
+          <SectionHead index="02" eyebrow={HOW_WE_WORK.eyebrow} id="how-heading" lead={HOW_WE_WORK.title} turn={HOW_WE_WORK.titleItalic} lede={HOW_WE_WORK.lede} />
+          <ol className="mt-14 grid gap-px overflow-hidden rounded-[var(--ct-r-l)] border bg-[var(--ct-line)] sm:grid-cols-2 lg:grid-cols-3">
+            {HOW_WE_WORK.layers.map((layer, i) => (
+              <Reveal as="li" key={layer.title} delay={i * 0.05} className="flex flex-col bg-[var(--ct-surface)] p-6">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="ct-meta ct-green tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="ct-meta ct-mute text-right">{COMPACT.layers[i].who}</span>
+                </div>
+                <h3 className="ct-display ct-m mt-4">{layer.title}</h3>
+                <p className="ct-body mt-2">{layer.body}</p>
+              </Reveal>
+            ))}
+          </ol>
+          <p className="ct-display ct-s mt-10">
+            {HOW_WE_WORK.close} <span className="ct-italic">{HOW_WE_WORK.closeItalic}</span>
+          </p>
+        </div>
+      </section>
+
       {/* --- Context --------------------------------------------------------- */}
       <section id="context" aria-labelledby="context-heading" className="ct-section ct-tint">
         <div className="ct-wrap">
-          <SectionHead index="01" eyebrow={CONTEXT.eyebrow} id="context-heading" lead={CONTEXT.title} turn={CONTEXT.titleItalic} lede={CONTEXT.lede} />
+          <SectionHead index="03" eyebrow={CONTEXT.eyebrow} id="context-heading" lead={CONTEXT.title} turn={CONTEXT.titleItalic} lede={CONTEXT.lede} />
           <div className="mt-14">
             <ContextLayers />
           </div>
@@ -106,7 +132,7 @@ export default function EmployersApproachPage() {
         <div className="ct-wrap">
           <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
             <SectionHead
-              index="02"
+              index="04"
               eyebrow={SOURCING.eyebrow}
               id="sourcing-heading"
               lead={SOURCING.title}
@@ -128,7 +154,7 @@ export default function EmployersApproachPage() {
       <section id="conversation" aria-labelledby="conversation-heading" className="ct-section ct-tint">
         <div className="ct-wrap">
           <SectionHead
-            index="03"
+            index="05"
             eyebrow={CONVERSATION.eyebrow}
             id="conversation-heading"
             lead={CONVERSATION.title}
@@ -148,7 +174,7 @@ export default function EmployersApproachPage() {
         <div className="ct-wrap grid gap-12 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-5">
             <div className="lg:sticky lg:top-[calc(var(--ct-nav-h)+2rem)]">
-              <SectionHead index="04" eyebrow={FIT.eyebrow} id="fit-heading" lead={FIT.title} turn={FIT.titleItalic} lede={FIT.lede} size="m" />
+              <SectionHead index="06" eyebrow={FIT.eyebrow} id="fit-heading" lead={FIT.title} turn={FIT.titleItalic} lede={FIT.lede} size="m" />
               {/* The equation, set as type. */}
               <p className="mt-10 flex flex-wrap items-baseline gap-x-3 gap-y-2 border-y py-5">
                 {FIT.inputs.map((input, i) => (
@@ -180,7 +206,7 @@ export default function EmployersApproachPage() {
       {/* --- Quality --------------------------------------------------------- */}
       <section id="quality" aria-labelledby="quality-heading" className="ct-section ct-tint">
         <div className="ct-wrap">
-          <SectionHead index="05" eyebrow={QUALITY.eyebrow} id="quality-heading" lead={QUALITY.title} turn={QUALITY.titleItalic} lede={QUALITY.lede} />
+          <SectionHead index="07" eyebrow={QUALITY.eyebrow} id="quality-heading" lead={QUALITY.title} turn={QUALITY.titleItalic} lede={QUALITY.lede} />
           <div className="mt-14">
             <QualityCompare />
           </div>
@@ -193,7 +219,7 @@ export default function EmployersApproachPage() {
         <div className="ct-wrap">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
             <SectionHead
-              index="06"
+              index="08"
               eyebrow={VISIBILITY.eyebrow}
               id="visibility-heading"
               lead={VISIBILITY.title}
@@ -218,19 +244,19 @@ export default function EmployersApproachPage() {
         </div>
       </section>
 
-      <ProductSection index="07" />
+      <ProductSection index="09" />
 
       {/* --- Capabilities and markets ---------------------------------------- */}
       <section id="capabilities" aria-labelledby="capabilities-heading" className="ct-section">
         <div className="ct-wrap grid gap-14 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-7">
-            <SectionHead index="08" eyebrow={CAPABILITIES.eyebrow} id="capabilities-heading" lead={CAPABILITIES.title} turn={CAPABILITIES.titleItalic} size="m" />
+            <SectionHead index="10" eyebrow={CAPABILITIES.eyebrow} id="capabilities-heading" lead={CAPABILITIES.title} turn={CAPABILITIES.titleItalic} size="m" />
             <div className="mt-10">
               <CapabilityList />
             </div>
           </div>
           <div id="global" className="lg:col-span-4 lg:col-start-9">
-            <Eyebrow index="09">{GLOBAL.eyebrow}</Eyebrow>
+            <Eyebrow index="11">{GLOBAL.eyebrow}</Eyebrow>
             <Headline as="h2" lead={GLOBAL.title} turn={GLOBAL.titleItalic} size="m" className="mt-6" />
             <p className="ct-body mt-5">{GLOBAL.lede}</p>
             <div className="mt-8">

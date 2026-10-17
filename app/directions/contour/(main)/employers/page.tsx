@@ -1,20 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ENQUIRY, HERO, HOW_WE_WORK, SCALE, TAGLINE } from "@/lib/contour/content";
-import { CONTINUES, DECISION, EMPLOYER_HERO, EVALUATION, HOW, SHORTLIST } from "@/lib/contour/proposed";
+import { ENQUIRY, HERO, SCALE, TAGLINE } from "@/lib/contour/content";
+import { EMPLOYER_HERO } from "@/lib/contour/proposed";
 import { EMAIL, ROUTES } from "@/lib/contour/site";
 import { DEMO_ASSESSMENT, DEMO_CANDIDATE, DEMO_EVALUATION, DEMO_RESPONSES, DEMO_ROLE } from "@/lib/assessment/demo";
 import { clientView } from "@/lib/assessment/evaluate";
-import { ButtonLink, Eyebrow, Headline, Illustrative, SectionHead } from "@/components/contour/ui";
-import { Philosophy, Problem } from "@/components/contour/home/Problem";
+import { ButtonLink, Eyebrow, Headline } from "@/components/contour/ui";
+import { Problem } from "@/components/contour/home/Problem";
 import { HumanSection } from "@/components/contour/home/Sections";
 import { SourcingProgression } from "@/components/contour/graphics/SourcingProgression";
-import { WorkContinues } from "@/components/contour/employers/WorkContinues";
-import { AssessmentFlow, AssessmentReview } from "@/components/contour/assessment/Review";
+import {
+  CompactContinues,
+  CompactDecision,
+  CompactEvaluation,
+  CompactHowWeWork,
+  CompactPhilosophy,
+  CompactShortlist,
+} from "@/components/contour/employers/Compact";
 import { ContactForm } from "@/components/contour/ContactForm";
 import { FaqList } from "@/components/contour/FaqList";
-import { Reveal } from "@/components/primitives/Reveal";
-import { REVIEW } from "@/lib/contour/proposed";
 
 export const metadata: Metadata = {
   title: "For employers",
@@ -74,111 +78,16 @@ export default function EmployersPage() {
         </div>
       </section>
 
-      {/* --- 01, 02 The hiring problem ---------------------------------------- */}
+      {/* --- 01 The hiring problem ------------------------------------------- */}
       <Problem index="01" />
-      <Philosophy index="02" />
 
-      {/* --- 03 How TALYNT works (the approved six layers) -------------------- */}
-      <section id="how-we-work" aria-labelledby="how-heading" className="ct-section scroll-mt-[var(--ct-nav-h)]">
-        <div className="ct-wrap">
-          <SectionHead index="03" eyebrow={HOW_WE_WORK.eyebrow} id="how-heading" lead={HOW_WE_WORK.title} turn={HOW_WE_WORK.titleItalic} lede={HOW_WE_WORK.lede} />
-          <ol className="mt-14 grid gap-px overflow-hidden rounded-[var(--ct-r-l)] border bg-[var(--ct-line)] sm:grid-cols-2 lg:grid-cols-3">
-            {HOW_WE_WORK.layers.map((layer, i) => (
-              <Reveal as="li" key={layer.title} delay={i * 0.05} className="flex flex-col bg-[var(--ct-surface)] p-6">
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="ct-meta ct-green tabular-nums">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="ct-meta ct-mute text-right">{HOW.who[i]}</span>
-                </div>
-                <h3 className="ct-display ct-m mt-4">{layer.title}</h3>
-                <p className="ct-body mt-2">{layer.body}</p>
-                {i === 2 && (
-                  <Link href={`${ROUTES.approach}#sourcing`} className="ct-link mt-auto pt-4 text-[0.92rem]">
-                    {HOW.searchLink}
-                  </Link>
-                )}
-                {i === 3 && (
-                  <a href="#evaluation" className="ct-link mt-auto pt-4 text-[0.92rem]">
-                    {EVALUATION.eyebrow}
-                  </a>
-                )}
-              </Reveal>
-            ))}
-          </ol>
-          <p className="ct-display ct-s mt-10">
-            {HOW_WE_WORK.close} <span className="ct-italic">{HOW_WE_WORK.closeItalic}</span>
-          </p>
-          <Link href={ROUTES.approach} className="ct-btn ct-btn-secondary mt-8">
-            {HOW.detailLink} <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-      </section>
-
-      {/* --- 04 While you run the business ----------------------------------- */}
-      <section id="continues" aria-labelledby="continues-heading" className="ct-section ct-tint">
-        <div className="ct-wrap">
-          <SectionHead index="04" eyebrow={CONTINUES.eyebrow} id="continues-heading" lead={CONTINUES.title} turn={CONTINUES.titleItalic} lede={CONTINUES.lede} />
-          <div className="mt-14">
-            <WorkContinues />
-          </div>
-        </div>
-      </section>
-
-      {/* --- 05 Role-specific evaluation ------------------------------------- */}
-      <section id="evaluation" aria-labelledby="evaluation-heading" className="ct-section scroll-mt-[var(--ct-nav-h)]">
-        <div className="ct-wrap">
-          <div className="grid gap-10 lg:grid-cols-12 lg:items-end">
-            <SectionHead index="05" eyebrow={EVALUATION.eyebrow} id="evaluation-heading" lead={EVALUATION.title} turn={EVALUATION.titleItalic} lede={EVALUATION.lede} className="lg:col-span-8" />
-            <ul className="flex flex-col gap-2 lg:col-span-4">
-              {EVALUATION.principles.map((p) => (
-                <li key={p} className="flex items-start gap-3 text-[0.95rem] leading-snug">
-                  <span aria-hidden="true" className="mt-[0.45rem] h-1.5 w-1.5 shrink-0 rounded-[1px] bg-[var(--ct-green)]" />
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="mt-14">
-            <AssessmentFlow role={DEMO_ROLE} assessment={DEMO_ASSESSMENT} responses={DEMO_RESPONSES} evaluation={shared} />
-          </div>
-          <Illustrative className="mt-5 max-w-3xl">{REVIEW.demo}</Illustrative>
-        </div>
-      </section>
-
-      {/* --- 06 A shortlist with context ------------------------------------- */}
-      <section id="shortlist" aria-labelledby="shortlist-heading" className="ct-section ct-tint scroll-mt-[var(--ct-nav-h)]">
-        <div className="ct-wrap">
-          <div className="grid gap-8 lg:grid-cols-12 lg:items-end">
-            <SectionHead index="06" eyebrow={SHORTLIST.eyebrow} id="shortlist-heading" lead={SHORTLIST.title} turn={SHORTLIST.titleItalic} lede={SHORTLIST.lede} className="lg:col-span-8" />
-            <div className="lg:col-span-4">
-              <Link href={ROUTES.review} className="ct-btn ct-btn-secondary">
-                {EVALUATION.openReview} <span aria-hidden="true">→</span>
-              </Link>
-            </div>
-          </div>
-          <div className="mt-14">
-            <AssessmentReview role={DEMO_ROLE} candidate={DEMO_CANDIDATE} assessment={DEMO_ASSESSMENT} responses={DEMO_RESPONSES} evaluation={shared} />
-          </div>
-          <Illustrative className="mt-5 max-w-3xl">{REVIEW.demo}</Illustrative>
-        </div>
-      </section>
-
-      {/* --- 07 The human decision -------------------------------------------- */}
-      <section id="decision" aria-labelledby="decision-heading" className="ct-section">
-        <div className="ct-wrap grid gap-12 lg:grid-cols-12 lg:gap-10">
-          <SectionHead index="07" eyebrow={DECISION.eyebrow} id="decision-heading" lead={DECISION.title} turn={DECISION.titleItalic} lede={DECISION.lede} className="lg:col-span-6" />
-          <ol className="flex flex-col lg:col-span-5 lg:col-start-8">
-            {DECISION.points.map((p, i) => (
-              <Reveal as="li" key={p.title} delay={i * 0.06} className="grid grid-cols-[2.5rem_1fr] gap-2 border-t py-6 first:border-t-0 first:pt-0 lg:first:border-t lg:first:pt-6">
-                <span className="ct-meta ct-green tabular-nums pt-1.5">{String(i + 1).padStart(2, "0")}</span>
-                <div>
-                  <h3 className="ct-display ct-s">{p.title}</h3>
-                  <p className="ct-body mt-2">{p.body}</p>
-                </div>
-              </Reveal>
-            ))}
-          </ol>
-        </div>
-      </section>
+      {/* --- 02–07 Told in pictures; the long form is on /employers/approach -- */}
+      <CompactPhilosophy index="02" />
+      <CompactHowWeWork index="03" />
+      <CompactContinues index="04" />
+      <CompactEvaluation index="05" role={DEMO_ROLE} assessment={DEMO_ASSESSMENT} evaluation={shared} />
+      <CompactShortlist index="06" role={DEMO_ROLE} candidate={DEMO_CANDIDATE} assessment={DEMO_ASSESSMENT} responses={DEMO_RESPONSES} evaluation={shared} />
+      <CompactDecision index="07" />
       <HumanSection index="08" />
 
       {/* --- Conversion ------------------------------------------------------ */}

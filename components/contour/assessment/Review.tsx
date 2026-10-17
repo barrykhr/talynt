@@ -3,7 +3,7 @@ import type { Role } from "@/lib/candidate/roles";
 import type { Passport } from "@/lib/candidate/passport-shape";
 import type { Assessment, Evaluation, Finding, Rating, Response } from "@/lib/assessment/types";
 import { LEVELS, RATING_LABEL } from "@/lib/assessment/rubric";
-import { EVALUATION, REVIEW } from "@/lib/contour/proposed";
+import { REVIEW } from "@/lib/contour/proposed";
 import { cx } from "@/lib/utils";
 
 /**
@@ -238,97 +238,6 @@ export function AssessmentReview({
           </div>
         </Column>
       </div>
-    </div>
-  );
-}
-
-/** The chain for each competency: requirement → competency → question → answer → evidence. */
-export function AssessmentFlow({
-  role,
-  assessment,
-  responses,
-  evaluation,
-}: {
-  role: Role;
-  assessment: Assessment;
-  responses: Record<string, Response>;
-  evaluation: Omit<Evaluation, "internalNotes">;
-}) {
-  return (
-    <div>
-      <ol className="hidden grid-cols-5 gap-4 border-b pb-3 xl:grid" aria-hidden="true">
-        {EVALUATION.steps.map((s, i) => (
-          <li key={s.id} className="flex items-baseline gap-2">
-            <span className="ct-meta ct-green tabular-nums">{String(i + 1).padStart(2, "0")}</span>
-            <span className="ct-meta ct-mute">{s.label}</span>
-          </li>
-        ))}
-      </ol>
-      <ol className="flex flex-col">
-        {assessment.competencies.map((c) => {
-          const essential = c.from.find((g) => g.kind === "essential");
-          const requirement = essential && essential.kind === "essential" ? role.lookingFor.essential[essential.index] : "";
-          const q = assessment.questions.find((x) => x.competencyIds.includes(c.id));
-          const finding = evaluation.findings.find((f) => f.competencyId === c.id);
-          const answer = q ? responses[q.id]?.text ?? "" : "";
-          const quote = finding?.evidence[0]?.quote;
-          const cells: Array<{ label: string; body: ReactNode }> = [
-            { label: EVALUATION.steps[0].label, body: <p className="text-[0.92rem] leading-snug">{requirement}</p> },
-            {
-              label: EVALUATION.steps[1].label,
-              body: (
-                <>
-                  <p className="text-[0.98rem] font-medium leading-snug">{c.label}</p>
-                  <p className="ct-small mt-1 text-[0.84rem]">{c.meaning}</p>
-                </>
-              ),
-            },
-            {
-              label: EVALUATION.steps[2].label,
-              body: (
-                <>
-                  <p className="ct-meta ct-mute text-[0.62rem]">{q ? KIND[q.kind] : ""}</p>
-                  <p className="mt-1 text-[0.9rem] leading-snug">{q?.prompt}</p>
-                </>
-              ),
-            },
-            {
-              label: EVALUATION.steps[3].label,
-              body: (
-                <p className="text-[0.88rem] leading-[1.55] text-[var(--ct-ink-2)]">
-                  {quote ? <Highlighted text={answer.length > 260 ? `${answer.slice(0, 260)}…` : answer} quotes={[quote]} /> : answer.slice(0, 260)}
-                </p>
-              ),
-            },
-            {
-              label: EVALUATION.steps[4].label,
-              body: finding ? (
-                <>
-                  <RatingBadge rating={finding.rating} />
-                  <p className="mt-2 text-[0.88rem] leading-snug">{finding.interpretation}</p>
-                </>
-              ) : null,
-            },
-          ];
-          return (
-            <li key={c.id} className="grid gap-4 border-b py-6 xl:grid-cols-5">
-              {cells.map((cell, i) => (
-                <div key={cell.label} className="relative min-w-0 xl:pr-4">
-                  <p className="ct-meta ct-green mb-1.5 xl:hidden">
-                    {String(i + 1).padStart(2, "0")} · {cell.label}
-                  </p>
-                  {cell.body}
-                  {i < cells.length - 1 && (
-                    <span aria-hidden="true" className="ct-mute absolute top-0 -right-1 hidden text-[0.8rem] xl:block">
-                      →
-                    </span>
-                  )}
-                </div>
-              ))}
-            </li>
-          );
-        })}
-      </ol>
     </div>
   );
 }

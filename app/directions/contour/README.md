@@ -42,8 +42,8 @@ All routes are under `/directions/contour`.
 | Route | What it is |
 |---|---|
 | `/` | **Entry.** "What brings you to TALYNT?" — two options, no navigation bar. The choice is remembered on the device and marked on return; it never redirects |
-| `/employers` | Employer homepage: hero and sourcing drawing → the approved position → problem → philosophy → how TALYNT works (the approved six layers) → while you run the business → role-specific evaluation → a shortlist with context → the human decision → human + AI → enquiry → FAQ |
-| `/employers/approach` | Every other approved client section: scale, context, sourcing, conversation, fit, quality, client visibility, TALYNT OS, capabilities, markets, enquiry |
+| `/employers` | Employer homepage: hero and sourcing drawing → the approved position → problem → then, as short visual sections: philosophy, how TALYNT works (six steps), while you run the business, role-specific evaluation, a shortlist with context, the human decision → human + AI → enquiry → FAQ |
+| `/employers/approach` | The long form: the philosophy and six layers in full, then every other approved client section: scale, context, sourcing, conversation, fit, quality, client visibility, TALYNT OS, capabilities, markets, enquiry |
 | `/employers/assessment-review` | The employer-facing assessment review, full width — a labelled demonstration |
 | `/candidates` | Candidate homepage: hero → the approved position → one profile, many applications → find opportunities → understand the role → career pathways → role-specific assessments → how applying works → your profile → FAQ → close |
 | `/opportunities` | Search, location, work model, function and experience filters, all in the URL |
@@ -128,8 +128,8 @@ Cascade notes for anyone extending this:
 |---|---|---|
 | Entry | `entry/EntryChoice.tsx` | Entry — a career pathway and a narrowing search, from one TALYNT mark |
 | Sourcing progression | `graphics/SourcingProgression.tsx` | Employer hero — brief → requirements → market → relevant → shortlist (a concept, labelled) |
-| Work continues | `employers/WorkContinues.tsx` | Employers — during the day, during the search, the next morning |
-| Assessment flow and review | `assessment/Review.tsx` | Employers, the review page — requirement → competency → question → answer → evidence |
+| Compact sections | `employers/Compact.tsx` | Employers 02–07 — icon steps, the day-to-morning arc, the evidence chain, a one-card shortlist |
+| Assessment review | `assessment/Review.tsx` | The review page — the role, the candidate's answers, the evaluation |
 | One profile → roles | `graphics/ProfileToRoles.tsx`, `candidate/OneProfile.tsx` | Candidates — real roles and their real assessment competencies |
 | Search signals | `graphics/SearchSignals.tsx` | `/employers/approach` |
 | Career pathways | `graphics/CareerPathways.tsx` | Candidates |

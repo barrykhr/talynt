@@ -77,7 +77,7 @@ export function Problem({ index = "01" }: { index?: string } = {}) {
 /** Sixty-four marks, one person read in context. The approved caption below it. */
 const SIGNAL_RINGS = [7, 12, 18].map((r, i) => ring(0, 0, r, 41 + i * 0.02, 0.1));
 
-function SignalInNoise() {
+export function SignalInNoise() {
   const columns = 8;
   const picked = 42;
   return (

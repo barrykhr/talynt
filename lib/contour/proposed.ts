@@ -61,45 +61,13 @@ export const PROGRESSION = [
   { id: "shortlist", label: "A shortlist, with context" },
 ] as const;
 
-/**
- * (ours) The approved six layers (HOW_WE_WORK in content.ts) are the operating
- * model, so the employer page uses them as written. This adds only who does
- * each one, and where the role-specific assessment sits.
- */
-export const HOW = {
-  who: ["TALYNT and you", "TALYNT", "TALYNT, with technology", "TALYNT, with a role-specific assessment", "TALYNT and you", "You, with TALYNT"],
-  searchLink: "See the search, drawn",
-  detailLink: "How we work, in detail",
-} as const;
-
-/** Headline and lede from the brief; the panels are ours. */
+/** Headline from the brief. */
 export const CONTINUES = {
   eyebrow: "While you run the business",
   title: "You focus on the business.",
   titleItalic: "We’ll keep the talent search moving.",
-  lede: "Once we understand the role, we work to identify relevant people, evaluate their experience against your requirements, and bring you profiles worth reviewing.",
   /** (ours) The honest qualifier. It stays next to the story wherever the story appears. */
   qualifier: "This describes how a search is organised, not a delivery time. How long a search takes depends on the role and the market.",
-  panels: [
-    {
-      when: "During the day",
-      title: "You share the role.",
-      body: "We clarify it with you:",
-      points: ["What the person needs to do", "The essential skills and experience", "The business context", "What the role expects in its first year"],
-    },
-    {
-      when: "During the search",
-      title: "The search narrows.",
-      body: "Step by step:",
-      points: ["Role requirements", "Talent discovery", "Relevant profiles identified", "Candidates evaluated", "Shortlist prepared"],
-    },
-    {
-      when: "The next morning",
-      title: "A shortlist with context.",
-      body: "When you next look, you see who, and why:",
-      points: ["Each person’s relevant experience", "Their assessment answers, quoted", "What a reviewer read in them", "What still needs asking"],
-    },
-  ],
 } as const;
 
 /** (ours) Role-specific evaluation, for employers. */
@@ -107,20 +75,6 @@ export const EVALUATION = {
   eyebrow: "Role-specific evaluation",
   title: "Evidence for the role you’re hiring for.",
   titleItalic: "Not a score.",
-  lede: "Every application includes a short written assessment built from the role’s essential requirements. A TALYNT reviewer reads each answer against a rubric written for that role, and what you receive is the evidence — quoted from the candidate — with the reviewer’s reading kept separate from it.",
-  steps: [
-    { id: "requirements", label: "Role requirements", body: "The essential requirements, as agreed with you." },
-    { id: "competencies", label: "Competencies", body: "What can fairly be assessed in writing, one per requirement." },
-    { id: "questions", label: "Questions", body: "An experience question where the profile shows it, a realistic scenario where it doesn’t." },
-    { id: "responses", label: "Responses", body: "The candidate’s own words, saved against this application only." },
-    { id: "evidence", label: "Evidence", body: "Quotes, a reading, a rubric level, and what to ask next." },
-  ],
-  principles: [
-    "Built from the role’s requirements, never from personal characteristics",
-    "No time limits, no paid tools, nothing confidential asked for",
-    "Versioned against the requirements it was written for",
-    "Read by a person; nothing is rejected automatically",
-  ],
   openReview: "Open the full review view",
 } as const;
 
@@ -129,7 +83,6 @@ export const SHORTLIST = {
   eyebrow: "A shortlist with context",
   title: "Who, and",
   titleItalic: "why them.",
-  lede: "A shortlisted candidate arrives with the role’s requirements on one side, their own profile and answers in the middle, and the evidence and open questions on the other — so the conversation you have next is the useful one.",
 } as const;
 
 /** (ours) */
@@ -137,12 +90,6 @@ export const DECISION = {
   eyebrow: "The human decision",
   title: "The assessment informs.",
   titleItalic: "You decide.",
-  lede: "An assessment is one input, alongside the conversations, the candidate’s history and your own judgement. Nothing in it rejects anyone automatically, and nothing in it adds up to a single number.",
-  points: [
-    { title: "Evidence before interpretation", body: "What the candidate wrote is quoted. The reviewer’s reading is labelled as a reading." },
-    { title: "Uncertainty is stated", body: "“Not enough to judge” is an answer, and it comes with the question to ask next." },
-    { title: "Only what you are entitled to see", body: "You see the assessment for your role. Other clients never see it, and TALYNT’s internal notes stay internal." },
-  ],
 } as const;
 
 /** (ours) The prototype review view. */
@@ -392,4 +339,57 @@ export const APPLICATIONS = {
   rubricVersion: "rubric version",
   savedTitle: "Saved roles",
   profileTitle: "Your profile",
+} as const;
+
+/* ===========================================================================
+   Employers — the compact homepage sections
+   =========================================================================== */
+
+/**
+ * (ours) Short labels for the visual versions of the employer homepage's
+ * sections 02–07. They shorten, never replace: the approved wording they
+ * condense (PHILOSOPHY and HOW_WE_WORK in content.ts) is shown in full on
+ * /employers/approach, which every compact section links to.
+ */
+export const COMPACT = {
+  philosophy: [
+    { icon: "understand", note: "Beyond who applies" },
+    { icon: "context", note: "Company, team, leadership" },
+    { icon: "decide", note: "Technology structures. People judge." },
+  ],
+  layers: [
+    { icon: "understand", note: "Business, team, role", who: "You + TALYNT" },
+    { icon: "define", note: "What they own and decide", who: "TALYNT" },
+    { icon: "discover", note: "Beyond active applicants", who: "TALYNT + technology" },
+    { icon: "evaluate", note: "Read together, by a person", who: "TALYNT + assessment" },
+    { icon: "calibrate", note: "Sharper with your feedback", who: "You + TALYNT" },
+    { icon: "decide", note: "A shortlist, with reasons", who: "Your call" },
+  ],
+  continues: [
+    { when: "Day", title: "You share the role", tags: ["The work", "Must-haves", "Context", "Year one"] },
+    { when: "Search", title: "The search narrows", tags: ["Discover", "Identify", "Evaluate"] },
+    { when: "Morning", title: "A shortlist with context", tags: ["Who", "Why", "What to ask"] },
+  ],
+  evaluationLede: "A short written assessment built from the role — read by a person, quoted back to you.",
+  chain: [
+    { icon: "requirement", label: "Requirement", note: "Agreed with you" },
+    { icon: "competency", label: "Competency", note: "One per requirement" },
+    { icon: "question", label: "Question", note: "Experience or scenario" },
+    { icon: "answer", label: "Answer", note: "In their own words" },
+    { icon: "evidence", label: "Evidence", note: "Quoted, rated, next questions" },
+  ],
+  principles: [
+    { icon: "shield", label: "No personal characteristics" },
+    { icon: "clock", label: "No timers, no paid tools" },
+    { icon: "version", label: "Versioned to the role" },
+    { icon: "person", label: "Read by a person" },
+  ],
+  shortlistLede: "Requirements, their answers and the evidence — on one card.",
+  demoNote: "Demonstration: a real role and assessment; the candidate and evaluation are fictional.",
+  decision: [
+    { icon: "evidence", title: "Evidence first", note: "Quotes, then a labelled reading" },
+    { icon: "question", title: "Uncertainty stated", note: "“Not enough to judge” comes with a question" },
+    { icon: "shield", title: "Need-to-know", note: "Your role only. Internal notes stay internal." },
+  ],
+  more: "The full detail",
 } as const;
