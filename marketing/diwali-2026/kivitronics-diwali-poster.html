@@ -513,7 +513,7 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
   }
 
   const COPY = {
-    final: { body: ['As the festival of lights begins,', 'we thank you for your trust and', 'partnership through the year.'],
+    final: { body: [],
          close: ['Wishing you and your family a joyful,', 'peaceful and prosperous Diwali.'] },
     a: { body: ['As the festival of lights begins,', 'we thank you for your trust and', 'partnership through the year.'],
          close: ['Wishing you and your family', 'a peaceful and joyful Diwali.'] },
@@ -584,8 +584,9 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
     ctx.save(); ctx.shadowColor = 'rgba(3,8,24,0.9)'; ctx.shadowBlur = 8;
     C.body.forEach((s, i) => text(s, 54, 476 + i * LH, BF, CREAM));
     const ry = 476 + (C.body.length - 1) * LH + 46;
-    rule(56, ry, 46);
-    C.close.forEach((s, i) => text(s, 54, ry + 46 + i * 31, CF, CREAM));
+    if (C.body.length) rule(56, ry, 46);
+    const cy = C.body.length ? ry + 46 : 486;
+    C.close.forEach((s, i) => text(s, 54, cy + i * 33, CF, CREAM));
     ctx.restore();
   }
 
