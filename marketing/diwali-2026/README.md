@@ -27,3 +27,6 @@ No-install fallback: open the HTML in a browser and screen-record the card for 6
 Fonts: Cormorant Garamond and Montserrat (SIL Open Font License), embedded via @fontsource.
 
 High-res still: open `kivitronics-diwali-poster.html?capture&scale=2` and save the canvas (right-click → Save image).
+
+Scene options (static stills, 1440×2160): `kivitronics-diwali-poster-option2-ghats.jpg`, `-option3-city.jpg`, `-option4-lamps.jpg`.
+Render any scene with `kivitronics-diwali-poster.html?scene=ghats|city|lamps` (add `&capture&scale=2` for a hi-res still). The animated GIFs and `kivitronics-diwali-poster.png/.jpg` still show the earlier palace skyline until a scene is chosen.
