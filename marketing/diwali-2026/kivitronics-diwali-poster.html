@@ -117,7 +117,7 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
 
   // ================= SKYLINE + WATER =================
   const reflectCols = [];
-  const SCENE = new URLSearchParams(location.search).get('scene') || 'ghats';
+  const SCENE = new URLSearchParams(location.search).get('scene') || 'city';
   const skylineLayer = () => layer(g => {
     const r = rng(42);
     // distant shore
@@ -456,13 +456,6 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
       radial(g, l.x, (LEDGE + 10) * 3.33, 110 * l.s, [[0, 'rgba(255,190,100,0.35)'], [1, 'rgba(255,150,60,0)']]); g.restore(); }
     g.save(); g.scale(1, .3); radial(g, urli.x, (LEDGE + 20) * 3.33, 200, [[0, 'rgba(255,190,100,0.35)'], [1, 'rgba(0,0,0,0)']]); g.restore();
     g.globalCompositeOperation = 'source-over';
-    // red & gold runner draped over the front
-    g.fillStyle = '#8f1d1d'; g.fillRect(230, LEDGE - 4, 150, H - LEDGE + 4);
-    g.fillStyle = '#b8352a'; g.fillRect(236, LEDGE - 4, 138, H - LEDGE + 4);
-    g.strokeStyle = '#e8b85c'; g.lineWidth = 1.5;
-    for (const x of [244, 366]) { g.beginPath(); g.moveTo(x, LEDGE - 4); g.lineTo(x, H); g.stroke(); }
-    for (let y = LEDGE + 10; y < H; y += 18) for (let x = 258; x < 360; x += 18) {
-      g.beginPath(); g.moveTo(x, y - 5); g.lineTo(x + 5, y); g.lineTo(x, y + 5); g.lineTo(x - 5, y); g.closePath(); g.stroke(); }
     // urli (wide brass bowl) with floating flowers
     const ug = g.createLinearGradient(urli.x - urli.rx, 0, urli.x + urli.rx, 0);
     ug.addColorStop(0, '#5a3510'); ug.addColorStop(.35, '#d9a24a'); ug.addColorStop(.5, '#ffe9b0'); ug.addColorStop(.7, '#c88c36'); ug.addColorStop(1, '#4e2c0c');
@@ -519,6 +512,16 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
     ctx.restore();
   }
 
+  const COPY = {
+    a: { body: ['As the festival of lights begins,', 'we thank you for your trust and', 'partnership through the year.'],
+         close: ['Wishing you and your family', 'a peaceful and joyful Diwali.'] },
+    b: { body: ['Warm wishes to you and your', 'loved ones for a Diwali filled', 'with light, good health and', 'happiness.'],
+         close: ['With warm regards.'] },
+    c: { body: ['May the festival of lights bring', 'clarity, calm and good health', 'to you and those close to you.'],
+         close: ['Wishing you a bright and', 'prosperous New Year.'] },
+  };
+  const COPY_KEY = COPY[new URLSearchParams(location.search).get('copy')] ? new URLSearchParams(location.search).get('copy') : 'a';
+
   // ================= TYPOGRAPHY =================
   function text(str, x, y, font, fill, spacing = 0, align = 'left') {
     ctx.font = font; ctx.letterSpacing = spacing + 'px'; ctx.textAlign = align; ctx.textBaseline = 'alphabetic';
@@ -573,23 +576,14 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
     lotus(cx, 410, 1);
     ctx.restore();
 
-    // body copy and quote share one type style
-    const BF = '400 18px Montserrat', LH = 29;
+    // message copy (variant chosen with ?copy=a|b|c)
+    const BF = '400 18px Montserrat', LH = 29, CF = '600 27px "Cormorant Garamond"';
+    const C = COPY[COPY_KEY];
     ctx.save(); ctx.shadowColor = 'rgba(3,8,24,0.9)'; ctx.shadowBlur = 8;
-    ['As we celebrate the festival of lights,', 'we see it as a time for new beginnings,',
-     'meaningful connections and exciting', 'opportunities ahead.']
-      .forEach((s, i) => text(s, 54, 470 + i * LH, BF, CREAM));
-
-    // second paragraph: same style and left edge as the first
-    const Q = 470 + 5 * LH;
-    ['May our shared ideas spark brighter', 'possibilities, and our collaboration']
-      .forEach((s, i) => text(s, 54, Q + i * LH, BF, CREAM));
-    const w1 = text('bring lasting growth and ', 54, Q + 2 * LH, BF, CREAM);
-    text('prosperity.', 54 + w1, Q + 2 * LH, BF, GOLD);
-
-    rule(56, 716, 46);
-    text('Wishing you a bright and', 54, 760, '600 27px "Cormorant Garamond"', CREAM);
-    text('prosperous Diwali.', 54, 790, '600 27px "Cormorant Garamond"', CREAM);
+    C.body.forEach((s, i) => text(s, 54, 476 + i * LH, BF, CREAM));
+    const ry = 476 + (C.body.length - 1) * LH + 46;
+    rule(56, ry, 46);
+    C.close.forEach((s, i) => text(s, 54, ry + 46 + i * 31, CF, CREAM));
     ctx.restore();
   }
 

@@ -30,3 +30,5 @@ High-res still: open `kivitronics-diwali-poster.html?capture&scale=2` and save t
 
 Scene options (static stills, 1440×2160): `kivitronics-diwali-poster-option2-ghats.jpg`, `-option3-city.jpg`, `-option4-lamps.jpg`.
 Render any scene with `kivitronics-diwali-poster.html?scene=ghats|city|lamps` (add `&capture&scale=2` for a hi-res still). The animated GIFs and `kivitronics-diwali-poster.png/.jpg` still show the earlier palace skyline until a scene is chosen.
+
+City scene, text options (stills): `kivitronics-diwali-city-text-A.jpg`, `-B.jpg`, `-C.jpg`. Render with `kivitronics-diwali-poster.html?copy=a|b|c` (default scene is now `city`).
