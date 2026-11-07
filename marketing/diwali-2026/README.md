@@ -6,6 +6,7 @@
 | `kivitronics-diwali-480.gif` | Lighter email version, 480×480, 20 fps |
 | `kivitronics-diwali-poster-600.gif` | **Poster version** (portrait 600×900, 20 fps, 6 s loop, ~4 MB): logo, palace skyline, lanterns, garlands, fireworks |
 | `kivitronics-diwali-poster-480.gif` | Lighter poster for email (480×720, 15 fps, ~2.3 MB) |
+| `kivitronics-diwali-poster.png` / `.jpg` | Static poster, high-res 1440×2160 (PNG lossless, JPG smaller for sharing) |
 | `kivitronics-diwali-poster.html` | Self-contained source for the poster (fonts + logo embedded) |
 | `kivitronics-diwali.html` | Self-contained source animation (fonts embedded, no network needed). Open in any browser to preview. |
 | `export-gif.js` | Re-exports the GIF from the HTML |
@@ -24,3 +25,5 @@ No-install fallback: open the HTML in a browser and screen-record the card for 6
 (e.g. with ScreenToGif or Kap), then trim to exactly one 6 s loop.
 
 Fonts: Cormorant Garamond and Montserrat (SIL Open Font License), embedded via @fontsource.
+
+High-res still: open `kivitronics-diwali-poster.html?capture&scale=2` and save the canvas (right-click → Save image).

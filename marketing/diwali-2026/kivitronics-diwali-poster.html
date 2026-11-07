@@ -27,13 +27,15 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
   const HORIZON = 842, LEDGE = 968;
   const GOLD = '#e8b85c', CREAM = '#f5ecda';
   const canvas = document.getElementById('c');
+  const SC = Math.max(1, Number(new URLSearchParams(location.search).get('scale')) || 1);   // ?scale=2 for hi-res stills
+  canvas.width = W * SC; canvas.height = H * SC;
   const ctx = canvas.getContext('2d');
   const logo = new Image();
   logo.src = 'data:image/png;base64,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';
 
   function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }; }
   const wave = (t, k, ph) => Math.sin(t / LOOP * TAU * k + ph);   // k = whole cycles per loop → seamless
-  function layer(fn) { const c = document.createElement('canvas'); c.width = W; c.height = H; fn(c.getContext('2d')); return c; }
+  function layer(fn) { const c = document.createElement('canvas'); c.width = W * SC; c.height = H * SC; const g = c.getContext('2d'); g.scale(SC, SC); fn(g); return c; }
   function radial(g, x, y, r, stops) {
     const gr = g.createRadialGradient(x, y, 0, x, y, r);
     stops.forEach(([o, c]) => gr.addColorStop(o, c)); g.fillStyle = gr;
@@ -257,8 +259,8 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
     { x: 505, len: 300, ph: .9 }, { x: 532, len: 210, ph: 3.3 }, { x: 560, len: 120, ph: 4.4 },
   ];
   const strandSprites = strands.map((s, si) => {
-    const c = document.createElement('canvas'); c.width = 40; c.height = s.len + 50;
-    const g = c.getContext('2d');
+    const c = document.createElement('canvas'); c.width = 40 * SC; c.height = (s.len + 50) * SC;
+    const g = c.getContext('2d'); g.scale(SC, SC);
     for (let y = 4, i = 0; y < s.len; y += 8.5, i++) {
       if (i % 7 === 6) marigold(g, 20, y, 5, '#fdf6e8', '#ffeec0');
       else marigold(g, 20, y, 6.2, (i + si) % 2 ? '#f08a1a' : '#f7ad28', (i + si) % 2 ? '#ffb340' : '#ffd36a');
@@ -273,7 +275,7 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
   function drawStrands(t) {
     strands.forEach((s, i) => {
       ctx.save(); ctx.translate(s.x, -4); ctx.rotate(.025 * wave(t, 1, s.ph));
-      ctx.drawImage(strandSprites[i], -20, 0); ctx.restore();
+      ctx.drawImage(strandSprites[i], -20, 0, 40, s.len + 50); ctx.restore();
     });
   }
 
@@ -482,17 +484,16 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
      'meaningful connections and exciting', 'opportunities ahead.']
       .forEach((s, i) => text(s, 54, 470 + i * LH, BF, CREAM));
 
-    // quote (exact wording)
-    text('“', 30, 638, '700 56px "Cormorant Garamond"', GOLD);
-    ['May our shared ideas spark', 'brighter possibilities, and our', 'collaboration bring lasting']
-      .forEach((s, i) => text(s, 72, 622 + i * LH, BF, CREAM));
-    const w1 = text('growth and ', 72, 622 + 3 * LH, BF, CREAM);
-    const w2 = text('prosperity.', 72 + w1, 622 + 3 * LH, BF, GOLD);
-    text('”', 72 + w1 + w2 + 6, 732, '700 56px "Cormorant Garamond"', GOLD);
+    // second paragraph: same style and left edge as the first
+    const Q = 470 + 5 * LH;
+    ['May our shared ideas spark brighter', 'possibilities, and our collaboration']
+      .forEach((s, i) => text(s, 54, Q + i * LH, BF, CREAM));
+    const w1 = text('bring lasting growth and ', 54, Q + 2 * LH, BF, CREAM);
+    text('prosperity.', 54 + w1, Q + 2 * LH, BF, GOLD);
 
-    rule(64, 762, 46);
-    text('Wishing you a bright and', 62, 806, '600 27px "Cormorant Garamond"', CREAM);
-    text('prosperous Diwali.', 62, 836, '600 27px "Cormorant Garamond"', CREAM);
+    rule(56, 716, 46);
+    text('Wishing you a bright and', 54, 760, '600 27px "Cormorant Garamond"', CREAM);
+    text('prosperous Diwali.', 54, 790, '600 27px "Cormorant Garamond"', CREAM);
     ctx.restore();
   }
 
@@ -501,26 +502,26 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
   function renderFrame(t) {
     t = ((t % LOOP) + LOOP) % LOOP;
     if (!L) L = { sky: skyLayer(), skyline: skylineLayer(), scrim: scrimLayer(), arch: archLayer(), garden: gardenLayer(), fg: fgLayer() };
-    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over';
-    ctx.drawImage(L.sky, 0, 0);
+    ctx.setTransform(SC, 0, 0, SC, 0, 0); ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(L.sky, 0, 0, W, H);
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     for (const s of stars) { const a = .3 + .5 * Math.max(0, wave(t, s.k, s.ph));
       ctx.fillStyle = `rgba(255,240,210,${a * .8})`; ctx.beginPath(); ctx.arc(s.x, s.y, s.s, 0, TAU); ctx.fill(); }
     ctx.restore();
     drawFireworks(t);
     drawSkyLanterns(t);
-    ctx.drawImage(L.skyline, 0, 0);
+    ctx.drawImage(L.skyline, 0, 0, W, H);
     drawReflections(t);
-    ctx.drawImage(L.scrim, 0, 0);
-    ctx.drawImage(L.garden, 0, 0);
+    ctx.drawImage(L.scrim, 0, 0, W, H);
+    ctx.drawImage(L.garden, 0, 0, W, H);
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     for (const b of bokeh) { const a = .25 + .3 * (.5 + .5 * wave(t, b.k, b.ph));
       radial(ctx, b.x, b.y, b.rr, [[0, `rgba(255,190,100,${a})`], [.7, `rgba(255,170,80,${a * .6})`], [1, 'rgba(255,150,60,0)']]); }
     ctx.restore();
-    ctx.drawImage(L.arch, 0, 0);
+    ctx.drawImage(L.arch, 0, 0, W, H);
     drawStrands(t);
     drawHangers(t);
-    ctx.drawImage(L.fg, 0, 0);
+    ctx.drawImage(L.fg, 0, 0, W, H);
     lamps.forEach((l, i) => flame(l.x, l.y, l.s, t, i * 1.37));
     urliCandles.forEach((c, i) => {
       ctx.fillStyle = '#f7efe0'; ctx.beginPath(); ctx.ellipse(c.x, c.y, 9, 3.5, 0, 0, TAU); ctx.fill();
