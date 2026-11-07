@@ -117,7 +117,7 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
 
   // ================= SKYLINE + WATER =================
   const reflectCols = [];
-  const SCENE = new URLSearchParams(location.search).get('scene') || 'city';
+  const SCENE = new URLSearchParams(location.search).get('scene') || 'lamps';
   const skylineLayer = () => layer(g => {
     const r = rng(42);
     // distant shore
