@@ -452,55 +452,47 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
     const lh = 66, lw = lh * logo.naturalWidth / logo.naturalHeight;
     ctx.drawImage(logo, 56, 64, lw, lh);
     text('KIVITRONICS', 56 + lw + 18, 108, '600 23px Montserrat', '#ffffff', 7.5);
-    // tagline
-    ['NEW OPPORTUNITIES', 'BRIGHTER POSSIBILITIES', 'TOGETHER'].forEach((s, i) =>
-      text(s, 64, 166 + i * 21, '500 12.5px Montserrat', '#e2b45f', 4.2));
-    rule(64, 228, 46);
-
     // HAPPY Diwali
     ctx.font = '700 156px "Cormorant Garamond"';
     const dw = ctx.measureText('Diwali').width, dx = 40, cx = dx + dw / 2;
-    const hw = text('HAPPY', cx - 22, 292, '400 31px Montserrat', CREAM, 10, 'center');
-    diyaIcon(cx + hw / 2 + 16, 286, t);
+    const hw = text('HAPPY', cx - 22, 262, '400 31px Montserrat', CREAM, 10, 'center');
+    diyaIcon(cx + hw / 2 + 16, 256, t);
     ctx.save();
     const p = (t / LOOP) * 1.8 - .4;
     const g = ctx.createLinearGradient(dx, 0, dx + dw, 0);
     g.addColorStop(0, '#c48a35'); g.addColorStop(.5, '#f5d78a'); g.addColorStop(1, '#c48a35');
     for (const [o, c] of [[p - .1, '#e0b25e'], [p, '#fff6da'], [p + .1, '#e0b25e']]) if (o > 0 && o < 1) g.addColorStop(o, c);
     ctx.shadowColor = 'rgba(255,170,70,0.5)'; ctx.shadowBlur = 26;
-    ctx.font = '700 156px "Cormorant Garamond"'; ctx.textAlign = 'left'; ctx.fillStyle = g; ctx.fillText('Diwali', dx, 410);
+    ctx.font = '700 156px "Cormorant Garamond"'; ctx.textAlign = 'left'; ctx.fillStyle = g; ctx.fillText('Diwali', dx, 380);
     ctx.restore();
     // divider with lotus
     ctx.save();
     for (const [a, b] of [[cx - 150, cx - 30], [cx + 30, cx + 150]]) {
       const lg = ctx.createLinearGradient(a, 0, b, 0);
       lg.addColorStop(a < cx ? 0 : 1, 'rgba(232,184,92,0)'); lg.addColorStop(a < cx ? 1 : 0, 'rgba(232,184,92,0.9)');
-      ctx.fillStyle = lg; ctx.fillRect(a, 440, b - a, 1.4);
+      ctx.fillStyle = lg; ctx.fillRect(a, 410, b - a, 1.4);
     }
-    lotus(cx, 440, 1);
+    lotus(cx, 410, 1);
     ctx.restore();
 
-    // body copy
+    // body copy and quote share one type style
+    const BF = '400 18px Montserrat', LH = 29;
     ctx.save(); ctx.shadowColor = 'rgba(3,8,24,0.9)'; ctx.shadowBlur = 8;
     ['As we celebrate the festival of lights,', 'we see it as a time for new beginnings,',
      'meaningful connections and exciting', 'opportunities ahead.']
-      .forEach((s, i) => text(s, 54, 488 + i * 27, '400 17.5px Montserrat', CREAM));
+      .forEach((s, i) => text(s, 54, 470 + i * LH, BF, CREAM));
 
     // quote (exact wording)
-    text('“', 34, 636, '700 64px "Cormorant Garamond"', GOLD);
-    const qf = '300 22.5px Montserrat';
+    text('“', 30, 638, '700 56px "Cormorant Garamond"', GOLD);
     ['May our shared ideas spark', 'brighter possibilities, and our', 'collaboration bring lasting']
-      .forEach((s, i) => text(s, 72, 622 + i * 31, qf, '#ffffff'));
-    const w1 = text('growth and ', 72, 715, qf, '#ffffff');
-    const w2 = text('prosperity.', 72 + w1, 715, '700 22.5px Montserrat', GOLD);
-    text('”', 72 + w1 + w2 + 6, 739, '700 64px "Cormorant Garamond"', GOLD);
+      .forEach((s, i) => text(s, 72, 622 + i * LH, BF, CREAM));
+    const w1 = text('growth and ', 72, 622 + 3 * LH, BF, CREAM);
+    const w2 = text('prosperity.', 72 + w1, 622 + 3 * LH, BF, GOLD);
+    text('”', 72 + w1 + w2 + 6, 732, '700 56px "Cormorant Garamond"', GOLD);
 
-    rule(64, 748, 46);
-    text('Wishing you a bright and', 62, 786, '600 27px "Cormorant Garamond"', CREAM);
-    text('prosperous Diwali.', 62, 815, '600 27px "Cormorant Garamond"', CREAM);
-    rule(64, 836, 46);
-    text('Best Wishes,', 64, 868, '400 15.5px Montserrat', CREAM, .5);
-    text('Team Kivitronics', 64, 893, '700 19px Montserrat', GOLD);
+    rule(64, 762, 46);
+    text('Wishing you a bright and', 62, 806, '600 27px "Cormorant Garamond"', CREAM);
+    text('prosperous Diwali.', 62, 836, '600 27px "Cormorant Garamond"', CREAM);
     ctx.restore();
   }
 
