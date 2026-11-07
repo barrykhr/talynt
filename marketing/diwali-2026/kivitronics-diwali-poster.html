@@ -513,6 +513,8 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
   }
 
   const COPY = {
+    final: { body: ['As the festival of lights begins,', 'we thank you for your trust and', 'partnership through the year.'],
+         close: ['Wishing you and your family a joyful,', 'peaceful and prosperous Diwali.'] },
     a: { body: ['As the festival of lights begins,', 'we thank you for your trust and', 'partnership through the year.'],
          close: ['Wishing you and your family', 'a peaceful and joyful Diwali.'] },
     b: { body: ['Warm wishes to you and your', 'loved ones for a Diwali filled', 'with light, good health and', 'happiness.'],
@@ -520,7 +522,7 @@ canvas { height: min(1080px, 100vh - 32px); width: auto; max-width: calc(100vw -
     c: { body: ['May the festival of lights bring', 'clarity, calm and good health', 'to you and those close to you.'],
          close: ['Wishing you a bright and', 'prosperous New Year.'] },
   };
-  const COPY_KEY = COPY[new URLSearchParams(location.search).get('copy')] ? new URLSearchParams(location.search).get('copy') : 'a';
+  const COPY_KEY = COPY[new URLSearchParams(location.search).get('copy')] ? new URLSearchParams(location.search).get('copy') : 'final';
 
   // ================= TYPOGRAPHY =================
   function text(str, x, y, font, fill, spacing = 0, align = 'left') {
