@@ -35,6 +35,28 @@ Optional configuration (nothing renders, and nothing is guessed, when unset):
 
 `NEXT_PUBLIC_*` values are read at build time, so rebuild after setting them.
 
+## Variants
+
+One design, two builds, chosen by `NEXT_PUBLIC_CT_VARIANT` (see `lib/contour/variant.ts`):
+
+| Value | What it builds |
+|---|---|
+| unset | The full design: the entry choice, employers and candidates, in the editorial palette. |
+| `mono` | The employer site on its own, in black and white with a touch of lime. |
+
+```bash
+NEXT_PUBLIC_CT_VARIANT=mono npm run build && npm run start   # open /directions/contour/employers
+node scripts/export-static-site.mjs . /tmp/talynt-work /tmp/talynt-mono mono
+```
+
+The mono build uses the same pages and the same copy. It differs only as follows:
+
+- **Colour.** The layout adds `.ct-mono`, which remaps the colour tokens. White sections stay white with near-black ink. Every tinted band becomes black. Lime marks the person's node, highlights, focus, hover on primary actions and the accent on black. Lime is never used as text on white.
+- **Logo.** It uses the approved single-colour logo files.
+- **Employer only.** There is no entry choice: the root sends visitors to the employer homepage. The navigation has no employer/candidate switch. The footer, contact page and FAQ leave out candidate pages and questions. The static copy contains no candidate pages at all.
+
+The default build is unchanged: every page renders the same HTML as before the variant was added. There is one exception, a fix: the footer's "Client visibility" link now points to that section on `/employers/approach`, where it lives.
+
 ## Pages
 
 All routes are under `/directions/contour`.

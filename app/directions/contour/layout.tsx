@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import "./contour.css";
 import { MotionProvider } from "@/components/contour/MotionProvider";
+import { VARIANT } from "@/lib/contour/variant";
 
 /**
  * DIRECTION C — "CONTOUR"
@@ -42,12 +43,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fafaf7",
+  themeColor: VARIANT === "mono" ? "#ffffff" : "#fafaf7",
 };
 
 export default function ContourLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`ct ${serif.variable}`}>
+    <div className={`ct ${VARIANT === "mono" ? "ct-mono " : ""}${serif.variable}`}>
       <MotionProvider>{children}</MotionProvider>
     </div>
   );

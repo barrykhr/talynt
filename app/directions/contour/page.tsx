@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { TAGLINE } from "@/lib/contour/content";
 import { ENTRY } from "@/lib/contour/proposed";
 import { ROUTES } from "@/lib/contour/site";
 import { EntryChoice } from "@/components/contour/entry/EntryChoice";
+import { EMPLOYERS_ONLY, LOGO } from "@/lib/contour/variant";
 
 /**
  * The entry screen: one question, two ways in. No navigation bar and no wall
@@ -11,6 +13,7 @@ import { EntryChoice } from "@/components/contour/entry/EntryChoice";
  * other page carries a switch back to the other side.
  */
 export default function Entry() {
+  if (EMPLOYERS_ONLY) redirect(ROUTES.employers);
   return (
     <div className="flex min-h-[100svh] flex-col">
       <a href="#ct-main" className="ct-skip">
@@ -18,7 +21,7 @@ export default function Entry() {
       </a>
       <header className="ct-wrap flex items-center justify-between gap-6 py-6">
         <Link href={ROUTES.home} aria-label="TALYNT LABS — home" className="shrink-0">
-          <Image src="/brand/talynt-primary-light.svg" alt="" width={126} height={36} priority unoptimized className="h-9 w-auto" />
+          <Image src={LOGO.primary} alt="" width={126} height={36} priority unoptimized className="h-9 w-auto" />
         </Link>
         <nav aria-label="Company">
           <ul className="flex items-center gap-1 text-[0.9rem]">

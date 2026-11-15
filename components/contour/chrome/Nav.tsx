@@ -8,6 +8,7 @@ import { ROUTES } from "@/lib/contour/site";
 import { AUDIENCE_HOME, audienceOf, useAudience, type Audience } from "@/lib/contour/audience";
 import { SWITCH } from "@/lib/contour/proposed";
 import { useCandidateApplications } from "@/lib/candidate/applications";
+import { EMPLOYERS_ONLY, LOGO } from "@/lib/contour/variant";
 import { cx } from "@/lib/utils";
 
 /**
@@ -69,7 +70,7 @@ function AudienceSwitch({ side, onChoose, className }: { side: Audience; onChoos
 export function Nav() {
   const pathname = usePathname();
   const { audience, choose } = useAudience();
-  const side: Audience = audienceOf(pathname) ?? audience ?? "employer";
+  const side: Audience = EMPLOYERS_ONLY ? "employer" : audienceOf(pathname) ?? audience ?? "employer";
   const [lifted, setLifted] = useState(false);
   const [open, setOpen] = useState(false);
   const { applications, loaded } = useCandidateApplications();
@@ -129,7 +130,7 @@ export function Nav() {
   const drafts = loaded ? applications.filter((a) => !a.submittedAt).length : 0;
   const links = LINKS[side];
   const action = ACTION[side];
-  const home = audienceOf(pathname) || audience ? AUDIENCE_HOME[side] : ROUTES.home;
+  const home = EMPLOYERS_ONLY ? ROUTES.employers : audienceOf(pathname) || audience ? AUDIENCE_HOME[side] : ROUTES.home;
 
   // Remember the side of any page the visitor lands on, so shared pages follow it.
   const pageSide = audienceOf(pathname);
@@ -155,7 +156,7 @@ export function Nav() {
       <nav aria-label="Primary" className="ct-wrap flex h-[var(--ct-nav-h)] items-center justify-between gap-4">
         <Link href={home} className="shrink-0" aria-label="TALYNT LABS — home">
           {/* The approved lockup, as drawn. 36px tall keeps it above its 120px minimum width. */}
-          <Image src="/brand/talynt-primary-light.svg" alt="" width={126} height={36} priority unoptimized className="h-9 w-auto" />
+          <Image src={LOGO.primary} alt="" width={126} height={36} priority unoptimized className="h-9 w-auto" />
         </Link>
 
         <ul className="hidden items-center gap-0.5 xl:flex">
@@ -193,7 +194,7 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <AudienceSwitch side={side} onChoose={choose} className="hidden md:inline-flex" />
+          {!EMPLOYERS_ONLY && <AudienceSwitch side={side} onChoose={choose} className="hidden md:inline-flex" />}
           <Link href={action.href} className="ct-btn ct-btn-primary hidden min-h-10 px-4 text-[0.9rem] lg:inline-flex">
             {action.label}
           </Link>
@@ -237,8 +238,8 @@ export function Nav() {
         >
           <div className="ct-wrap flex min-h-full flex-col justify-between gap-10 pt-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
             <div>
-              <AudienceSwitch side={side} onChoose={(a) => { choose(a); setOpen(false); }} />
-              <ul className="mt-4">
+              {!EMPLOYERS_ONLY && <AudienceSwitch side={side} onChoose={(a) => { choose(a); setOpen(false); }} />}
+              <ul className={EMPLOYERS_ONLY ? undefined : "mt-4"}>
                 {[{ label: side === "employer" ? "For employers" : "For candidates", href: AUDIENCE_HOME[side] }, ...links].map((link) => (
                   <li key={link.href} className="border-b">
                     <Link

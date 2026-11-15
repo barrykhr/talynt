@@ -6,6 +6,7 @@ import { ContactForm } from "@/components/contour/ContactForm";
 import { Eyebrow, Headline } from "@/components/contour/ui";
 import { LinkedInIcon, WhatsAppIcon } from "@/components/contour/chrome/Icons";
 import { Meeting } from "@/components/contour/graphics/Meeting";
+import { EMPLOYERS_ONLY } from "@/lib/contour/variant";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -49,7 +50,8 @@ export default function ContactPage() {
           </div>
 
           <div className="flex flex-col gap-6 lg:col-span-5">
-            {/* Candidates */}
+            {/* Candidates (not in the employer-only variant) */}
+            {!EMPLOYERS_ONLY && (
             <div className="ct-panel p-6 sm:p-8">
               <Eyebrow tone="violet">For candidates</Eyebrow>
               <p className="ct-body mt-4">
@@ -76,6 +78,7 @@ export default function ContactPage() {
                 </a>
               </p>
             </div>
+            )}
 
             {/* Everyone */}
             <div className="ct-panel p-6 sm:p-8">
@@ -85,7 +88,9 @@ export default function ContactPage() {
                   { label: "General and hiring", email: EMAIL.general },
                   { label: "Candidates", email: EMAIL.talent },
                   { label: "Your personal information", email: EMAIL.privacy },
-                ].map((row) => (
+                ]
+                  .filter((row) => !(EMPLOYERS_ONLY && row.email === EMAIL.talent))
+                  .map((row) => (
                   <div key={row.email} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t py-3">
                     <dt className="ct-small">{row.label}</dt>
                     <dd>

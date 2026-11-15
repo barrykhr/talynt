@@ -843,3 +843,137 @@ html:has(.ct) body {
     }
   }
 }
+
+/* ==========================================================================
+   Variant: mono — black, white and a touch of lime
+   --------------------------------------------------------------------------
+   Built with NEXT_PUBLIC_CT_VARIANT=mono (lib/contour/variant.ts). The layout
+   adds .ct-mono; everything below is scoped to it, so the default build is
+   untouched. The system's tokens are remapped, nothing else:
+
+   - White ground, near-black ink. The accent that was green is black on the
+     white sections and lime on the black ones.
+   - Every tinted band (.ct-tint) turns black, so the page alternates white
+     and black. The tokens are redefined on the band itself, so everything
+     inside it — panels, windows, tags, borders — follows.
+   - Lime is the touch: the person's node, the highlighter, the focus ring,
+     hover on primary actions, and the accent on black. It is never text on
+     white (it fails contrast there).
+   - Violet, the candidate colour, has no job here and becomes grey.
+   ========================================================================== */
+
+.ct.ct-mono {
+  --ct-bg: #ffffff;
+  --ct-bg-2: #f4f4f2;
+  --ct-bg-3: #e9e9e6;
+  --ct-surface: #ffffff;
+
+  --ct-ink: #0b0b0b;
+  --ct-ink-2: #2e2e2e;
+  --ct-mute: #5c5c5c;
+  --ct-faint: #8d8d8d;
+
+  --ct-line: #e3e3e0;
+  --ct-line-2: #c8c8c4;
+
+  --ct-green: #0b0b0b;
+  --ct-green-deep: #000000;
+  --ct-green-wash: #f1f8d8;
+  --ct-violet: #8d8d8d;
+  --ct-violet-ink: #3d3d3d;
+  --ct-violet-wash: #efefed;
+  --ct-lime: #d4f24c;
+  --ct-lime-soft: #f1fbcf;
+  --ct-signal: #c2ea1f;
+
+  /* Lime that still reads as a mark on white: used for small fills only. */
+  --ct-lime-deep: #9bc410;
+}
+
+/* The black bands. */
+.ct-mono .ct-tint {
+  --ct-bg: #0b0b0b;
+  --ct-bg-2: #0b0b0b;
+  --ct-bg-3: #1d1d1d;
+  --ct-surface: #151515;
+
+  --ct-ink: #f6f6f3;
+  --ct-ink-2: #d2d2ce;
+  --ct-mute: #a0a09b;
+  --ct-faint: #75756f;
+
+  --ct-line: #262626;
+  --ct-line-2: #3b3b3b;
+
+  --ct-green: #d4f24c;
+  --ct-green-deep: #c2ea1f;
+  --ct-green-wash: #1f2610;
+  --ct-violet: #8d8d8d;
+  --ct-violet-ink: #cfcfca;
+  --ct-violet-wash: #1d1d1d;
+  --ct-lime-soft: #232b0f;
+
+  color: var(--ct-ink);
+}
+
+/* Highlighted words and quotes always sit dark on lime, whatever the band. */
+.ct-mono mark,
+.ct-mono .bg-\[var\(--ct-lime\)\] {
+  color: #0b0b0b !important;
+}
+
+/* On black, the highlighter becomes the colour of the words themselves. */
+.ct-mono .ct-tint .ct-mark {
+  background-image: none;
+  color: var(--ct-lime);
+}
+
+/* Primary actions: black on white, lime on black; hover turns them lime. */
+.ct-mono .ct-btn-primary:hover {
+  background-color: var(--ct-lime);
+  color: #0b0b0b;
+}
+
+.ct-mono .ct-tint .ct-btn-primary {
+  background-color: var(--ct-lime);
+  color: #0b0b0b;
+}
+
+.ct-mono .ct-tint .ct-btn-primary:hover {
+  background-color: #ffffff;
+}
+
+/* Links: black words with a lime underline on white. */
+.ct-mono .ct-link {
+  text-decoration-color: var(--ct-lime-deep);
+  text-decoration-thickness: 2px;
+}
+
+.ct-mono .ct-tint .ct-link {
+  text-decoration-color: color-mix(in oklab, var(--ct-lime) 55%, transparent);
+}
+
+.ct-mono .ct-tint .ct-link:hover {
+  text-decoration-color: var(--ct-lime);
+}
+
+/* Focus: a lime ring with a black edge reads on both grounds. */
+.ct-mono :focus-visible {
+  outline: 2px solid var(--ct-ink);
+  box-shadow: 0 0 0 5px var(--ct-lime);
+}
+
+/* The single-colour lockup is drawn black; on the black bands it turns white. */
+.ct-mono .ct-tint .ct-logo {
+  filter: invert(1);
+}
+
+.ct-mono ::selection {
+  background: var(--ct-lime);
+  color: #0b0b0b;
+}
+
+html:has(.ct-mono),
+html:has(.ct-mono) body {
+  background-color: #ffffff;
+}

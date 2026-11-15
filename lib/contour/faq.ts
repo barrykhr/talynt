@@ -9,6 +9,7 @@
  */
 
 import { EMAIL, ROUTES } from "./site";
+import { EMPLOYERS_ONLY } from "./variant";
 
 export type FaqSource = { label: string; href: string };
 
@@ -22,14 +23,16 @@ export type Faq = {
   featured?: boolean;
 };
 
-export const CATEGORIES = [
+const ALL_CATEGORIES = [
   { id: "general", label: "General" },
   { id: "employers", label: "Employers" },
   { id: "candidates", label: "Candidates" },
   { id: "privacy", label: "Privacy and support" },
 ] as const;
 
-export type CategoryId = (typeof CATEGORIES)[number]["id"];
+export type CategoryId = (typeof ALL_CATEGORIES)[number]["id"];
+
+export const CATEGORIES = ALL_CATEGORIES.filter((c) => !(EMPLOYERS_ONLY && c.id === "candidates"));
 
 const SRC = {
   home: { label: "Homepage", href: "/" },
@@ -47,7 +50,7 @@ const SRC = {
   review: { label: "Assessment review", href: ROUTES.review },
 } satisfies Record<string, FaqSource>;
 
-export const FAQS: Faq[] = [
+const ALL_FAQS: Faq[] = [
   /* --- General ---------------------------------------------------------- */
   {
     id: "what-is-talynt-labs",
@@ -292,3 +295,6 @@ export const FAQS: Faq[] = [
     sources: [SRC.privacy],
   },
 ];
+
+/** Every question this build shows. */
+export const FAQS: Faq[] = EMPLOYERS_ONLY ? ALL_FAQS.filter((f) => f.category !== "candidates") : ALL_FAQS;

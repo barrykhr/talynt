@@ -17,16 +17,23 @@
  * - Review-only labels ("Direction C", links to the other directions, the
  *   FAQ's "proposed for approval" note) are removed.
  *
- * Usage: node scripts/export-static-site.mjs . <work dir> <output dir>
+ * Usage: node scripts/export-static-site.mjs . <work dir> <output dir> [mono]
  * The output's index.html is a hand-over page for hosts that serve one entry
  * page; every other page is a complete document.
+ *
+ * With "mono", the copy is the employer site on its own in black, white and
+ * lime (NEXT_PUBLIC_CT_VARIANT=mono, see lib/contour/variant.ts): no entry
+ * choice and no candidate pages, and it opens on the employer homepage.
  */
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
-const [repo, work, dist] = process.argv.slice(2).map((p) => path.resolve(p));
-if (!repo || !work || !dist) throw new Error("usage: export-static-site.mjs <repo> <work dir> <output dir>");
+const [repo, work, dist] = process.argv.slice(2, 5).map((p) => path.resolve(p));
+if (!repo || !work || !dist) throw new Error("usage: export-static-site.mjs <repo> <work dir> <output dir> [mono]");
+const MONO = process.argv[5] === "mono";
+// The page the copy opens on.
+const HOME = MONO ? "employers.html" : "home.html";
 
 const sh = (cmd, opts = {}) => execSync(cmd, { stdio: "inherit", ...opts });
 const read = (p) => fs.readFileSync(path.join(work, p), "utf8");
@@ -74,9 +81,16 @@ fs.rmSync(path.join(app, "(site)/README.md"), { force: true });
 fs.mkdirSync(path.join(app, "(site)/home"));
 fs.renameSync(path.join(app, "(site)/page.tsx"), path.join(app, "(site)/home/page.tsx"));
 
+// The employer-only copy has no entry choice and no candidate pages.
+if (MONO) {
+  for (const p of ["home", "(main)/candidates", "(main)/opportunities", "(main)/profile", "(main)/applications", "(main)/dashboard"]) {
+    fs.rmSync(path.join(app, "(site)", p), { recursive: true, force: true });
+  }
+}
+
 // A static copy has no server to answer a redirect: the old dashboard address
 // becomes a plain page that forwards, with a link for anyone without refresh.
-write("app/(site)/(main)/dashboard/page.tsx", `export default function DashboardPage() {
+if (!MONO) write("app/(site)/(main)/dashboard/page.tsx", `export default function DashboardPage() {
   return (
     <section className="ct-wrap py-24">
       <meta httpEquiv="refresh" content="0; url=applications.html" />
@@ -192,7 +206,8 @@ for (const file of walk(work).filter((f) => /\/(app|components|lib)\//.test(f) &
   s = s
     .replace(/from "next\/link";/g, 'from "@/lib/demo/link";')
     .replace(/from "next\/image";/g, 'from "@/lib/demo/image";')
-    .replace(/src="\/brand\//g, 'src="brand/');
+    // Brand files, whether written as an attribute or a string (lib/contour/variant.ts).
+    .replace(/(["'])\/brand\//g, "$1brand/");
   if (s !== before) fs.writeFileSync(file, s);
 }
 
@@ -228,7 +243,7 @@ patch("lib/demo/fetch.ts", "): Promise<Response> {\n", "): Promise<Response> {\n
 /* 5. No review labels ------------------------------------------------------ */
 patch(
   "components/contour/chrome/Footer.tsx",
-  /\n\s*<p className="ct-meta ct-mute flex flex-wrap items-center gap-x-4 gap-y-2">\s*<span>Direction C[^]*?<\/p>/,
+  /\n\s*<p className="ct-meta ct-mute flex flex-wrap items-center gap-x-4 gap-y-2">[^]*?<\/p>/,
   "",
 );
 patch("app/(site)/(main)/faq/page.tsx", /\n\s*<Illustrative className="mt-6 max-w-2xl">[^]*?<\/Illustrative>/, "");
@@ -251,7 +266,10 @@ for (const [from, to] of [
 ]) patch("lib/contour/faq.ts", from, to);
 
 /* 6. Build ----------------------------------------------------------------- */
-sh("npx next build", { cwd: work, env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1" } });
+sh("npx next build", {
+  cwd: work,
+  env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", NEXT_PUBLIC_CT_VARIANT: MONO ? "mono" : "" },
+});
 
 /* 7. Flatten --------------------------------------------------------------- */
 const out = path.join(work, "out");
@@ -291,7 +309,8 @@ for (const file of walk(path.join(out, "_next/static"))) {
   } else fs.copyFileSync(file, target);
 }
 
-for (const asset of ["icon.svg", "brand/talynt-tagline-light.svg", "brand/talynt-primary-light.svg"]) {
+const logos = MONO ? ["brand/talynt-tagline-mono.svg", "brand/talynt-primary-mono.svg"] : ["brand/talynt-tagline-light.svg", "brand/talynt-primary-light.svg"];
+for (const asset of ["icon.svg", ...logos]) {
   const target = path.join(dist, asset);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.copyFileSync(path.join(out, asset), target);
@@ -299,23 +318,23 @@ for (const asset of ["icon.svg", "brand/talynt-tagline-light.svg", "brand/talynt
 
 /* 8. The entry page ------------------------------------------------------- */
 // Published as the artifact's own page (the host wraps it in a document), so
-// it carries no doctype or <html>. It hands straight over to home.html.
+// it carries no doctype or <html>. It hands straight over to the first page.
 fs.writeFileSync(path.join(dist, "index.html"), `<title>TALYNT LABS — Talent intelligence, built for hiring</title>
 <meta name="description" content="TALYNT LABS combines deep talent sourcing, human conversations and intelligent technology to help companies make better hiring decisions.">
-<meta http-equiv="refresh" content="0; url=home.html">
+<meta http-equiv="refresh" content="0; url=${HOME}">
 <style>
-  :root { --bg: #fafaf7; --ink: #202321; --mute: #5f6560; --green: #257461; }
+  :root { --bg: ${MONO ? "#ffffff" : "#fafaf7"}; --ink: ${MONO ? "#0b0b0b" : "#202321"}; --mute: ${MONO ? "#5c5c5c" : "#5f6560"}; --green: ${MONO ? "#0b0b0b" : "#257461"}; }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) { --bg: #121413; --ink: #ecefea; --mute: #9aa19a; --green: #5fc2a2; }
+    :root:not([data-theme="light"]) { --bg: #121413; --ink: #ecefea; --mute: #9aa19a; --green: ${MONO ? "#d4f24c" : "#5fc2a2"}; }
   }
-  :root[data-theme="dark"] { --bg: #121413; --ink: #ecefea; --mute: #9aa19a; --green: #5fc2a2; }
+  :root[data-theme="dark"] { --bg: #121413; --ink: #ecefea; --mute: #9aa19a; --green: ${MONO ? "#d4f24c" : "#5fc2a2"}; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 ui-sans-serif, system-ui, sans-serif; }
   .entry { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 16px; text-align: center; }
   .entry a { color: var(--green); }
   .entry p { margin: 0; color: var(--mute); }
 </style>
-<main class="entry"><p>Opening <a href="home.html">TALYNT LABS</a>…</p></main>
-<script>location.replace("home.html" + location.search + location.hash);</script>
+<main class="entry"><p>Opening <a href="${HOME}">TALYNT LABS</a>…</p></main>
+<script>location.replace("${HOME}" + location.search + location.hash);</script>
 `);
 
 console.log(`\nPages (${pages.length}):\n  ${pages.sort().join("\n  ")}`);

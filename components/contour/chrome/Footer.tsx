@@ -2,15 +2,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { EMAIL, LINKEDIN, ROUTES, whatsappHref } from "@/lib/contour/site";
 import { Meeting } from "@/components/contour/graphics/Meeting";
+import { EMPLOYERS_ONLY, LOGO } from "@/lib/contour/variant";
 import { LinkedInIcon, WhatsAppIcon } from "./Icons";
 
-const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
+const ALL_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
   {
     title: "Employers",
     links: [
       { label: "For employers", href: ROUTES.employers },
       { label: "How we work", href: `${ROUTES.employers}#how-we-work` },
-      { label: "Client visibility", href: `${ROUTES.employers}#visibility` },
+      { label: "Client visibility", href: `${ROUTES.approach}#visibility` },
       { label: "Start a search", href: ROUTES.enquiry },
     ],
   },
@@ -41,6 +42,11 @@ const COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string
   },
 ];
 
+/** The employer-only variant leaves out the candidate pages and the candidate-facing "How we evaluate". */
+const COLUMNS = EMPLOYERS_ONLY
+  ? ALL_COLUMNS.filter((c) => c.title !== "Candidates").map((c) => ({ ...c, links: c.links.filter((l) => l.href !== ROUTES.howWeEvaluate) }))
+  : ALL_COLUMNS;
+
 export function Footer() {
   const whatsapp = whatsappHref();
 
@@ -51,21 +57,23 @@ export function Footer() {
           <div className="flex flex-col gap-8">
             {/* The endorsed lockup — the approved first-impression mark. */}
             <Image
-              src="/brand/talynt-tagline-light.svg"
+              src={LOGO.tagline}
               alt="TALYNT LABS — Talent intelligence, built for hiring."
               width={210}
               height={80}
               unoptimized
-              className="h-auto w-[210px]"
+              className={EMPLOYERS_ONLY ? "ct-logo h-auto w-[210px]" : "h-auto w-[210px]"}
             />
             <Meeting className="w-full max-w-[17rem]" decorative />
             <div className="flex flex-col gap-1.5 text-[0.92rem]">
               <a href={`mailto:${EMAIL.general}`} className="ct-link w-fit">
                 {EMAIL.general}
               </a>
-              <a href={`mailto:${EMAIL.talent}`} className="w-fit text-[var(--ct-mute)] hover:text-[var(--ct-ink)]">
-                {EMAIL.talent} <span className="ct-meta ct-mute">· candidates</span>
-              </a>
+              {!EMPLOYERS_ONLY && (
+                <a href={`mailto:${EMAIL.talent}`} className="w-fit text-[var(--ct-mute)] hover:text-[var(--ct-ink)]">
+                  {EMAIL.talent} <span className="ct-meta ct-mute">· candidates</span>
+                </a>
+              )}
             </div>
             {(LINKEDIN || whatsapp) && (
               <ul className="flex items-center gap-2" aria-label="TALYNT LABS elsewhere">
@@ -99,7 +107,7 @@ export function Footer() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4">
+          <div className={`grid grid-cols-2 gap-x-8 gap-y-10 ${EMPLOYERS_ONLY ? "sm:grid-cols-3" : "sm:grid-cols-4"}`}>
             {COLUMNS.map((column) => (
               <nav key={column.title} aria-label={column.title}>
                 <p className="ct-meta ct-mute">{column.title}</p>
@@ -123,7 +131,7 @@ export function Footer() {
         <div className="mt-16 flex flex-col gap-4 border-t ct-b2 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="ct-meta ct-mute">© {new Date().getFullYear()} TALYNT LABS. All rights reserved.</p>
           <p className="ct-meta ct-mute flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span>Direction C — Contour · design review build</span>
+            <span>{EMPLOYERS_ONLY ? "Direction C — Mono, employers only · design review build" : "Direction C — Contour · design review build"}</span>
             <Link href="/" className="ct-green hover:underline">
               Current site →
             </Link>

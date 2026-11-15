@@ -6,6 +6,8 @@
  * terms render from lib/legal.ts here and on the approved site alike.
  */
 
+import { EMPLOYERS_ONLY } from "./variant";
+
 export const BASE = "/directions/contour";
 
 /** Prefix a path with the direction's base. `to("/faq#privacy")`. */
@@ -15,7 +17,8 @@ export function to(path = ""): string {
 }
 
 export const ROUTES = {
-  home: to(),
+  // The employer-only variant has no entry choice: its home is the employer homepage.
+  home: EMPLOYERS_ONLY ? to("/employers") : to(),
   employers: to("/employers"),
   candidates: to("/candidates"),
   opportunities: to("/opportunities"),
