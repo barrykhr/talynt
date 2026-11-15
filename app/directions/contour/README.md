@@ -51,7 +51,7 @@ node scripts/export-static-site.mjs . /tmp/talynt-work /tmp/talynt-mono mono
 
 The mono build uses the same pages and the same copy. It differs only as follows:
 
-- **Colour.** The layout adds `.ct-mono`, which remaps the colour tokens. White sections stay white with near-black ink. Every tinted band becomes black. Lime marks the person's node, highlights, focus, hover on primary actions and the accent on black. Lime is never used as text on white.
+- **Colour.** The layout adds `.ct-mono`, which remaps the colour tokens to a dark page: black ground, white type, bands alternating between two near-blacks. Lime is the one colour. It marks the opening headline's italic turn, primary buttons (pills), links, highlights, focus and the person's node, and glows softly behind the first section of each page. Cards are dark and slightly translucent.
 - **Logo.** It uses the approved single-colour logo files.
 - **Employer only.** There is no entry choice: the root sends visitors to the employer homepage. The navigation has no employer/candidate switch. The footer, contact page and FAQ leave out candidate pages and questions. The static copy contains no candidate pages at all.
 

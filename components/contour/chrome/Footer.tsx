@@ -62,7 +62,7 @@ export function Footer() {
               width={210}
               height={80}
               unoptimized
-              className={EMPLOYERS_ONLY ? "ct-logo h-auto w-[210px]" : "h-auto w-[210px]"}
+              className="h-auto w-[210px]"
             />
             <Meeting className="w-full max-w-[17rem]" decorative />
             <div className="flex flex-col gap-1.5 text-[0.92rem]">

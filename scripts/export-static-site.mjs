@@ -323,7 +323,7 @@ fs.writeFileSync(path.join(dist, "index.html"), `<title>TALYNT LABS — Talent i
 <meta name="description" content="TALYNT LABS combines deep talent sourcing, human conversations and intelligent technology to help companies make better hiring decisions.">
 <meta http-equiv="refresh" content="0; url=${HOME}">
 <style>
-  :root { --bg: ${MONO ? "#ffffff" : "#fafaf7"}; --ink: ${MONO ? "#0b0b0b" : "#202321"}; --mute: ${MONO ? "#5c5c5c" : "#5f6560"}; --green: ${MONO ? "#0b0b0b" : "#257461"}; }
+  :root { --bg: ${MONO ? "#0a0a0a" : "#fafaf7"}; --ink: ${MONO ? "#f5f5f2" : "#202321"}; --mute: ${MONO ? "#9b9b96" : "#5f6560"}; --green: ${MONO ? "#c8f04a" : "#257461"}; }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) { --bg: #121413; --ink: #ecefea; --mute: #9aa19a; --green: ${MONO ? "#d4f24c" : "#5fc2a2"}; }
   }

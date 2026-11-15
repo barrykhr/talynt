@@ -845,135 +845,190 @@ html:has(.ct) body {
 }
 
 /* ==========================================================================
-   Variant: mono — black, white and a touch of lime
+   Variant: mono — black, white and lime
    --------------------------------------------------------------------------
    Built with NEXT_PUBLIC_CT_VARIANT=mono (lib/contour/variant.ts). The layout
    adds .ct-mono; everything below is scoped to it, so the default build is
-   untouched. The system's tokens are remapped, nothing else:
+   untouched. Dark first:
 
-   - White ground, near-black ink. The accent that was green is black on the
-     white sections and lime on the black ones.
-   - Every tinted band (.ct-tint) turns black, so the page alternates white
-     and black. The tokens are redefined on the band itself, so everything
-     inside it — panels, windows, tags, borders — follows.
-   - Lime is the touch: the person's node, the highlighter, the focus ring,
-     hover on primary actions, and the accent on black. It is never text on
-     white (it fails contrast there).
+   - A black page with white type. Bands alternate between two near-blacks,
+     so sections still read as sections.
+   - Lime is the one colour: the italic turn of the opening headline, primary
+     buttons (pills), links, highlights, the person's node, focus, and a soft
+     glow behind the first section of each page.
+   - Panels and interface windows are dark cards with a hairline border.
    - Violet, the candidate colour, has no job here and becomes grey.
    ========================================================================== */
 
-.ct.ct-mono {
-  --ct-bg: #ffffff;
-  --ct-bg-2: #f4f4f2;
-  --ct-bg-3: #e9e9e6;
-  --ct-surface: #ffffff;
-
-  --ct-ink: #0b0b0b;
-  --ct-ink-2: #2e2e2e;
-  --ct-mute: #5c5c5c;
-  --ct-faint: #8d8d8d;
-
-  --ct-line: #e3e3e0;
-  --ct-line-2: #c8c8c4;
-
-  --ct-green: #0b0b0b;
-  --ct-green-deep: #000000;
-  --ct-green-wash: #f1f8d8;
-  --ct-violet: #8d8d8d;
-  --ct-violet-ink: #3d3d3d;
-  --ct-violet-wash: #efefed;
-  --ct-lime: #d4f24c;
-  --ct-lime-soft: #f1fbcf;
-  --ct-signal: #c2ea1f;
-
-  /* Lime that still reads as a mark on white: used for small fills only. */
-  --ct-lime-deep: #9bc410;
-}
-
-/* The black bands. */
+.ct.ct-mono,
 .ct-mono .ct-tint {
-  --ct-bg: #0b0b0b;
-  --ct-bg-2: #0b0b0b;
-  --ct-bg-3: #1d1d1d;
-  --ct-surface: #151515;
+  --ct-bg: #0a0a0a;
+  --ct-bg-2: #111111;
+  --ct-bg-3: #1c1c1c;
+  --ct-surface: #141414;
 
-  --ct-ink: #f6f6f3;
-  --ct-ink-2: #d2d2ce;
-  --ct-mute: #a0a09b;
-  --ct-faint: #75756f;
+  --ct-ink: #f5f5f2;
+  --ct-ink-2: #cfcfca;
+  --ct-mute: #9b9b96;
+  --ct-faint: #6f6f6a;
 
-  --ct-line: #262626;
-  --ct-line-2: #3b3b3b;
+  --ct-line: #232323;
+  --ct-line-2: #363636;
 
-  --ct-green: #d4f24c;
-  --ct-green-deep: #c2ea1f;
-  --ct-green-wash: #1f2610;
-  --ct-violet: #8d8d8d;
-  --ct-violet-ink: #cfcfca;
-  --ct-violet-wash: #1d1d1d;
-  --ct-lime-soft: #232b0f;
+  --ct-green: #c8f04a;
+  --ct-green-deep: #b4e02e;
+  --ct-green-wash: #1b220b;
+  --ct-violet: #8a8a85;
+  --ct-violet-ink: #d8d8d3;
+  --ct-violet-wash: #1c1c1c;
+  --ct-lime: #c8f04a;
+  --ct-lime-soft: #1f2a0c;
+  --ct-signal: #c8f04a;
 
   color: var(--ct-ink);
+  color-scheme: dark;
 }
 
-/* Highlighted words and quotes always sit dark on lime, whatever the band. */
+/* The second near-black, for alternate bands. */
+.ct-mono .ct-tint {
+  background-color: #111111;
+  --ct-bg: #111111;
+  --ct-surface: #171717;
+}
+
+/* A soft lime glow and a fine vertical texture behind the first section of a
+   page, fading out before the content below. Decoration only. */
+.ct-mono #ct-main > section:first-child {
+  position: relative;
+  isolation: isolate;
+}
+
+.ct-mono #ct-main > section:first-child::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 65% at 70% 66%, rgb(200 240 74 / 0.30), transparent 70%),
+    radial-gradient(ellipse 26% 38% at 70% 78%, rgb(200 240 74 / 0.30), transparent 70%),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 7px);
+  -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+
+/* The closing enquiry gets the same glow, rising from the bottom. */
+.ct-mono #enquiry {
+  position: relative;
+  isolation: isolate;
+}
+
+.ct-mono #enquiry::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 50% 55% at 30% 100%, rgb(200 240 74 / 0.12), transparent 70%);
+}
+
+/* The opening headline's italic turn is the one lime phrase on the page. */
+.ct-mono h1 .ct-italic {
+  color: var(--ct-lime);
+}
+
+/* Highlighted words and quotes sit dark on lime. */
 .ct-mono mark,
 .ct-mono .bg-\[var\(--ct-lime\)\] {
-  color: #0b0b0b !important;
+  color: #0a0a0a !important;
 }
 
-/* On black, the highlighter becomes the colour of the words themselves. */
-.ct-mono .ct-tint .ct-mark {
+.ct-mono .ct-mark {
   background-image: none;
   color: var(--ct-lime);
 }
 
-/* Primary actions: black on white, lime on black; hover turns them lime. */
+/* Buttons: lime pills, and an outlined pill beside them. */
+.ct-mono .ct-btn {
+  border-radius: 999px;
+}
+
+.ct-mono .ct-btn-primary {
+  background-color: var(--ct-lime);
+  color: #0a0a0a;
+  box-shadow: 0 0 0 1px rgb(200 240 74 / 0.35), 0 10px 40px -12px rgb(200 240 74 / 0.55);
+}
+
 .ct-mono .ct-btn-primary:hover {
-  background-color: var(--ct-lime);
-  color: #0b0b0b;
-}
-
-.ct-mono .ct-tint .ct-btn-primary {
-  background-color: var(--ct-lime);
-  color: #0b0b0b;
-}
-
-.ct-mono .ct-tint .ct-btn-primary:hover {
   background-color: #ffffff;
+  color: #0a0a0a;
 }
 
-/* Links: black words with a lime underline on white. */
+.ct-mono .ct-btn-secondary {
+  --ct-bc: #3a3a3a;
+  background-color: rgb(255 255 255 / 0.03);
+}
+
+.ct-mono .ct-btn-secondary:hover {
+  --ct-bc: var(--ct-lime);
+  background-color: rgb(255 255 255 / 0.06);
+}
+
+/* Cards and interface windows: dark, hairline, a faint lift. */
+.ct-mono .ct-window,
+.ct-mono .ct-panel {
+  background: linear-gradient(180deg, rgb(26 26 26 / 0.88), rgb(16 16 16 / 0.92));
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  --ct-bc: #2a2a2a;
+  box-shadow: 0 30px 80px -40px rgb(0 0 0 / 0.9);
+}
+
+.ct-mono .ct-window-bar {
+  background: rgb(22 22 22 / 0.7);
+}
+
+.ct-mono .ct-tag {
+  background: rgb(255 255 255 / 0.03);
+}
+
+/* Links: lime. */
 .ct-mono .ct-link {
-  text-decoration-color: var(--ct-lime-deep);
-  text-decoration-thickness: 2px;
+  color: var(--ct-lime);
+  text-decoration-color: rgb(200 240 74 / 0.45);
 }
 
-.ct-mono .ct-tint .ct-link {
-  text-decoration-color: color-mix(in oklab, var(--ct-lime) 55%, transparent);
-}
-
-.ct-mono .ct-tint .ct-link:hover {
+.ct-mono .ct-link:hover {
   text-decoration-color: var(--ct-lime);
 }
 
-/* Focus: a lime ring with a black edge reads on both grounds. */
-.ct-mono :focus-visible {
-  outline: 2px solid var(--ct-ink);
-  box-shadow: 0 0 0 5px var(--ct-lime);
+/* Form errors in a red that reads on black. */
+.ct-mono .ct-error {
+  color: #ff8f73;
 }
 
-/* The single-colour lockup is drawn black; on the black bands it turns white. */
-.ct-mono .ct-tint .ct-logo {
+.ct-mono .ct-input[aria-invalid="true"],
+.ct-mono .ct-textarea[aria-invalid="true"] {
+  --ct-bc: #ff8f73;
+}
+
+/* Focus: a lime ring. */
+.ct-mono :focus-visible {
+  outline: 2px solid var(--ct-lime);
+}
+
+/* The approved single-colour lockups are drawn black; here they are white. */
+.ct-mono img[src*="talynt-"] {
   filter: invert(1);
 }
 
 .ct-mono ::selection {
   background: var(--ct-lime);
-  color: #0b0b0b;
+  color: #0a0a0a;
 }
 
 html:has(.ct-mono),
 html:has(.ct-mono) body {
-  background-color: #ffffff;
+  background-color: #0a0a0a;
+  color-scheme: dark;
 }

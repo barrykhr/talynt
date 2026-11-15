@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: VARIANT === "mono" ? "#ffffff" : "#fafaf7",
+  themeColor: VARIANT === "mono" ? "#0a0a0a" : "#fafaf7",
 };
 
 export default function ContourLayout({ children }: { children: React.ReactNode }) {
