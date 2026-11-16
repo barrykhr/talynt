@@ -38,7 +38,12 @@
   #qr img { width:240px; display:block; margin:8px auto; }
   .research { background:#faf8f4; border-radius:8px; padding:10px; font-size:13px; }
   .research a { color:var(--accent); word-break:break-all; }
-  @media (max-width: 1000px) { main { grid-template-columns:1fr; height:auto; } }
+  .research ul { margin:4px 0 8px; padding-left:18px; }
+  .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  select { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
+  .levelhelp { margin-top:6px; padding:8px 10px; border-radius:8px; background:#faf8f4; font-size:12.5px; color:var(--muted); }
+  .levelhelp b { color:var(--ink); }
+  @media (max-width: 1000px) { main, main.nowa { grid-template-columns:1fr; height:auto; } .row { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -54,17 +59,48 @@
   </section>
 
   <section>
-    <h2>Job post &amp; company</h2>
+    <h2>Job post, role &amp; company</h2>
     <div id="messages" class="hint">Paste the WhatsApp message (job post) below. If WhatsApp is linked, you can also pick it from a chat on the left.</div>
-    <label for="source">Selected message</label>
-    <textarea id="source" rows="6" placeholder="Click a message above or paste a job post here"></textarea>
-    <label for="company">Company name</label>
-    <input id="company" placeholder="e.g. Razorpay">
-    <label for="linkedin">…or LinkedIn company page link</label>
-    <input id="linkedin" placeholder="https://www.linkedin.com/company/razorpay/">
-    <div class="hint">Fill in either one (or both). Tip: if LinkedIn blocks the page, paste its About section into Notes.</div>
+    <label for="source">Job post / WhatsApp message</label>
+    <textarea id="source" rows="5" placeholder="Paste the job post here"></textarea>
+
+    <div class="row">
+      <div><label for="role">Role to pitch for</label>
+        <input id="role" placeholder="e.g. Senior Backend Engineer (Go)"></div>
+      <div><label for="location">Location (optional)</label>
+        <input id="location" placeholder="e.g. Bangalore"></div>
+    </div>
+    <div class="hint">Leave the role empty to pick it up from the job post.</div>
+
+    <label for="level">Personalisation level</label>
+    <select id="level">
+      <option value="market">1 · Market level: the talent market for this role</option>
+      <option value="company" selected>2 · Company level: their current talent &amp; hiring challenges</option>
+      <option value="person">3 · Person level: the hiring manager you're messaging</option>
+    </select>
+    <div id="levelHelp" class="levelhelp"></div>
+
+    <div id="companyFields">
+      <label for="company">Company name</label>
+      <input id="company" placeholder="e.g. Razorpay">
+      <label for="linkedin">…or LinkedIn company page link</label>
+      <input id="linkedin" placeholder="https://www.linkedin.com/company/razorpay/">
+      <div class="hint" id="companyHint">Fill in either one (or both). If LinkedIn blocks the page, paste its About section into Notes.</div>
+    </div>
+
+    <div id="personFields" hidden>
+      <div class="row">
+        <div><label for="personName">Their name</label><input id="personName" placeholder="e.g. Priya Sharma"></div>
+        <div><label for="personTitle">Their title</label><input id="personTitle" placeholder="e.g. VP Engineering"></div>
+      </div>
+      <label for="personUrl">Their LinkedIn profile (optional)</label>
+      <input id="personUrl" placeholder="https://www.linkedin.com/in/...">
+      <label for="personNotes">What you know about them</label>
+      <textarea id="personNotes" rows="3" placeholder="Paste from their LinkedIn: headline, about, recent posts, past companies"></textarea>
+    </div>
+
     <label for="notes">Notes (optional)</label>
-    <input id="notes" placeholder="e.g. mention we placed 3 backend engineers in fintech last month">
+    <input id="notes" placeholder="e.g. we placed 3 Go engineers in fintech last month">
     <button id="gen">Research &amp; draft message</button>
     <div id="genStatus"></div>
   </section>
@@ -149,23 +185,48 @@ async function loadMessages(chatId) {
   } catch (e) { setMsg(box, e.message, "err"); }
 }
 
+const LEVEL_HELP = {
+  market: "<b>Best when you know little about the company.</b> Researches how hard this role is to hire right now (open postings, salary trends, scarce skills, competing employers, notice periods) and opens with one sharp market insight. Company name is optional.",
+  company: "<b>Best default.</b> Researches the company's current team and hiring: headcount growth, open roles, funding or expansion, long-open roles. Then asks one question about their current talent and hiring challenge for this role.",
+  person: "<b>Most personal; use for key accounts.</b> Writes to the hiring manager by name, using what you paste from their LinkedIn plus public info, tied to their team's priority for this role. Paste their LinkedIn headline, about and recent posts into the box below.",
+};
+function syncLevel() {
+  const lv = $("level").value;
+  $("levelHelp").innerHTML = LEVEL_HELP[lv];
+  $("personFields").hidden = lv !== "person";
+  $("companyHint").textContent = lv === "market"
+    ? "Optional at market level: just used to name the company in the message."
+    : "Fill in either one (or both). If LinkedIn blocks the page, paste its About section into Notes.";
+}
+$("level").onchange = syncLevel; syncLevel();
+
 $("gen").onclick = async () => {
   const btn = $("gen"); btn.disabled = true;
-  setMsg($("genStatus"), "Researching the company and drafting… (20–60s)", "hint");
+  setMsg($("genStatus"), "Researching and drafting… (30–90s)", "hint");
   try {
-    const r = await api("/api/generate", { sourceMessage: $("source").value, companyName: $("company").value, linkedinUrl: $("linkedin").value, notes: $("notes").value });
+    const ids = ["level","role","location","companyName:company","linkedinUrl:linkedin","notes","personName","personTitle","personUrl","personNotes"];
+    const body = { sourceMessage: $("source").value };
+    for (const k of ids) { const [key, id] = k.includes(":") ? k.split(":") : [k, k]; body[key] = $(id).value; }
+    const r = await api("/api/generate", body);
     lastResult = r;
     const box = $("research"); box.className = "research"; box.textContent = "";
     const add = (label, text) => { const p = document.createElement("p"); const b = document.createElement("b"); b.textContent = label + " "; p.append(b, text); box.appendChild(p); };
     add("Role:", r.role + (r.otherRoles.length ? `  (also: ${r.otherRoles.join(", ")})` : ""));
-    add("Company:", r.companySummary);
+    if (r.company) add("Company:", r.company);
+    add("Level:", $("level").selectedOptions[0].textContent.split(":")[0].replace(/^\d · /, ""));
+    if (r.researchPoints.length) {
+      const b = document.createElement("b"); b.textContent = "What the research found:"; box.appendChild(b);
+      const ul = document.createElement("ul");
+      for (const pt of r.researchPoints) { const li = document.createElement("li"); li.textContent = pt; ul.appendChild(li); }
+      box.appendChild(ul);
+    }
     if (r.sources.length) {
       const p = document.createElement("p"); p.append(Object.assign(document.createElement("b"), { textContent: "Sources: " }));
-      r.sources.slice(0, 5).forEach((u, i) => { if (!/^https?:\/\//.test(u)) return; const a = document.createElement("a"); a.href = u; a.target = "_blank"; a.rel = "noopener"; a.textContent = u; if (i) p.append(" · "); p.append(a); });
+      r.sources.slice(0, 6).forEach((u, i) => { if (!/^https?:\/\//.test(u)) return; const a = document.createElement("a"); a.href = u; a.target = "_blank"; a.rel = "noopener"; a.textContent = u; if (i) p.append(" · "); p.append(a); });
       box.appendChild(p);
     }
     $("draft").value = r.message; countWords();
-    setMsg($("genStatus"), "Draft ready → review on the right.", "ok");
+    setMsg($("genStatus"), "Draft ready → review on the right. Check every fact before sending.", "ok");
   } catch (e) { setMsg($("genStatus"), e.message, "err"); }
   btn.disabled = false;
 };
@@ -185,7 +246,7 @@ function phoneDigits() { return $("phone").value.replace(/\D/g, ""); }
 function logOpen() {
   // Record that you opened it; the actual send happens in WhatsApp.
   fetch("/api/log", { method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ phone: phoneDigits(), message: $("draft").value, companyName: $("company").value, linkedinUrl: $("linkedin").value, role: lastResult?.role }) }).catch(() => {});
+    body: JSON.stringify({ phone: phoneDigits(), message: $("draft").value, companyName: $("company").value, linkedinUrl: $("linkedin").value, role: lastResult?.role, level: $("level").value }) }).catch(() => {});
 }
 $("openwa").onclick = () => {
   const d = phoneDigits(), msg = $("draft").value.trim();

@@ -30,10 +30,19 @@ Linked devices → Link a device).
 ## Using it
 
 1. Paste the job post from WhatsApp into the first box.
-2. Enter the **company name** and/or its **LinkedIn company page link**. LinkedIn often
+2. Enter the **role** to pitch for (or leave it empty to pick it up from the post), and a
+   location if relevant.
+3. Choose a **personalisation level**:
+   - **Market**: how hard this role is to hire right now (postings, pay, scarce skills,
+     competing employers). Company is optional. Good when you know little about the company.
+   - **Company**: their current team and hiring (growth, open roles, funding, long-open
+     roles), and one question about their talent challenge for this role. The default.
+   - **Person**: written to the hiring manager by name, using what you paste from their
+     LinkedIn plus public info. Best for key accounts.
+4. Enter the **company name** and/or its **LinkedIn company page link**. LinkedIn often
    blocks automated reading, so paste the page's About section into Notes for best results.
-3. Click **Research & draft**, then check the role, research and sources, and edit the draft.
-4. Enter the number with country code (e.g. `919876543210`) and click **Open in WhatsApp**,
+5. Click **Research & draft**, then check the role, research and sources, and edit the draft.
+6. Enter the number with country code (e.g. `919876543210`) and click **Open in WhatsApp**,
    then press send in WhatsApp. Or click **Copy message**.
 
 Every message you open or send is logged to `sent-log.jsonl`.

@@ -7,7 +7,7 @@ import express from "express";
 import QRCode from "qrcode";
 import qrcodeTerminal from "qrcode-terminal";
 import pkg from "whatsapp-web.js";
-import { generateOutreach } from "./generate.js";
+import { generateOutreach, LEVELS } from "./generate.js";
 
 const { Client, LocalAuth } = pkg;
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -113,16 +113,23 @@ app.get("/api/chats/:id/messages", async (req, res) => {
 });
 
 app.post("/api/generate", async (req, res) => {
-  const { sourceMessage, companyName, linkedinUrl, notes } = req.body || {};
-  if (!sourceMessage?.trim()) return res.status(400).json({ error: "Pick or paste a message first." });
-  if (!companyName?.trim() && !linkedinUrl?.trim()) {
+  const b = req.body || {};
+  const level = LEVELS.includes(b.level) ? b.level : "company";
+  const has = (v) => typeof v === "string" && v.trim() !== "";
+  if (!has(b.role) && !has(b.sourceMessage)) {
+    return res.status(400).json({ error: "Enter the role, or paste the job post so the role can be picked up from it." });
+  }
+  if (level !== "market" && !has(b.companyName) && !has(b.linkedinUrl)) {
     return res.status(400).json({ error: "Enter a company name or paste its LinkedIn company page link." });
   }
-  if (linkedinUrl?.trim() && !/^https?:\/\/([a-z]+\.)?linkedin\.com\//i.test(linkedinUrl.trim())) {
+  if (level === "person" && !has(b.personName)) {
+    return res.status(400).json({ error: "Person level: enter the recipient's name." });
+  }
+  if (has(b.linkedinUrl) && !/^https?:\/\/([a-z]+\.)?linkedin\.com\//i.test(b.linkedinUrl.trim())) {
     return res.status(400).json({ error: "That doesn't look like a LinkedIn link (https://www.linkedin.com/company/...)." });
   }
   try {
-    res.json(await generateOutreach({ sourceMessage, companyName, linkedinUrl: linkedinUrl?.trim(), notes }));
+    res.json(await generateOutreach({ ...b, level, linkedinUrl: b.linkedinUrl?.trim() }));
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: e.message });
@@ -130,10 +137,10 @@ app.post("/api/generate", async (req, res) => {
 });
 
 app.post("/api/log", (req, res) => {
-  const { phone, message, companyName, linkedinUrl, role } = req.body || {};
+  const { phone, message, companyName, linkedinUrl, role, level } = req.body || {};
   fs.appendFileSync(
     LOG_FILE,
-    JSON.stringify({ at: new Date().toISOString(), via: "opened-in-whatsapp", phone, companyName, linkedinUrl, role, message }) + "\n",
+    JSON.stringify({ at: new Date().toISOString(), via: "opened-in-whatsapp", level, phone, companyName, linkedinUrl, role, message }) + "\n",
   );
   res.json({ ok: true });
 });
