@@ -20,7 +20,7 @@ const SYSTEM = `You write short, personal cold-outreach messages that are sent o
 
 Process:
 1. Read the source message (usually a job post or hiring announcement shared in a WhatsApp chat). Work out the role being hired for. If several roles appear, pick the main one and list the others.
-2. Use web search to research the company the user names: what it does, size/stage, recent news (funding, launches, expansion), and any signal about why it is hiring this role. Keep research focused: a few searches are enough.
+2. Research the company the user names: what it does, size/stage, recent news (funding, launches, expansion), and any signal about why it is hiring this role. If the user gives a LinkedIn company page link, try to open it first; LinkedIn often blocks automated access, so if it does not load, use the company slug in the link (linkedin.com/company/<slug>) to identify the company and research it with web search (its website, news, funding). If no company name is given, take it from the LinkedIn link or the source message. Keep research focused: a few searches are enough.
 3. Write the outreach message from the sender to the hiring contact.
 
 Message rules:
@@ -44,9 +44,17 @@ function extractJson(text) {
   return JSON.parse(text.slice(start, end + 1));
 }
 
-export async function generateOutreach({ sourceMessage, companyName, notes }) {
+export function slugFromLinkedIn(url) {
+  const m = String(url || "").match(/linkedin\.com\/(?:company|school|showcase)\/([^/?#]+)/i);
+  return m ? decodeURIComponent(m[1]).replace(/[-_]+/g, " ").trim() : "";
+}
+
+export async function generateOutreach({ sourceMessage, companyName, linkedinUrl, notes }) {
+  const slug = slugFromLinkedIn(linkedinUrl);
   const userText = [
-    `Company name: ${companyName}`,
+    companyName ? `Company name: ${companyName}` : null,
+    linkedinUrl ? `Company LinkedIn page: ${linkedinUrl}` : null,
+    slug ? `(LinkedIn slug suggests the company is: ${slug})` : null,
     notes ? `Extra notes from me: ${notes}` : null,
     "",
     "Source message:",
@@ -94,7 +102,10 @@ async function draftWithClaude(userText) {
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
       system: SYSTEM,
-      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 5 }],
+      tools: [
+        { type: "web_search_20260209", name: "web_search", max_uses: 5 },
+        { type: "web_fetch_20260209", name: "web_fetch", max_uses: 3 },
+      ],
       messages,
     });
 

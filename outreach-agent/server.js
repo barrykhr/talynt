@@ -103,12 +103,16 @@ app.get("/api/chats/:id/messages", async (req, res) => {
 });
 
 app.post("/api/generate", async (req, res) => {
-  const { sourceMessage, companyName, notes } = req.body || {};
-  if (!sourceMessage?.trim() || !companyName?.trim()) {
-    return res.status(400).json({ error: "Pick a message and enter a company name." });
+  const { sourceMessage, companyName, linkedinUrl, notes } = req.body || {};
+  if (!sourceMessage?.trim()) return res.status(400).json({ error: "Pick or paste a message first." });
+  if (!companyName?.trim() && !linkedinUrl?.trim()) {
+    return res.status(400).json({ error: "Enter a company name or paste its LinkedIn company page link." });
+  }
+  if (linkedinUrl?.trim() && !/^https?:\/\/([a-z]+\.)?linkedin\.com\//i.test(linkedinUrl.trim())) {
+    return res.status(400).json({ error: "That doesn't look like a LinkedIn link (https://www.linkedin.com/company/...)." });
   }
   try {
-    res.json(await generateOutreach({ sourceMessage, companyName, notes }));
+    res.json(await generateOutreach({ sourceMessage, companyName, linkedinUrl: linkedinUrl?.trim(), notes }));
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: e.message });
@@ -117,7 +121,7 @@ app.post("/api/generate", async (req, res) => {
 
 app.post("/api/send", async (req, res) => {
   if (!requireReady(res)) return;
-  const { phone, message, companyName, role } = req.body || {};
+  const { phone, message, companyName, linkedinUrl, role } = req.body || {};
   const digits = String(phone || "").replace(/\D/g, "");
   if (digits.length < 8) {
     return res.status(400).json({ error: "Enter the number with country code, e.g. 919876543210." });
@@ -129,7 +133,7 @@ app.post("/api/send", async (req, res) => {
     const sent = await wa.sendMessage(numberId._serialized, message);
     fs.appendFileSync(
       LOG_FILE,
-      JSON.stringify({ at: new Date().toISOString(), phone: digits, companyName, role, message }) + "\n",
+      JSON.stringify({ at: new Date().toISOString(), phone: digits, companyName, linkedinUrl, role, message }) + "\n",
     );
     res.json({ ok: true, id: sent.id._serialized });
   } catch (e) {
