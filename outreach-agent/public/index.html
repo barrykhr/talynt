@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Outreach Agent</title>
+<style>
+  :root { --bg:#f6f4ef; --card:#fff; --ink:#1d1b18; --muted:#6f6a62; --line:#e3ded4; --accent:#e4572e; --ok:#1f8a4c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif; background:var(--bg); color:var(--ink); }
+  header { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--line); background:var(--card); }
+  header h1 { font-size:16px; margin:0; }
+  #status { font-size:13px; color:var(--muted); }
+  #status.ready { color:var(--ok); }
+  main { display:grid; grid-template-columns: 280px 1fr 1fr; gap:14px; padding:14px; height:calc(100vh - 54px); }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px; overflow:auto; }
+  h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:0 0 10px; }
+  .chat, .msg { padding:8px 10px; border-radius:8px; cursor:pointer; border:1px solid transparent; }
+  .chat:hover, .msg:hover { background:#f3efe7; }
+  .chat.active, .msg.active { border-color:var(--accent); background:#fdf0eb; }
+  .chat small { display:block; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .msg { white-space:pre-wrap; margin-bottom:6px; background:#faf8f4; font-size:13px; }
+  .msg.me { background:#eef6ee; }
+  label { display:block; font-weight:600; margin:12px 0 4px; font-size:13px; }
+  input, textarea { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font:inherit; background:#fff; }
+  textarea { resize:vertical; }
+  button { margin-top:12px; padding:10px 16px; border:0; border-radius:8px; background:var(--ink); color:#fff; font:inherit; font-weight:600; cursor:pointer; }
+  button.send { background:var(--accent); }
+  button:disabled { opacity:.5; cursor:wait; }
+  .hint { color:var(--muted); font-size:12px; }
+  .err { color:#b42318; margin-top:8px; }
+  .ok { color:var(--ok); margin-top:8px; }
+  #qr img { width:240px; display:block; margin:8px auto; }
+  .research { background:#faf8f4; border-radius:8px; padding:10px; font-size:13px; }
+  .research a { color:var(--accent); word-break:break-all; }
+  @media (max-width: 1000px) { main { grid-template-columns:1fr; height:auto; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Outreach Agent</h1>
+  <span id="status">Connecting…</span>
+</header>
+<main>
+  <section>
+    <h2>1 · WhatsApp chats</h2>
+    <div id="qr"></div>
+    <div id="chats"></div>
+  </section>
+
+  <section>
+    <h2>2 · Pick the message</h2>
+    <div id="messages" class="hint">Choose a chat on the left, then click the message (job post) you want to respond to. Or paste one below.</div>
+    <label for="source">Selected message</label>
+    <textarea id="source" rows="6" placeholder="Click a message above or paste a job post here"></textarea>
+    <label for="company">Company name</label>
+    <input id="company" placeholder="e.g. Razorpay">
+    <label for="notes">Notes (optional)</label>
+    <input id="notes" placeholder="e.g. mention we placed 3 backend engineers in fintech last month">
+    <button id="gen">Research &amp; draft message</button>
+    <div id="genStatus"></div>
+  </section>
+
+  <section>
+    <h2>3 · Review &amp; send</h2>
+    <div id="research" class="hint">The research summary and draft will appear here.</div>
+    <label for="draft">Message (edit freely)</label>
+    <textarea id="draft" rows="9"></textarea>
+    <div class="hint"><span id="wc">0</span> words</div>
+    <label for="phone">Send to (with country code)</label>
+    <input id="phone" placeholder="e.g. 919876543210">
+    <button id="send" class="send">Send on WhatsApp</button>
+    <div id="sendStatus"></div>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let lastResult = null, activeChat = null;
+
+async function api(url, opts) {
+  const r = await fetch(url, opts && { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(opts) });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || r.statusText);
+  return data;
+}
+function setMsg(el, text, cls) { el.className = cls || ""; el.textContent = text; }
+
+async function pollStatus() {
+  try {
+    const s = await api("/api/status");
+    const st = $("status");
+    st.className = s.state === "ready" ? "ready" : "";
+    st.textContent = { ready: "● WhatsApp connected", qr: "Scan the QR code to connect", starting: "Starting WhatsApp…", disconnected: "Disconnected — restart the server" }[s.state];
+    $("qr").innerHTML = "";
+    if (s.qr) {
+      const img = document.createElement("img"); img.src = s.qr; $("qr").appendChild(img);
+      const p = document.createElement("p"); p.className = "hint";
+      p.textContent = "WhatsApp → Settings → Linked devices → Link a device"; $("qr").appendChild(p);
+    }
+    if (s.state === "ready" && !$("chats").dataset.loaded) loadChats();
+  } catch {}
+  setTimeout(pollStatus, 3000);
+}
+
+async function loadChats() {
+  $("chats").dataset.loaded = "1";
+  const list = $("chats"); list.textContent = "Loading chats…";
+  try {
+    const chats = await api("/api/chats");
+    list.textContent = "";
+    for (const c of chats) {
+      const d = document.createElement("div"); d.className = "chat";
+      const b = document.createElement("b"); b.textContent = (c.isGroup ? "👥 " : "") + c.name;
+      const s = document.createElement("small"); s.textContent = c.preview;
+      d.append(b, s);
+      d.onclick = () => { document.querySelectorAll(".chat").forEach(x => x.classList.remove("active")); d.classList.add("active"); loadMessages(c.id); };
+      list.appendChild(d);
+    }
+  } catch (e) { list.dataset.loaded = ""; setMsg(list, e.message, "err"); }
+}
+
+async function loadMessages(chatId) {
+  activeChat = chatId;
+  const box = $("messages"); box.className = ""; box.textContent = "Loading messages…";
+  try {
+    const msgs = await api(`/api/chats/${encodeURIComponent(chatId)}/messages?limit=50`);
+    if (activeChat !== chatId) return;
+    box.textContent = "";
+    box.style.maxHeight = "38vh"; box.style.overflow = "auto";
+    for (const m of msgs) { // newest first
+      const d = document.createElement("div"); d.className = "msg" + (m.fromMe ? " me" : "");
+      d.textContent = m.body;
+      d.onclick = () => { document.querySelectorAll(".msg").forEach(x => x.classList.remove("active")); d.classList.add("active"); $("source").value = m.body; };
+      box.appendChild(d);
+    }
+    if (!msgs.length) box.textContent = "No text messages in this chat.";
+  } catch (e) { setMsg(box, e.message, "err"); }
+}
+
+$("gen").onclick = async () => {
+  const btn = $("gen"); btn.disabled = true;
+  setMsg($("genStatus"), "Researching the company and drafting… (20–60s)", "hint");
+  try {
+    const r = await api("/api/generate", { sourceMessage: $("source").value, companyName: $("company").value, notes: $("notes").value });
+    lastResult = r;
+    const box = $("research"); box.className = "research"; box.textContent = "";
+    const add = (label, text) => { const p = document.createElement("p"); const b = document.createElement("b"); b.textContent = label + " "; p.append(b, text); box.appendChild(p); };
+    add("Role:", r.role + (r.otherRoles.length ? `  (also: ${r.otherRoles.join(", ")})` : ""));
+    add("Company:", r.companySummary);
+    if (r.sources.length) {
+      const p = document.createElement("p"); p.append(Object.assign(document.createElement("b"), { textContent: "Sources: " }));
+      r.sources.slice(0, 5).forEach((u, i) => { if (!/^https?:\/\//.test(u)) return; const a = document.createElement("a"); a.href = u; a.target = "_blank"; a.rel = "noopener"; a.textContent = u; if (i) p.append(" · "); p.append(a); });
+      box.appendChild(p);
+    }
+    $("draft").value = r.message; countWords();
+    setMsg($("genStatus"), "Draft ready → review on the right.", "ok");
+  } catch (e) { setMsg($("genStatus"), e.message, "err"); }
+  btn.disabled = false;
+};
+
+$("send").onclick = async () => {
+  const phone = $("phone").value, message = $("draft").value;
+  if (!confirm(`Send this message to +${phone.replace(/\D/g, "")}?`)) return;
+  const btn = $("send"); btn.disabled = true;
+  try {
+    await api("/api/send", { phone, message, companyName: $("company").value, role: lastResult?.role });
+    setMsg($("sendStatus"), "Sent ✓ (logged to sent-log.jsonl)", "ok");
+  } catch (e) { setMsg($("sendStatus"), e.message, "err"); }
+  btn.disabled = false;
+};
+
+function countWords() { $("wc").textContent = ($("draft").value.trim().match(/\S+/g) || []).length; }
+$("draft").oninput = countWords;
+pollStatus();
+</script>
+</body>
+</html>

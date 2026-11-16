@@ -1,0 +1,18 @@
+{
+  "name": "talynt-outreach-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pick a WhatsApp message, research the company, draft a personalised pitch, review it, send it.",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.34.8"
+  }
+}
