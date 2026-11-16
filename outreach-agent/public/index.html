@@ -99,6 +99,10 @@
       <textarea id="personNotes" rows="3" placeholder="Paste from their LinkedIn: headline, about, recent posts, past companies"></textarea>
     </div>
 
+    <label for="senderName">Sending as (your name)</label>
+    <input id="senderName" placeholder="Your first and last name">
+    <div class="hint">Used to sign the message. Remembered on this device.</div>
+
     <label for="notes">Notes (optional)</label>
     <input id="notes" placeholder="e.g. we placed 3 Go engineers in fintech last month">
     <button id="gen">Research &amp; draft message</button>
@@ -199,13 +203,15 @@ function syncLevel() {
     : "Fill in either one (or both). If LinkedIn blocks the page, paste its About section into Notes.";
 }
 $("level").onchange = syncLevel; syncLevel();
+try { $("senderName").value = localStorage.getItem("senderName") || ""; } catch {}
 
 $("gen").onclick = async () => {
   const btn = $("gen"); btn.disabled = true;
   setMsg($("genStatus"), "Researching and drafting… (30–90s)", "hint");
   try {
     const ids = ["level","role","location","companyName:company","linkedinUrl:linkedin","notes","personName","personTitle","personUrl","personNotes"];
-    const body = { sourceMessage: $("source").value };
+    const body = { sourceMessage: $("source").value, senderName: $("senderName").value };
+    try { localStorage.setItem("senderName", $("senderName").value); } catch {}
     for (const k of ids) { const [key, id] = k.includes(":") ? k.split(":") : [k, k]; body[key] = $(id).value; }
     const r = await api("/api/generate", body);
     lastResult = r;

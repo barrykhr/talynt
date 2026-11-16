@@ -5,10 +5,12 @@
   "type": "module",
   "description": "Pick a WhatsApp message, research the company, draft a personalised pitch, review it, send it.",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "share": "node share.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",
+    "cloudflared": "^0.7.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "openai": "^6.49.0",

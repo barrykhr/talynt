@@ -9,9 +9,9 @@ let anthropic, openai;
 
 export const LEVELS = ["market", "company", "person"];
 
-function senderProfile() {
+function senderProfile(senderName) {
   return [
-    `Name: ${process.env.SENDER_NAME || "(not set)"}`,
+    `Name: ${senderName || process.env.SENDER_NAME || "(not set)"}`,
     `Company: ${process.env.SENDER_COMPANY || "(not set)"}`,
     `What we offer: ${process.env.SENDER_PITCH || "(not set)"}`,
     `Call to action: ${process.env.SENDER_CTA || "Open to a quick call this week?"}`,
@@ -44,7 +44,7 @@ Research the recipient using the person details given (name, title, notes, profi
 Message: address them by first name, reference one specific thing about them or their team (from the notes or public sources), connect it to the role and their likely priority, then how the sender helps. Never pretend familiarity you don't have.`,
 };
 
-function buildSystem(level) {
+function buildSystem(level, senderName) {
   return `You write short, personal cold-outreach messages sent over WhatsApp to hiring decision-makers, one at a time, after the sender reviews them.
 
 Steps:
@@ -63,7 +63,7 @@ Message rules (all levels):
 - Only address the recipient by name if the user or the source message gives it.
 
 Sender profile:
-${senderProfile()}
+${senderProfile(senderName)}
 
 Return ONLY a JSON object, no prose before or after, with these keys:
 {"role": string, "other_roles": string[], "company": string, "research_points": string[] (3 to 5 short findings you used, each with its key fact), "sources": string[] (URLs you relied on), "message": string (the WhatsApp message)}`;
@@ -83,7 +83,7 @@ export function slugFromLinkedIn(url) {
 
 export async function generateOutreach(input) {
   const {
-    level = "company", role, location, sourceMessage, companyName, linkedinUrl, notes,
+    level = "company", senderName, role, location, sourceMessage, companyName, linkedinUrl, notes,
     personName, personTitle, personUrl, personNotes,
   } = input;
   const slug = slugFromLinkedIn(linkedinUrl);
@@ -112,7 +112,7 @@ export async function generateOutreach(input) {
     .filter((l) => l !== null)
     .join("\n");
 
-  const system = buildSystem(LEVELS.includes(level) ? level : "company");
+  const system = buildSystem(LEVELS.includes(level) ? level : "company", String(senderName || "").trim().slice(0, 60));
   const result = process.env.OPENAI_API_KEY
     ? await draftWithOpenAI(system, userText)
     : await draftWithClaude(system, userText);

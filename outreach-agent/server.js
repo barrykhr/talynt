@@ -1,6 +1,7 @@
 // Local outreach agent: WhatsApp (via WhatsApp Web) + Claude research/drafting + a small web UI.
 import "dotenv/config";
 import fs from "fs";
+import crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
@@ -68,6 +69,20 @@ function requireReady(res) {
 
 // ---------- HTTP ----------
 const app = express();
+
+// Password gate: when APP_PASSWORD is set, the browser asks for it before showing anything.
+// Required when sharing the tool with a public link (npm run share).
+const APP_PASSWORD = process.env.APP_PASSWORD || "";
+const sha = (v) => crypto.createHash("sha256").update(v).digest();
+app.use((req, res, next) => {
+  if (!APP_PASSWORD) return next();
+  const [scheme, encoded] = (req.headers.authorization || "").split(" ");
+  const given = scheme === "Basic" && encoded ? Buffer.from(encoded, "base64").toString().split(":").slice(1).join(":") : "";
+  if (given && crypto.timingSafeEqual(sha(given), sha(APP_PASSWORD))) return next();
+  res.set("WWW-Authenticate", 'Basic realm="Outreach Agent"');
+  res.status(401).send("Password required. Use any username and the team password.");
+});
+
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(here, "public")));
 
