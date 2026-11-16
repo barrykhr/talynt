@@ -142,7 +142,8 @@ app.post("/api/send", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
+// Only this computer can open the page; others on your Wi-Fi cannot.
+app.listen(PORT, "127.0.0.1", () => {
   console.log(`Outreach agent UI: http://localhost:${PORT}`);
   console.log(`Drafting with: ${process.env.OPENAI_API_KEY ? "OpenAI (" + (process.env.OPENAI_MODEL || "gpt-5") + ")" : process.env.ANTHROPIC_API_KEY ? "Claude" : "NO API KEY SET - add one to .env"}`);
 });
