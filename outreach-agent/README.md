@@ -8,13 +8,14 @@ Nothing is sent without you clicking **Send** and confirming.
 
 ## Setup (about 10 minutes)
 
-You need Node.js 18+ and Google Chrome on your laptop, and an Anthropic API key
-(console.anthropic.com → API Keys).
+You need Node.js 18+ and an API key from either OpenAI (platform.openai.com → API keys)
+or Anthropic (console.anthropic.com → API Keys). Put one of them in `.env`; if both are
+set, OpenAI is used.
 
 ```bash
 cd outreach-agent
 npm install
-cp .env.example .env      # then fill in ANTHROPIC_API_KEY and your SENDER_* pitch
+cp .env.example .env      # then add your API key and your SENDER_* pitch
 npm start
 ```
 

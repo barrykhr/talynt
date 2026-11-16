@@ -1,8 +1,11 @@
 // Research a company on the web and draft a personalised WhatsApp outreach message.
+// Uses OpenAI if OPENAI_API_KEY is set in .env, otherwise Claude (ANTHROPIC_API_KEY).
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
-const client = new Anthropic();
 const MODEL = "claude-opus-5-5";
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5";
+let anthropic, openai;
 
 function senderProfile() {
   return [
@@ -54,11 +57,36 @@ export async function generateOutreach({ sourceMessage, companyName, notes }) {
     .filter((l) => l !== null)
     .join("\n");
 
+  const result = process.env.OPENAI_API_KEY
+    ? await draftWithOpenAI(userText)
+    : await draftWithClaude(userText);
+  return {
+    role: result.role || "",
+    otherRoles: result.other_roles || [],
+    companySummary: result.company_summary || "",
+    sources: result.sources || [],
+    message: result.message || "",
+  };
+}
+
+async function draftWithOpenAI(userText) {
+  openai ??= new OpenAI();
+  const response = await openai.responses.create({
+    model: OPENAI_MODEL,
+    instructions: SYSTEM,
+    input: userText,
+    tools: [{ type: "web_search" }],
+  });
+  return extractJson(response.output_text);
+}
+
+async function draftWithClaude(userText) {
+  anthropic ??= new Anthropic();
   const messages = [{ role: "user", content: userText }];
 
   // Server-side web search can pause long turns; resume up to a few times.
   for (let i = 0; i < 5; i++) {
-    const response = await client.beta.messages.create({
+    const response = await anthropic.beta.messages.create({
       model: MODEL,
       max_tokens: 16000,
       output_config: { effort: "medium" },
@@ -82,14 +110,7 @@ export async function generateOutreach({ sourceMessage, companyName, notes }) {
       .filter((b) => b.type === "text")
       .map((b) => b.text)
       .join("");
-    const result = extractJson(text);
-    return {
-      role: result.role || "",
-      otherRoles: result.other_roles || [],
-      companySummary: result.company_summary || "",
-      sources: result.sources || [],
-      message: result.message || "",
-    };
+    return extractJson(text);
   }
   throw new Error("Research took too many steps; try again.");
 }

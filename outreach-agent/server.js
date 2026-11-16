@@ -138,4 +138,7 @@ app.post("/api/send", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log(`Outreach agent UI: http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Outreach agent UI: http://localhost:${PORT}`);
+  console.log(`Drafting with: ${process.env.OPENAI_API_KEY ? "OpenAI (" + (process.env.OPENAI_MODEL || "gpt-5") + ")" : process.env.ANTHROPIC_API_KEY ? "Claude" : "NO API KEY SET - add one to .env"}`);
+});
