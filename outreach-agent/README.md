@@ -19,22 +19,24 @@ cp .env.example .env      # then add your API key and your SENDER_* pitch
 npm start
 ```
 
-Open http://localhost:3030, then on your phone go to WhatsApp → Settings → Linked devices
-→ Link a device and scan the QR code. The login is saved in `.wwebjs_auth/`, so you only
-scan once.
+Open http://localhost:3030.
 
-If Chrome isn't found, set `CHROME_PATH` in `.env` to your Chrome binary, for example
-`/Applications/Google Chrome.app/Contents/MacOS/Google Chrome` on a Mac.
+By default WhatsApp is **not linked** (safest). You paste the job post yourself, and the
+**Open in WhatsApp** button opens a chat with the number and your message typed in; you
+press send in WhatsApp. To let the tool read your chats and send directly instead, set
+`CONNECT_WHATSAPP=yes` in `.env`, restart, and scan the QR code (WhatsApp → Settings →
+Linked devices → Link a device).
 
 ## Using it
 
-1. **Chats**: click a chat (group or direct) on the left.
-2. **Pick the message**: click the job post. It fills "Selected message" (you can also paste).
-3. Type the **company name** and any notes, then click **Research & draft**.
-4. **Review**: check the role, the research summary and sources, and edit the draft.
-5. Enter the number with country code (e.g. `919876543210`) and click **Send on WhatsApp**.
+1. Paste the job post from WhatsApp into the first box.
+2. Enter the **company name** and/or its **LinkedIn company page link**. LinkedIn often
+   blocks automated reading, so paste the page's About section into Notes for best results.
+3. Click **Research & draft**, then check the role, research and sources, and edit the draft.
+4. Enter the number with country code (e.g. `919876543210`) and click **Open in WhatsApp**,
+   then press send in WhatsApp. Or click **Copy message**.
 
-Every send is logged to `sent-log.jsonl`.
+Every message you open or send is logged to `sent-log.jsonl`.
 
 ## Files
 

@@ -12,6 +12,11 @@
   header h1 { font-size:16px; margin:0; }
   #status { font-size:13px; color:var(--muted); }
   #status.ready { color:var(--ok); }
+  main.nowa { grid-template-columns: 1fr 1fr; }
+  main.nowa #chatsPanel { display:none; }
+  button.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); margin-right:8px; }
+  .waonly { display:none; }
+  main.wa .waonly { display:inline-block; }
   main { display:grid; grid-template-columns: 280px 1fr 1fr; gap:14px; padding:14px; height:calc(100vh - 54px); }
   section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px; overflow:auto; }
   h2 { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:0 0 10px; }
@@ -42,15 +47,15 @@
   <span id="status">Connecting…</span>
 </header>
 <main>
-  <section>
-    <h2>1 · WhatsApp chats</h2>
+  <section id="chatsPanel">
+    <h2>WhatsApp chats</h2>
     <div id="qr"></div>
     <div id="chats"></div>
   </section>
 
   <section>
-    <h2>2 · Pick the message</h2>
-    <div id="messages" class="hint">Choose a chat on the left, then click the message (job post) you want to respond to. Or paste one below.</div>
+    <h2>Job post &amp; company</h2>
+    <div id="messages" class="hint">Paste the WhatsApp message (job post) below. If WhatsApp is linked, you can also pick it from a chat on the left.</div>
     <label for="source">Selected message</label>
     <textarea id="source" rows="6" placeholder="Click a message above or paste a job post here"></textarea>
     <label for="company">Company name</label>
@@ -65,14 +70,17 @@
   </section>
 
   <section>
-    <h2>3 · Review &amp; send</h2>
+    <h2>Review &amp; send</h2>
     <div id="research" class="hint">The research summary and draft will appear here.</div>
     <label for="draft">Message (edit freely)</label>
     <textarea id="draft" rows="9"></textarea>
     <div class="hint"><span id="wc">0</span> words</div>
     <label for="phone">Send to (with country code)</label>
     <input id="phone" placeholder="e.g. 919876543210">
-    <button id="send" class="send">Send on WhatsApp</button>
+    <button id="openwa" class="send">Open in WhatsApp</button>
+    <button id="copy" class="ghost">Copy message</button>
+    <button id="send" class="ghost waonly">Send directly</button>
+    <div class="hint">"Open in WhatsApp" opens a chat with this number with your message typed in. Check it, then press send.</div>
     <div id="sendStatus"></div>
   </section>
 </main>
@@ -93,7 +101,8 @@ async function pollStatus() {
     const s = await api("/api/status");
     const st = $("status");
     st.className = s.state === "ready" ? "ready" : "";
-    st.textContent = { ready: "● WhatsApp connected", qr: "Scan the QR code to connect", starting: "Starting WhatsApp…", disconnected: "Disconnected — restart the server" }[s.state];
+    document.querySelector("main").className = s.state === "off" ? "nowa" : "wa";
+    st.textContent = { off: "Paste mode (WhatsApp not linked)", ready: "● WhatsApp connected", qr: "Scan the QR code to connect", starting: "Starting WhatsApp…", disconnected: "Disconnected — restart the server" }[s.state];
     $("qr").innerHTML = "";
     if (s.qr) {
       const img = document.createElement("img"); img.src = s.qr; $("qr").appendChild(img);
@@ -172,6 +181,24 @@ $("send").onclick = async () => {
   btn.disabled = false;
 };
 
+function phoneDigits() { return $("phone").value.replace(/\D/g, ""); }
+function logOpen() {
+  // Record that you opened it; the actual send happens in WhatsApp.
+  fetch("/api/log", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ phone: phoneDigits(), message: $("draft").value, companyName: $("company").value, linkedinUrl: $("linkedin").value, role: lastResult?.role }) }).catch(() => {});
+}
+$("openwa").onclick = () => {
+  const d = phoneDigits(), msg = $("draft").value.trim();
+  if (d.length < 8) return setMsg($("sendStatus"), "Enter the number with country code, e.g. 919876543210.", "err");
+  if (!msg) return setMsg($("sendStatus"), "The message is empty.", "err");
+  window.open(`https://wa.me/${d}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
+  logOpen();
+  setMsg($("sendStatus"), "Opened WhatsApp. Press send there.", "ok");
+};
+$("copy").onclick = async () => {
+  try { await navigator.clipboard.writeText($("draft").value); setMsg($("sendStatus"), "Copied ✓", "ok"); }
+  catch { $("draft").select(); setMsg($("sendStatus"), "Press Cmd+C (Mac) or Ctrl+C (Windows) to copy.", "hint"); }
+};
 function countWords() { $("wc").textContent = ($("draft").value.trim().match(/\S+/g) || []).length; }
 $("draft").oninput = countWords;
 pollStatus();

@@ -15,10 +15,15 @@ const LOG_FILE = path.join(here, "sent-log.jsonl");
 const PORT = Number(process.env.PORT || 3030);
 
 // ---------- WhatsApp ----------
-let waState = "starting"; // starting | qr | ready | disconnected
+// Off by default: you paste messages and send from your own WhatsApp.
+// Set CONNECT_WHATSAPP=yes in .env to link WhatsApp (QR scan) for chat browsing and direct sending.
+const CONNECT_WA = /^(yes|true|1)$/i.test(process.env.CONNECT_WHATSAPP || "");
+let waState = CONNECT_WA ? "starting" : "off"; // off | starting | qr | ready | disconnected
 let qrDataUrl = null;
+let wa = null;
 
-const wa = new Client({
+if (CONNECT_WA) {
+wa = new Client({
   authStrategy: new LocalAuth({ dataPath: path.join(here, ".wwebjs_auth") }),
   puppeteer: {
     headless: true,
@@ -47,10 +52,15 @@ wa.on("disconnected", (reason) => {
   console.error("WhatsApp disconnected:", reason);
 });
 wa.initialize();
+}
 
 function requireReady(res) {
   if (waState !== "ready") {
-    res.status(409).json({ error: "WhatsApp is not connected yet. Scan the QR code first." });
+    res.status(409).json({
+      error: CONNECT_WA
+        ? "WhatsApp is not connected yet. Scan the QR code first."
+        : "WhatsApp isn't linked. Use 'Open in WhatsApp' instead.",
+    });
     return false;
   }
   return true;
@@ -119,6 +129,15 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
+app.post("/api/log", (req, res) => {
+  const { phone, message, companyName, linkedinUrl, role } = req.body || {};
+  fs.appendFileSync(
+    LOG_FILE,
+    JSON.stringify({ at: new Date().toISOString(), via: "opened-in-whatsapp", phone, companyName, linkedinUrl, role, message }) + "\n",
+  );
+  res.json({ ok: true });
+});
+
 app.post("/api/send", async (req, res) => {
   if (!requireReady(res)) return;
   const { phone, message, companyName, linkedinUrl, role } = req.body || {};
@@ -145,5 +164,6 @@ app.post("/api/send", async (req, res) => {
 // Only this computer can open the page; others on your Wi-Fi cannot.
 app.listen(PORT, "127.0.0.1", () => {
   console.log(`Outreach agent UI: http://localhost:${PORT}`);
+  console.log(`WhatsApp: ${CONNECT_WA ? "linking (scan the QR)" : "not linked - paste messages, send with 'Open in WhatsApp'"}`);
   console.log(`Drafting with: ${process.env.OPENAI_API_KEY ? "OpenAI (" + (process.env.OPENAI_MODEL || "gpt-5") + ")" : process.env.ANTHROPIC_API_KEY ? "Claude" : "NO API KEY SET - add one to .env"}`);
 });
