@@ -169,8 +169,18 @@ app.post("/api/send", async (req, res) => {
 });
 
 // Only this computer can open the page; others on your Wi-Fi cannot.
-app.listen(PORT, "127.0.0.1", () => {
+const server = app.listen(PORT, "127.0.0.1", () => {
   console.log(`Outreach agent UI: http://localhost:${PORT}`);
   console.log(`WhatsApp: ${CONNECT_WA ? "linking (scan the QR)" : "not linked - paste messages, send with 'Open in WhatsApp'"}`);
   console.log(`Drafting with: ${process.env.OPENAI_API_KEY ? "OpenAI (" + (process.env.OPENAI_MODEL || "gpt-5") + ")" : process.env.ANTHROPIC_API_KEY ? "Claude" : "NO API KEY SET - add one to .env"}`);
+})
+server.on("error", (e) => {
+  if (e.code === "EADDRINUSE") {
+    console.error(`\nThe tool is already running (port ${PORT} is in use).`);
+    console.error(`Just open http://localhost:${PORT} in your browser,`);
+    console.error(`or stop the old copy with:  lsof -ti tcp:${PORT} | xargs kill   and run npm start again.\n`);
+    process.exit(1);
+  }
+  throw e;
 });
+
