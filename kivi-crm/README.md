@@ -1,8 +1,15 @@
 # KiviTronics CRM
 
-Internal CRM for the KiviTronics Consulting team: companies, contacts, the sales
-pipeline, hiring requirements and delivery, activities and follow-ups,
-spreadsheet import/export, reports, and per-user Gmail and Google Calendar.
+Internal CRM and outreach workspace for the KiviTronics Consulting team.
+
+- **Records:** leads, companies, contacts, the sales pipeline, hiring
+  requirements and delivery, and commercial agreements (MSA).
+- **Revenue:** pipeline, booked, earned, invoiced, realized and outstanding,
+  kept as separate measures.
+- **Research:** company research with per-claim sources and reviewable
+  outreach drafts, plus monitoring of public signals.
+- **Daily work:** tasks and follow-ups, imports and exports, reports, a website
+  lead inbox, and per-user Gmail and Google Calendar.
 
 A new installation is **genuinely empty**: there are no demo companies, sample
 people or placeholder users in the database. The first screen invites you to add
@@ -23,6 +30,9 @@ a company or import leads.
 | [docs/GOOGLE.md](docs/GOOGLE.md) | Gmail and Calendar: Google Cloud setup, scopes, verification, how sync behaves |
 | [docs/OPERATIONS.md](docs/OPERATIONS.md) | Backups and restore, exports, clearing development data, key rotation, logs |
 | [docs/SECURITY.md](docs/SECURITY.md) | Access model and how each common web risk is handled |
+| [docs/RESEARCH.md](docs/RESEARCH.md) | Research providers (ported from the outreach agent), evidence rules, drafts, monitoring sources and schedule |
+| [docs/REVENUE.md](docs/REVENUE.md) | Revenue definitions, Won/booked rules, invoices and partial payments |
+| [docs/LEAD_CAPTURE.md](docs/LEAD_CAPTURE.md) | Website form endpoint, embed snippet and spam protection |
 
 ## Quick start (local)
 
@@ -50,14 +60,31 @@ and print a warning.
 
 | Area | Status |
 |---|---|
-| Google Workspace sign-in, allowlist, Admin and Member roles, audit log | Works once Supabase and Google sign-in are configured (docs/SETUP.md) |
-| Companies, contacts, pipeline (list and board), requirements, activities and tasks, search, reports | Works |
-| Duplicate detection and merging; archive and restore; record history | Works |
-| CSV/XLSX import (mapping, preview, duplicate decisions, error report); CSV export | Works |
-| WhatsApp | Logged manually as an activity type and lead source. There is **no** WhatsApp API integration. |
-| Gmail: send from CRM records, metadata sync, review queue | Code is complete. **Inactive until** the Google Cloud OAuth client, `TOKEN_ENCRYPTION_KEY` and the service-role key are set. The Settings page says so clearly. |
-| Google Calendar: event sync, create meetings | Same as Gmail |
-| Scheduled background sync (every 30 min) | Needs `CRON_SECRET` and a host that runs crons (Vercel Pro for a 30-minute schedule) |
+| Google Workspace sign-in (linked by Google's stable account id), allowlist, Admin and Member roles, audit log | Works once Supabase and Google sign-in are configured (docs/SETUP.md) |
+| Leads, companies, contacts, opportunities (qualification, priority, nurture, Won gating), requirements, agreements | Works |
+| Pipeline board (drag and drop plus keyboard), saved views, no-next-action, lead inbox | Works |
+| Tasks: My tasks, Team tasks, Due today, Overdue, No next action; activity timeline | Works |
+| Revenue: placements, earned events, invoices, partial payments, credits, aging, yield, forecast | Works (operational reporting, not accounting) |
+| Import (CSV/XLSX, mapping, preview, skip/link/update/create decisions, row-level error report); CSV exports with IDs | Works |
+| Reports with definitions, date ranges and currencies; product and operations measures | Works |
+| Monitoring: Greenhouse, Lever, RSS, manual signals; review queue; in-app notifications | Code complete, using public sources with no keys. Runs on the schedule once `CRON_SECRET` is set. Not yet run against live boards from this environment. |
+| Company research and outreach drafts | Code complete. **Inactive until** `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` or `OUTREACH_AGENT_URL` is set. Not run against a live model here. |
+| Gmail and Calendar (send, sync with per-user privacy controls, meetings) | Code complete. **Inactive until** the Google Cloud OAuth client and `TOKEN_ENCRYPTION_KEY` are set |
+| Website lead capture endpoint | Off until `LEAD_CAPTURE_ENABLED=true` |
+| WhatsApp | Logged manually, and drafts can be copied for manual sending. There is **no** WhatsApp API integration. |
+
+Every integration shows its real status under Settings → Workspace and Research updates → Sources & jobs.
+
+## Starts empty
+
+- **No business data:** migrations create one row of default *settings* and
+  nothing else — no companies, contacts, revenue, research or users.
+- **Tested:** `tests/db/*` check that every business table is empty on a fresh
+  install.
+- **Development fixtures:** `npm run dev:seed` exists only for development. It
+  refuses to run unless `ALLOW_DEV_SEED=true` **and** the Supabase URL is local.
+- **Resetting local data:** see docs/OPERATIONS.md. There is no "delete
+  everything" control in the app.
 
 ## Project layout
 
@@ -68,6 +95,8 @@ src/app/(crm)/         every signed-in page (overview, companies, contacts, pipe
 src/app/api/           CSV export, import reports, Google OAuth connect/callback, cron sync, health
 src/lib/actions/       server actions — every mutation is validated and authorised here
 src/lib/google/        OAuth, encrypted token store, Gmail/Calendar clients, sync and matching
+src/lib/research/      research providers (ported outreach-agent logic), evidence rules, job runner
+src/lib/monitoring/    public-signal adapters (Greenhouse, Lever, RSS), SSRF-safe fetch, run engine
 src/lib/import/        spreadsheet parsing (no formula evaluation), mapping and duplicate planning
 src/components/        UI primitives, forms, timeline, import wizard
 scripts/               provision-user (first admin), dev-only seed and reset
@@ -84,6 +113,8 @@ tests/unit, tests/db   automated tests (see above)
 - The **sales stage** (New lead → … → Won, plus Nurture and Lost) is tracked on
   opportunities. The **delivery status** (New requirement → … → Placed, On hold,
   Closed / filled) is tracked on requirements. **MSA status** is tracked on the company.
+- **MSA status** comes only from agreement records. **Won** requires a signed MSA and a live,
+  client-accepted requirement (enforced in SQL). See docs/REVENUE.md.
 - Every company, contact, opportunity, requirement and task has **one accountable
   owner**. Only the current owner or an admin can reassign it; anyone can take an
   unassigned record. The database enforces this, not just the UI.

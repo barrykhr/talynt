@@ -68,8 +68,14 @@ export const ACTIVITY_TYPES = labels([
   ["event", "Event"],
   ["note", "Note"],
   ["task", "Task"],
+  ["research_update", "Research update"],
+  ["requirement_milestone", "Requirement milestone"],
+  ["invoice", "Invoice"],
+  ["payment", "Payment"],
 ] as const);
 export type ActivityType = (typeof ACTIVITY_TYPES.values)[number];
+/** Types a person logs by hand; the others are written by the system. */
+export const MANUAL_ACTIVITY_TYPES: ActivityType[] = ["call", "email", "meeting", "whatsapp", "event", "note", "task"];
 
 export const CLIENT_STATUS_LABEL = {
   active_client: "Active client",
@@ -81,3 +87,43 @@ export type ClientStatus = keyof typeof CLIENT_STATUS_LABEL;
 export function isOneOf<T extends string>(values: readonly T[], v: unknown): v is T {
   return typeof v === "string" && (values as readonly string[]).includes(v);
 }
+
+export const PRIORITIES = labels([["high", "High"], ["normal", "Normal"], ["low", "Low"]] as const);
+export type Priority = (typeof PRIORITIES.values)[number];
+
+export const FEE_BASES = labels([
+  ["percent_first_year", "% of first-year compensation"],
+  ["fixed_fee", "Fixed placement fee"],
+  ["retainer_milestone", "Retainer / milestone fee"],
+  ["contract_margin", "Contract staffing margin"],
+  ["other", "Other"],
+] as const);
+export type FeeBasis = (typeof FEE_BASES.values)[number];
+
+export const AGREEMENT_KINDS = labels([["msa", "MSA"], ["sow", "Statement of work"], ["rate_card", "Rate card"], ["nda", "NDA"], ["other", "Other"]] as const);
+export const AGREEMENT_STATUSES = labels([
+  ["not_started", "Not started"], ["in_discussion", "In discussion"], ["signed", "Signed"], ["expired", "Expired"], ["terminated", "Terminated"],
+] as const);
+
+export const PLACEMENT_STATUSES = labels([["offer_accepted", "Offer accepted"], ["joined", "Joined"], ["fell_through", "Fell through"]] as const);
+
+export const SIGNAL_TYPES = labels([
+  ["hiring", "New job postings"], ["job_volume_change", "Job-posting volume change"], ["announcement", "Announcement"],
+  ["funding", "Funding"], ["expansion", "Expansion / new location"], ["leadership", "Leadership change"], ["other", "Other"],
+] as const);
+export type SignalType = (typeof SIGNAL_TYPES.values)[number];
+
+export const EVIDENCE_LABEL = { verified_fact: "Verified public fact", reported_claim: "Source-reported claim", inference: "Inference" } as const;
+export const CONFIDENCE_LABEL = { high: "High confidence", medium: "Medium confidence", low: "Low confidence" } as const;
+
+export const DEFAULT_CURRENCY = "INR";
+
+/** Plain-language definitions shown next to every revenue number. */
+export const REVENUE_DEFINITIONS = {
+  pipeline: "Estimated value of open opportunities (not Won or Lost). Weighted = value × stage probability, or the deal's own probability if set.",
+  booked: "Value of live requirements the client has accepted, with agreed commercial terms, at a company with a signed MSA (conditions set by an admin). An MSA alone is not booked revenue.",
+  earned: "Revenue whose contractual milestone has been met — e.g. a placement fee once the candidate joins (or accepts, per settings). Not the same as invoiced or paid.",
+  invoiced: "Amount on invoices issued in the period (cancelled invoices excluded).",
+  realized: "Money actually received from customers in the period. An invoice or placement on its own is never realized revenue.",
+  outstanding: "Invoiced amount not yet paid or credited, as of today, regardless of the date range.",
+} as const;

@@ -4,14 +4,19 @@ import { requireMemberPage } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getTeam, getTeamMap, displayName } from "@/lib/data/team";
 import { isUuid, likePattern, pageParam, pageRange, param, withParams, type SearchParams } from "@/lib/data/query";
-import { Badge, Card, EmptyState, LinkButton, PageHeader, Pagination, Table, Tabs, Td, Th, buttonClass, cx } from "@/components/ui";
+import { Badge, Card, EmptyState, LinkButton, PageHeader, Pagination, Table, Tabs, Td, Th, cx } from "@/components/ui";
 import { FollowUp, MsaBadge, Owner, SourceText, StageBadge } from "@/components/crm";
 import { FilterBar } from "@/components/filter-bar";
 import { StageMover } from "@/components/stage-mover";
 import { IconDownload, IconPipeline, IconPlus } from "@/components/icons";
-import { LEAD_SOURCES, MSA_STATUSES, OPPORTUNITY_STAGES, PAGE_SIZE, PIPELINE_FLOW, type MsaStatus, type OpportunityStage } from "@/lib/constants";
-import { addDays, formatRelative, todayInZone } from "@/lib/time";
-import type { Opportunity } from "@/lib/types";
+import { LEAD_SOURCES, MSA_STATUSES, OPPORTUNITY_STAGES, PAGE_SIZE, type MsaStatus } from "@/lib/constants";
+import { addDays, daysUntil, formatDate, formatRelative, todayInZone } from "@/lib/time";
+import { formatMoney } from "@/lib/money";
+import { initials } from "@/lib/data/team";
+import { PipelineBoard, type BoardCard } from "@/components/pipeline-board";
+import { InlineAction } from "@/components/forms";
+import { setWebSubmissionStatus } from "@/lib/actions/leads";
+import type { Opportunity, WebSubmission } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Pipeline" };
 
@@ -19,6 +24,8 @@ const SAVED = {
   open: "All open",
   mine: "My pipeline",
   follow_ups: "Follow-ups due",
+  no_next_action: "No next action",
+  inbox: "Lead inbox",
   unassigned: "Unassigned",
   msa_pending: "MSA pending",
   won: "Won",
@@ -50,7 +57,8 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
     .from("opportunities")
     .select(needsCompanyFilter ? "*, companies!inner(name, msa_status)" : "*, companies(name, msa_status)", { count: "exact" });
   query = saved === "archived" ? query.not("archived_at", "is", null) : query.is("archived_at", null);
-  if (saved === "open" || saved === "mine" || saved === "follow_ups" || saved === "unassigned" || saved === "msa_pending") {
+  if (saved === "no_next_action") query = query.is("next_follow_up_on", null);
+  if (saved === "open" || saved === "mine" || saved === "follow_ups" || saved === "unassigned" || saved === "msa_pending" || saved === "no_next_action" || saved === "inbox") {
     if (!stage) query = query.not("stage", "in", "(won,lost)");
   }
   if (saved === "mine") query = query.eq("owner_id", member.id);
@@ -76,10 +84,34 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
     query = query.order("next_follow_up_on", { ascending: true, nullsFirst: false }).order("updated_at", { ascending: false }).range(from, to);
   }
 
-  const [{ data, count, error }, teamList, team, { count: total }] = await Promise.all([
+  const [{ data, count, error }, teamList, team, { count: total }, { data: inboxData }, { data: pipeData }] = await Promise.all([
     query, getTeam(), getTeamMap(), supabase.from("opportunities").select("id", { count: "exact", head: true }),
+    supabase.from("web_submissions").select("*").eq("status", "new").order("received_at", { ascending: false }).limit(50),
+    supabase.from("opportunity_pipeline").select("opportunity_id, probability").limit(1000),
   ]);
-  const rows = (data ?? []) as unknown as Row[];
+  const inbox = (inboxData ?? []) as WebSubmission[];
+  const probability = new Map(((pipeData ?? []) as { opportunity_id: string; probability: number }[]).map((p) => [p.opportunity_id, p.probability]));
+  let rows = (data ?? []) as unknown as Row[];
+  if (saved === "no_next_action" && rows.length) {
+    // Exclude deals with an open task — that counts as a next action.
+    const { data: withTask } = await supabase.from("activities").select("opportunity_id").eq("type", "task").is("completed_at", null)
+      .is("archived_at", null).in("opportunity_id", rows.map((r) => r.id));
+    const has = new Set((withTask ?? []).map((t: { opportunity_id: string }) => t.opportunity_id));
+    rows = rows.filter((r) => !has.has(r.id));
+  }
+  const ageDays = (iso: string) => Math.max(0, -daysUntil(iso.slice(0, 10), today));
+  const boardCards: BoardCard[] = rows.map((o) => {
+    const d = o.next_follow_up_on ? daysUntil(o.next_follow_up_on, today) : null;
+    const m = team.get(o.owner_id ?? "");
+    return {
+      id: o.id, title: o.title, company: o.companies?.name ?? "", stage: o.stage, ownerInitials: initials(m), ownerName: displayName(m),
+      value: o.estimated_value !== null ? formatMoney(o.estimated_value, o.currency, { compact: true }) : null,
+      followUp: o.next_follow_up_on ? (d! < 0 ? `Overdue ${-d!}d` : d === 0 ? "Due today" : formatDate(o.next_follow_up_on, { withYear: false })) : null,
+      followUpTone: d === null ? "none" : d < 0 ? "danger" : d <= 1 ? "warn" : "neutral",
+      stageAgeDays: ageDays(o.stage_changed_at), priority: o.priority,
+      noNextAction: !o.next_follow_up_on && o.stage !== "won" && o.stage !== "lost",
+    };
+  });
   const filtered = Boolean(q || owner || source || stage || follow || msa || location || saved !== "open");
   const keep = { view: board ? "board" : "", saved: saved === "open" ? "" : saved };
   const viewHref = (b: boolean) => withParams("/pipeline", sp, { view: b ? "board" : null, page: null });
@@ -96,20 +128,21 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
               <Link href={viewHref(true)} aria-current={board ? "page" : undefined} className={cx("rounded px-2.5 py-1 text-[13px]", board ? "bg-sunken font-medium" : "text-muted")}>Board</Link>
             </div>
             <LinkButton href="/api/export/opportunities"><IconDownload /> Export</LinkButton>
-            <LinkButton variant="primary" href="/pipeline/new"><IconPlus /> New opportunity</LinkButton>
+            <LinkButton href="/pipeline/new">New opportunity</LinkButton>
+            <LinkButton variant="primary" href="/leads/new"><IconPlus /> Add a lead</LinkButton>
           </>
         }
       />
 
-      {(total ?? 0) === 0 ? (
+      {saved === "inbox" ? null : (total ?? 0) === 0 && inbox.length === 0 ? (
         <div className="card">
           <EmptyState icon={<IconPipeline />} title="Your pipeline is empty"
             description="Create an opportunity for a company you're pursuing. Move it through Researching, Contacted, Qualified and Proposal / MSA to Won."
-            actions={<><LinkButton variant="primary" href="/pipeline/new"><IconPlus /> Add your first opportunity</LinkButton><LinkButton href="/import">Import leads</LinkButton></>} />
+            actions={<><LinkButton variant="primary" href="/leads/new"><IconPlus /> Add a lead</LinkButton><LinkButton href="/import">Import a spreadsheet</LinkButton></>} />
         </div>
       ) : (
         <>
-          <Tabs label="Saved views" current={saved} tabs={(Object.keys(SAVED) as Saved[]).map((s) => ({ key: s, label: SAVED[s], href: withParams("/pipeline", {}, { saved: s === "open" ? null : s, view: board ? "board" : null }) }))} />
+          <Tabs label="Saved views" current={saved} tabs={(Object.keys(SAVED) as Saved[]).map((s) => ({ key: s, label: SAVED[s], href: withParams("/pipeline", {}, { saved: s === "open" ? null : s, view: board ? "board" : null }), count: s === "inbox" ? inbox.length : undefined }))} />
           <FilterBar
             action="/pipeline"
             keep={keep}
@@ -129,11 +162,11 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
             : rows.length === 0 ? (
               <div className="card"><EmptyState compact icon={<IconPipeline />} title={filtered ? "Nothing matches these filters" : "No opportunities here"} /></div>
             ) : board ? (
-              <Board rows={rows} team={team} />
+              <PipelineBoard cards={boardCards} />
             ) : (
               <Card bodyClassName="p-0">
                 <Table caption="Opportunities">
-                  <thead><tr><Th>Opportunity</Th><Th>Stage</Th><Th>Owner</Th><Th>Next follow-up</Th><Th className="hidden lg:table-cell">Source</Th><Th className="hidden md:table-cell">Last activity</Th><Th className="hidden xl:table-cell">Move</Th></tr></thead>
+                  <thead><tr><Th>Opportunity</Th><Th>Stage</Th><Th>Owner</Th><Th>Next action</Th><Th className="hidden lg:table-cell text-right">Value</Th><Th className="hidden md:table-cell">Last activity</Th><Th className="hidden xl:table-cell">Move</Th></tr></thead>
                   <tbody>
                     {rows.map((o) => (
                       <tr key={o.id} className="hover:bg-sunken/40">
@@ -152,8 +185,12 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
                           </div>
                         </Td>
                         <Td><Owner member={team.get(o.owner_id ?? "")} /></Td>
-                        <Td><FollowUp date={o.next_follow_up_on} closed={o.stage === "won" || o.stage === "lost"} /></Td>
-                        <Td className="hidden lg:table-cell"><SourceText source={o.source} /></Td>
+                        <Td>
+                          {!o.next_follow_up_on && o.stage !== "won" && o.stage !== "lost" ? <Badge tone="warn">No next action</Badge> : <FollowUp date={o.next_follow_up_on} closed={o.stage === "won" || o.stage === "lost"} />}
+                          {o.next_action ? <div className="max-w-[200px] truncate text-xs text-muted">{o.next_action}</div> : null}
+                          <div className="text-[11px] text-faint">{ageDays(o.stage_changed_at)}d in stage</div>
+                        </Td>
+                        <Td className="hidden text-right lg:table-cell tabular-nums">{o.estimated_value !== null ? <>{formatMoney(o.estimated_value, o.currency)}<div className="text-[11px] text-faint">{probability.get(o.id) ?? 0}%</div></> : <span className="text-faint">—</span>}<div className="text-[11px] text-faint"><SourceText source={o.source} /></div></Td>
                         <Td className="hidden text-muted md:table-cell">{formatRelative(o.last_activity_at)}</Td>
                         <Td className="hidden xl:table-cell">{saved !== "archived" ? <StageMover id={o.id} stage={o.stage} compact /> : null}</Td>
                       </tr>
@@ -165,47 +202,29 @@ export default async function PipelinePage({ searchParams }: { searchParams: Pro
             )}
         </>
       )}
+      {saved === "inbox" ? (
+        <Card title={`Website enquiries · ${inbox.length}`}>
+          {inbox.length === 0 ? <EmptyState compact icon={<IconPipeline />} title="Inbox is empty" description="Enquiries from the website form land here for a person to review. See docs/LEAD_CAPTURE.md to connect the form." /> : (
+            <ul className="divide-y divide-line">
+              {inbox.map((w) => (
+                <li key={w.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <div className="font-medium">{w.company_name ?? "(no company given)"} · {w.full_name}</div>
+                    <div className="text-xs text-muted">{w.email}{w.phone ? ` · ${w.phone}` : ""} · received {formatRelative(w.received_at)}</div>
+                    {w.role_needed ? <div className="mt-1 text-sm">Hiring: {w.role_needed}{w.hiring_volume ? ` × ${w.hiring_volume}` : ""}{w.location ? ` · ${w.location}` : ""}</div> : null}
+                    {w.message ? <p className="mt-1 whitespace-pre-wrap text-sm text-ink-soft">{w.message.slice(0, 400)}</p> : null}
+                  </div>
+                  <div className="flex gap-2">
+                    <LinkButton size="sm" variant="primary" href={`/leads/new?submission=${w.id}`}>Convert to lead</LinkButton>
+                    <InlineAction action={setWebSubmissionStatus} hidden={{ id: w.id, status: "dismissed" }}>Dismiss</InlineAction>
+                    <InlineAction action={setWebSubmissionStatus} hidden={{ id: w.id, status: "spam" }}>Spam</InlineAction>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      ) : null}
     </>
-  );
-}
-
-function Board({ rows, team }: { rows: Row[]; team: Awaited<ReturnType<typeof getTeamMap>> }) {
-  const columns: OpportunityStage[] = [...PIPELINE_FLOW, "nurture", "lost"];
-  const byStage = new Map<OpportunityStage, Row[]>(columns.map((c) => [c, []]));
-  for (const r of rows) byStage.get(r.stage)?.push(r);
-  const visible = columns.filter((c) => (byStage.get(c)?.length ?? 0) > 0 || PIPELINE_FLOW.includes(c));
-  return (
-    <div className="-mx-4 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6">
-      <div className="flex min-w-max gap-3">
-        {visible.map((stage) => {
-          const items = byStage.get(stage) ?? [];
-          return (
-            <section key={stage} aria-label={`${OPPORTUNITY_STAGES.label[stage]} — ${items.length}`} className="flex w-[260px] shrink-0 flex-col rounded-lg border border-line bg-sunken/50">
-              <header className="flex items-center justify-between border-b border-line px-3 py-2">
-                <h2 className="text-[13px] font-semibold">{OPPORTUNITY_STAGES.label[stage]}</h2>
-                <Badge>{items.length}</Badge>
-              </header>
-              <ul className="flex flex-1 flex-col gap-2 p-2">
-                {items.length === 0 ? <li className="px-1 py-4 text-center text-xs text-faint">Empty</li> : null}
-                {items.map((o) => (
-                  <li key={o.id} className="rounded-md border border-line bg-surface p-2.5 shadow-xs">
-                    <Link href={`/pipeline/${o.id}`} className="block text-sm font-medium leading-snug hover:underline">{o.title}</Link>
-                    <div className="mt-0.5 truncate text-xs text-muted">{o.companies?.name}</div>
-                    <div className="mt-2 flex items-center justify-between gap-2">
-                      <Owner member={team.get(o.owner_id ?? "")} />
-                      <FollowUp date={o.next_follow_up_on} closed={o.stage === "won" || o.stage === "lost"} />
-                    </div>
-                    <details className="mt-2">
-                      <summary className={buttonClass("ghost", "sm", "w-full cursor-pointer justify-start")}>Move…</summary>
-                      <div className="pt-2"><StageMover id={o.id} stage={o.stage} compact /></div>
-                    </details>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          );
-        })}
-      </div>
-    </div>
   );
 }

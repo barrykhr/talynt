@@ -11,6 +11,9 @@ import {
   type ClientStatus, type LeadSource, type MsaStatus, type OpportunityStage, type RequirementStatus,
 } from "@/lib/constants";
 import { addDays, formatDate, todayInZone } from "@/lib/time";
+import { formatMoney } from "@/lib/money";
+import { REVENUE_DEFINITIONS } from "@/lib/constants";
+import Link from "next/link";
 
 export const metadata: Metadata = { title: "Reports" };
 
@@ -22,6 +25,20 @@ interface Report {
   client_status: Partial<Record<ClientStatus, number>>;
   requirement_status: { status: RequirementStatus; count: number; volume: number; filled: number }[];
   msa_status: Partial<Record<MsaStatus, number>>;
+}
+
+interface Ops {
+  time_in_stage_days: Record<string, { avg_days: number; samples: number }>;
+  open_with_owner_and_follow_up_pct: number | null;
+  open_count: number;
+  no_next_action: number;
+  median_hours_to_first_touch: number | null;
+  leads_without_first_touch: number;
+  imports: { rows: number; duplicates: number; failed: number; skipped: number };
+  requirements_by_location: { location: string; count: number; volume: number }[];
+  signals: { new: number; accepted: number; dismissed: number; review_rate_pct: number | null };
+  research: { companies_researched: number; stale_over_90_days: number; findings_pending: number };
+  monitors: { enabled: number; erroring: number; stale: number };
 }
 
 const pct = (n: number, d: number) => (d > 0 ? `${Math.round((n / d) * 100)}%` : "—");
@@ -43,10 +60,14 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const to = isDate(param(sp, "to")) ? param(sp, "to") : today;
   const owner = isUuid(param(sp, "owner")) ? param(sp, "owner") : "";
   const supabase = await createClient();
-  const [{ data, error }, teamList, team] = await Promise.all([
+  const [{ data, error }, teamList, team, { data: opsData }, { data: revData }] = await Promise.all([
     supabase.rpc("report_summary", { p_from: from, p_to: to, p_owner: owner || null, p_today: today }),
     getTeam(), getTeamMap(),
+    supabase.rpc("report_operations", { p_from: from, p_to: to, p_today: today }),
+    supabase.rpc("revenue_summary", { p_from: from, p_to: to, p_owner: owner || null }),
   ]);
+  const ops = (opsData ?? null) as Ops | null;
+  const rev = (revData ?? {}) as Record<string, Record<string, number>>;
   const r = (data ?? null) as Report | null;
   const ownerLabel = owner ? displayName(team.get(owner)) : "Everyone";
 
@@ -175,6 +196,76 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                 })}
               </tbody>
             </Table>
+          </Card>
+
+          {ops ? (
+            <>
+              <Card title="Follow-up discipline (current)" id="discipline">
+                <dl className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {([
+                    ["Open deals with owner + next follow-up", ops.open_with_owner_and_follow_up_pct === null ? "—" : `${ops.open_with_owner_and_follow_up_pct}%`, `${ops.open_count} open opportunities`],
+                    ["No next action", String(ops.no_next_action), "No follow-up date and no open task"],
+                    ["Median time to first touch", ops.median_hours_to_first_touch === null ? "—" : `${ops.median_hours_to_first_touch} h`, "Lead created → first logged activity or research, created in range"],
+                    ["Leads never touched", String(ops.leads_without_first_touch), "Created in range"],
+                  ] as const).map(([l, v, h]) => (
+                    <div key={l} className="rounded-md bg-sunken/60 p-3"><dt className="text-xs text-muted">{l}</dt><dd className="text-lg font-semibold tabular-nums">{v}</dd><p className="text-[11px] text-faint">{h}</p></div>
+                  ))}
+                </dl>
+                <p className="mt-3 text-xs"><Link className="link" href="/pipeline?saved=no_next_action">Open the no-next-action list</Link></p>
+              </Card>
+
+              <Card title="Average time in stage" bodyClassName="p-0" id="time-in-stage">
+                <p className="px-4 pt-3 text-xs text-muted">From stage history of opportunities created in range; the current stage counts up to today.</p>
+                <Table caption="Time in stage">
+                  <thead><tr><Th>Stage</Th><Th className="text-right">Average days</Th><Th className="text-right">Samples</Th></tr></thead>
+                  <tbody>{OPPORTUNITY_STAGES.values.map((st) => (
+                    <tr key={st}><Td>{OPPORTUNITY_STAGES.label[st]}</Td><Td className="text-right tabular-nums">{ops.time_in_stage_days[st]?.avg_days ?? "—"}</Td><Td className="text-right tabular-nums">{ops.time_in_stage_days[st]?.samples ?? 0}</Td></tr>
+                  ))}</tbody>
+                </Table>
+              </Card>
+
+              <div className="grid gap-6 lg:grid-cols-2">
+                <Card title="Live requirements by location (current)" bodyClassName="p-0">
+                  <Table caption="Requirements by location">
+                    <thead><tr><Th>Location</Th><Th className="text-right">Requirements</Th><Th className="text-right">Hiring volume</Th></tr></thead>
+                    <tbody>{ops.requirements_by_location.length === 0 ? <tr><Td className="text-muted">No live requirements.</Td></tr> : ops.requirements_by_location.map((r) => (
+                      <tr key={r.location}><Td>{r.location}</Td><Td className="text-right tabular-nums">{r.count}</Td><Td className="text-right tabular-nums">{r.volume}</Td></tr>
+                    ))}</tbody>
+                  </Table>
+                </Card>
+                <Card title="Research & signals">
+                  <dl className="grid grid-cols-2 gap-3 text-sm">
+                    <div><dt className="text-xs text-muted">Signals first seen in range</dt><dd>{ops.signals.new} new · {ops.signals.accepted} accepted · {ops.signals.dismissed} dismissed</dd></div>
+                    <div><dt className="text-xs text-muted">Signal review rate</dt><dd>{ops.signals.review_rate_pct === null ? "—" : `${ops.signals.review_rate_pct}%`}</dd></div>
+                    <div><dt className="text-xs text-muted">Companies researched in range</dt><dd>{ops.research.companies_researched}</dd></div>
+                    <div><dt className="text-xs text-muted">Research older than 90 days</dt><dd>{ops.research.stale_over_90_days} compan{ops.research.stale_over_90_days === 1 ? "y" : "ies"}</dd></div>
+                    <div><dt className="text-xs text-muted">Findings waiting for review</dt><dd>{ops.research.findings_pending}</dd></div>
+                    <div><dt className="text-xs text-muted">Monitors (now)</dt><dd>{ops.monitors.enabled} on · {ops.monitors.erroring} failing · {ops.monitors.stale} stale</dd></div>
+                  </dl>
+                  <p className="mt-3 text-xs"><Link className="link" href="/research">Review signals and findings</Link></p>
+                </Card>
+              </div>
+
+              <Card title="Imports in range">
+                <p className="text-sm">{ops.imports.rows} rows · {ops.imports.duplicates} flagged as possible duplicates ({pct(ops.imports.duplicates, ops.imports.rows)}) · {ops.imports.failed} failed ({pct(ops.imports.failed, ops.imports.rows)}) · {ops.imports.skipped} skipped</p>
+                <p className="mt-1 text-xs"><Link className="link" href="/import">Import history and row reports</Link></p>
+              </Card>
+            </>
+          ) : null}
+
+          <Card title="Revenue in range" id="revenue">
+            {Object.keys(rev).length === 0 ? <p className="text-sm text-faint">No revenue records yet.</p> : Object.entries(rev).map(([c, v]) => (
+              <div key={c} className="mb-3">
+                <div className="mb-1 text-xs font-medium text-muted">{c}</div>
+                <dl className="grid grid-cols-2 gap-2 text-sm md:grid-cols-6">
+                  {([["Pipeline (weighted)", v.pipeline_weighted, REVENUE_DEFINITIONS.pipeline], ["Booked", v.booked, REVENUE_DEFINITIONS.booked], ["Earned", v.earned, REVENUE_DEFINITIONS.earned],
+                    ["Invoiced", v.invoiced, REVENUE_DEFINITIONS.invoiced], ["Realized", v.collected, REVENUE_DEFINITIONS.realized], ["Outstanding (today)", v.outstanding, REVENUE_DEFINITIONS.outstanding]] as const).map(([l, val, d]) => (
+                    <div key={l} title={d}><dt className="text-xs text-muted">{l}</dt><dd className="tabular-nums">{formatMoney(val, c)}</dd></div>
+                  ))}
+                </dl>
+              </div>
+            ))}
+            <p className="text-xs"><Link className="link" href="/revenue">Forecast vs collected, payment aging and yield</Link> · hover a figure for its definition</p>
           </Card>
         </div>
       )}

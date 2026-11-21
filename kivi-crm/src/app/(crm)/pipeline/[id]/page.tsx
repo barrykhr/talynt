@@ -12,6 +12,10 @@ import { ConfirmAction, Disclosure, InlineAction } from "@/components/forms";
 import { ActivityForm } from "@/components/record-forms";
 import { StageMover } from "@/components/stage-mover";
 import { CommunicationPanel } from "@/components/communication";
+import { ResearchPanel } from "@/components/research-panel";
+import { RevenueRollup } from "@/components/revenue";
+import { formatMoney } from "@/lib/money";
+import { PRIORITIES } from "@/lib/constants";
 import { IconPlus } from "@/components/icons";
 import { setOpportunityArchived } from "@/lib/actions/opportunities";
 import { setMsaStatus } from "@/lib/actions/companies";
@@ -36,6 +40,11 @@ export default async function OpportunityPage({ params }: { params: Promise<{ id
   if (!data) notFound();
   const opp = data as Opportunity;
 
+  const [{ data: wonData }, { data: pipeRow }] = await Promise.all([
+    supabase.rpc("opportunity_won_conditions", { p_opportunity: id }),
+    supabase.from("opportunity_pipeline").select("probability, probability_source, weighted_value").eq("opportunity_id", id).maybeSingle(),
+  ]);
+  const won = ((wonData ?? []) as { msa_signed: boolean; accepted_live_requirements: number }[])[0] ?? { msa_signed: false, accepted_live_requirements: 0 };
   const [companyRes, contactLinks, reqsRes, actsRes, histRes, team, teamOpts] = await Promise.all([
     supabase.from("company_overview").select("*").eq("id", opp.company_id).maybeSingle(),
     supabase.from("opportunity_contacts").select("contact_id").eq("opportunity_id", id),
@@ -79,6 +88,21 @@ export default async function OpportunityPage({ params }: { params: Promise<{ id
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-6">
+          {!archived && !closed ? (
+            <Card title="Next action">
+              {opp.next_action || opp.next_follow_up_on ? (
+                <p className="text-sm">{opp.next_action ?? "Follow up"} {opp.next_follow_up_on ? <FollowUp date={opp.next_follow_up_on} /> : <span className="text-warn">· no date set</span>}</p>
+              ) : <p className="text-sm text-warn">No next action. Edit the opportunity to set one, or add a task below.</p>}
+              {opp.stage === "nurture" ? <p className="mt-2 text-sm text-muted">Nurture: {opp.nurture_reason}{opp.revisit_on ? ` · revisit ${formatDate(opp.revisit_on)}` : ""}</p> : null}
+            </Card>
+          ) : null}
+          <Card title="Won conditions">
+            <p className="mb-2 text-xs text-muted">An opportunity can only be marked Won when both are true. The stage label alone never decides it.</p>
+            <ul className="space-y-1 text-sm">
+              <li className={won.msa_signed ? "text-ok" : "text-muted"}>{won.msa_signed ? "✓" : "○"} Company MSA signed {!won.msa_signed && company ? <Link className="link text-xs" href={`/companies/${company.id}#agreements`}>manage agreements</Link> : null}</li>
+              <li className={won.accepted_live_requirements > 0 ? "text-ok" : "text-muted"}>{won.accepted_live_requirements > 0 ? "✓" : "○"} {won.accepted_live_requirements} live requirement(s) the client has accepted</li>
+            </ul>
+          </Card>
           {!archived ? (
             <Card title="Move stage">
               <div className="max-w-md"><StageMover id={id} stage={opp.stage} /></div>
@@ -89,6 +113,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ id
             actions={!archived ? <Disclosure summary={<><IconPlus /> Log activity</>}><ActivityForm links={{ opportunity_id: id, company_id: opp.company_id }} contacts={contacts.map((c) => ({ value: c.id, label: c.full_name }))} team={teamOpts} defaultOwner={member.id} back={back} /></Disclosure> : null}>
             <ActivityTimeline activities={activities} team={team} links={links} back={back} currentUserId={member.id} />
           </Card>
+          {!archived && company ? <ResearchPanel companyId={company.id} opportunityId={id} contacts={contacts.map((c) => ({ value: c.id, label: c.full_name }))} member={member} back={back} /> : null}
           <Card title={`Requirements from this deal · ${reqs.length}`} actions={!archived ? <LinkButton size="sm" href={`/requirements/new?company=${opp.company_id}&opportunity=${id}`}><IconPlus /> New</LinkButton> : null}>
             {reqs.length === 0 ? <p className="text-sm text-muted">Delivery is tracked separately from the sales stage. Add a requirement when the client shares a role.</p> : (
               <ul className="divide-y divide-line">
@@ -106,7 +131,14 @@ export default async function OpportunityPage({ params }: { params: Promise<{ id
           <Card title="Details">
             <DescriptionList items={[
               { label: "Owner", value: <Owner member={team.get(opp.owner_id ?? "")} /> },
+              { label: "Priority", value: PRIORITIES.label[opp.priority] },
               { label: "Next follow-up", value: <FollowUp date={opp.next_follow_up_on} closed={closed} /> },
+              { label: "Estimated value", value: opp.estimated_value !== null ? <>{formatMoney(opp.estimated_value, opp.currency)}{pipeRow ? <span className="block text-xs text-muted">{pipeRow.probability}% ({pipeRow.probability_source}) → {formatMoney(pipeRow.weighted_value, opp.currency)} weighted</span> : null}</> : "Not set" },
+              { label: "Expected close", value: formatDate(opp.expected_close_on) },
+              { label: "Decision-maker", value: contacts.find((c) => c.id === opp.decision_maker_contact_id)?.full_name ?? "Not identified" },
+              { label: "Hiring timing", value: opp.hiring_timing ?? "—" },
+              { label: "Fee basis discussed", value: opp.fee_basis_note ?? "—" },
+              { label: "Next agreed step", value: opp.next_agreed_step ?? "—" },
               { label: "Hiring need", value: opp.hiring_need ?? "—" },
               { label: "Volume", value: opp.hiring_volume ?? "—" },
               { label: "Location", value: opp.location ?? "—" },
@@ -142,6 +174,7 @@ export default async function OpportunityPage({ params }: { params: Promise<{ id
             <CommunicationPanel member={member} links={{ opportunity_id: id, company_id: opp.company_id }} back={back}
               defaultTo={contacts.find((c) => c.email)?.email ?? ""} recipients={contacts.filter((c) => c.email).map((c) => ({ value: c.email!, label: c.full_name }))} />
           ) : null}
+          <Card title="Revenue from linked requirements"><RevenueRollup opportunityId={id} /></Card>
           <Card title="Notes"><NotesText text={opp.notes} /></Card>
           <Card title="Stage & owner history"><HistoryList entries={history} team={team} /></Card>
         </aside>

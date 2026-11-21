@@ -126,7 +126,8 @@ export function normalizeRow(
   const stageRaw = get("stage");
   const stage = stageRaw ? normalizeStage(stageRaw) : null;
   if (stageRaw && !stage) warnings.push(`Unknown stage “${stageRaw.slice(0, 30)}” — imported as New lead`);
-  if (stage === "lost") warnings.push("Stage “Lost” needs a reason — imported as Nurture instead");
+  if (stage === "lost") warnings.push("Stage “Lost” needs a reason — imported as Nurture instead; add the reason on the opportunity");
+  if (stage === "won") warnings.push("Won requires a signed MSA and an accepted requirement — imported as Proposal / MSA");
 
   const msaRaw = get("msa_status");
   const msa = msaRaw ? normalizeMsa(msaRaw) : null;
@@ -158,7 +159,7 @@ export function normalizeRow(
     contact: { full_name: fullName, role_title: cleanText(get("contact_role"), 160), email, phone },
     opportunity: {
       hiring_need: cleanText(get("hiring_need"), 300), hiring_volume: volume, budget: cleanText(get("budget"), 300),
-      next_follow_up_on: follow, stage: stage === "lost" ? "nurture" : stage,
+      next_follow_up_on: follow, stage: stage === "lost" ? "nurture" : stage === "won" ? "proposal_msa" : stage,
     },
     source,
     msa_status: msa,
@@ -175,7 +176,7 @@ export function normalizeRow(
 export interface ExistingCompanyMatch { company_id: string; name: string; domain: string | null; reason: "same_domain" | "same_name" | "similar_name" }
 export interface ExistingContactMatch { contact_id: string; full_name: string; email: string }
 
-export type Decision = "link" | "skip" | "create";
+export type Decision = "link" | "update" | "skip" | "create";
 
 export interface PlannedRow extends NormalizedRow {
   companyKey: string | null;
@@ -234,7 +235,9 @@ export function planRows(
       def = "skip";
     } else if (existingCompany || existingContact) {
       needs = true;
-      if (existingCompany && existingCompany.reason === "similar_name" && !existingContact) allowed = ["link", "create", "skip"];
+      // "update" overwrites the existing record's fields with this row's non-empty values.
+      allowed = ["link", "update", "skip"];
+      if (existingCompany && existingCompany.reason === "similar_name" && !existingContact) allowed = ["link", "update", "create", "skip"];
       if (kind === "companies") def = "skip";
     }
     return { ...r, companyKey: key, existingCompany, existingContact, duplicateInFileOf, needsDecision: needs, allowedDecisions: allowed, defaultDecision: def };

@@ -61,6 +61,7 @@ export async function createTestDb(): Promise<TestDb> {
 
 export interface AuthUserOptions {
   email: string;
+  sub?: string;
   provider?: string;
   hd?: string | null;
   verified?: boolean;
@@ -70,10 +71,11 @@ export interface AuthUserOptions {
 /** Simulates what Supabase Auth stores after a Google sign-in. */
 export async function createAuthUser(pool: pg.Pool, o: AuthUserOptions): Promise<string> {
   const id = randomUUID();
-  const identity: Record<string, unknown> = { email: o.email, email_verified: o.verified ?? true, full_name: o.name ?? null };
+  const sub = o.sub ?? `google-${randomUUID()}`;
+  const identity: Record<string, unknown> = { sub, email: o.email, email_verified: o.verified ?? true, full_name: o.name ?? null };
   if (o.hd !== null) identity.custom_claims = { hd: o.hd ?? o.email.split("@")[1] };
   await pool.query("insert into auth.users (id, email, raw_user_meta_data) values ($1, $2, $3)", [id, o.email, identity]);
-  await pool.query("insert into auth.identities (user_id, provider, identity_data) values ($1, $2, $3)", [id, o.provider ?? "google", identity]);
+  await pool.query("insert into auth.identities (user_id, provider, provider_id, identity_data) values ($1, $2, $3, $4)", [id, o.provider ?? "google", sub, identity]);
   return id;
 }
 

@@ -33,6 +33,15 @@ export function StageMover({ id, stage, compact }: { id: string; stage: Opportun
           <input id={`loss-${id}`} name="loss_reason" required placeholder="Why was it lost?" className="input h-8 py-1 text-[13px]" maxLength={1000} />
         </>
       ) : null}
+      {next === "nurture" && stage !== "nurture" ? (
+        <>
+          <label className="sr-only" htmlFor={`nur-${id}`}>Nurture reason</label>
+          <input id={`nur-${id}`} name="nurture_reason" required placeholder="Why nurture? (e.g. budget next quarter)" className="input h-8 py-1 text-[13px]" maxLength={1000} />
+          <label className="text-[11px] text-muted" htmlFor={`rev-${id}`}>Revisit on</label>
+          <input id={`rev-${id}`} name="revisit_on" type="date" className="input h-8 py-1 text-[13px]" />
+        </>
+      ) : null}
+      {next === "won" && stage !== "won" ? <p className="text-[11px] text-muted">Needs a signed MSA and an accepted live requirement.</p> : null}
       {state.error ? <p role="alert" className="text-xs text-danger">{state.error}</p> : null}
       {state.ok && !pending ? <p role="status" className="text-xs text-ok">Moved.</p> : null}
     </form>

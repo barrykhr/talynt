@@ -25,9 +25,9 @@ export default async function ImportPage() {
         <ImportWizard />
         <aside className="space-y-6">
           <Card title="Export CSV">
-            <p className="mb-3 text-sm text-muted">Exports include every non-archived record you can see. Cells that look like formulas are neutralised.</p>
+            <p className="mb-3 text-sm text-muted">Exports include every non-archived record you can see, with stable IDs so files can be joined. Cells that look like formulas are neutralised. Every export is audited.</p>
             <div className="flex flex-col gap-2">
-              {[["companies", "Companies"], ["contacts", "Contacts"], ["opportunities", "Opportunities"], ["requirements", "Requirements"], ["activities", "Activities"]].map(([k, l]) => (
+              {[["companies", "Companies"], ["contacts", "Contacts"], ["opportunities", "Opportunities"], ["requirements", "Requirements"], ["activities", "Activities"], ["revenue", "Revenue by requirement"], ["invoices", "Invoices"], ["payments", "Payments"]].map(([k, l]) => (
                 <LinkButton key={k} size="sm" href={`/api/export/${k}`} className="justify-start"><IconDownload /> {l}</LinkButton>
               ))}
             </div>

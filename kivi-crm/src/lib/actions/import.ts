@@ -6,6 +6,7 @@ import { AuthError, requireMember } from "@/lib/auth";
 import { createClient, type ServerSupabase } from "@/lib/supabase/server";
 import { getTeam } from "@/lib/data/team";
 import { log } from "@/lib/log";
+import { friendlyDbError } from "@/lib/db-errors";
 import { ImportFileError, parseSpreadsheet } from "@/lib/import/parse";
 import { importDecisionsSchema, importInputSchema, type ImportInput } from "@/lib/import/schema";
 import {
@@ -156,6 +157,7 @@ export async function commitImport(raw: ImportInput & { decisions: Record<string
     };
 
     // ---- Companies
+    const updatedRows = new Set<number>();
     const companyIdForRow = new Map<number, string>();
     const newCompanies = new Map<string, { id: string; rows: number[]; record: Record<string, unknown> }>();
     for (const r of plan) {
@@ -166,9 +168,24 @@ export async function commitImport(raw: ImportInput & { decisions: Record<string
         continue;
       }
       if (input.kind === "contacts" && !r.company.name) continue;
-      if (r.existingCompany && d === "link") {
+      if (r.existingCompany && (d === "link" || d === "update")) {
         companyIdForRow.set(r.row, r.existingCompany.company_id);
-        if (input.kind === "companies") outcomes.set(r.row, { outcome: "skipped", message: `Already in the CRM as ${r.existingCompany.name} — not changed` });
+        if (d === "update") {
+          // Explicit user choice: overwrite with this row's non-empty values (history keeps old values for tracked fields).
+          const patch = Object.fromEntries(Object.entries({
+            industry: r.company.industry, location: r.company.location, owner_id: r.owner_id !== member.id || input.ownerMode === "me" ? r.owner_id : undefined,
+          }).filter(([, v]) => v !== null && v !== undefined));
+          if (Object.keys(patch).length) {
+            const { error } = await supabase.from("companies").update(patch).eq("id", r.existingCompany.company_id);
+            if (error) { outcomes.set(r.row, { outcome: "failed", message: `Update failed: ${friendlyDbError(error, "import.update")}` }); continue; }
+          }
+          updatedRows.add(r.row);
+        }
+        if (input.kind === "companies") {
+          outcomes.set(r.row, d === "update"
+            ? { outcome: "updated", message: `Updated ${r.existingCompany.name} with this row's values` }
+            : { outcome: "skipped", message: `Already in the CRM as ${r.existingCompany.name} — not changed` });
+        }
         continue;
       }
       // Separate company requested ("create") gets its own key so it isn't merged with the match.
@@ -182,7 +199,7 @@ export async function commitImport(raw: ImportInput & { decisions: Record<string
           id: randomUUID(), rows: [r.row],
           record: {
             name: r.company.name, website: r.company.website, industry: r.company.industry, location: r.company.location,
-            source: r.source, owner_id: r.owner_id, msa_status: r.msa_status ?? "not_started",
+            source: r.source, owner_id: r.owner_id,
             notes: input.kind === "companies" ? r.notes : null,
           },
         });
@@ -196,6 +213,15 @@ export async function commitImport(raw: ImportInput & { decisions: Record<string
     for (const c of newCompanies.values()) {
       if (createdCompanies.has(c.id)) for (const row of c.rows) companyIdForRow.set(row, c.id);
     }
+    // MSA status from the file becomes an agreement record (the single source of MSA status).
+    const agreements = [...newCompanies.values()].filter((c) => createdCompanies.has(c.id)).flatMap((c) => {
+      const r = plan.find((p) => p.row === c.rows[0])!;
+      if (!r.msa_status || r.msa_status === "not_started") return [];
+      return [{ company_id: c.id, kind: "msa", status: r.msa_status, title: "Master Services Agreement (imported)",
+        signed_on: r.msa_status === "signed" ? new Date().toISOString().slice(0, 10) : null,
+        terms: r.msa_status === "signed" ? "Imported as signed; the signing date is the import date — correct it if known." : null }];
+    });
+    if (agreements.length) await supabase.from("commercial_agreements").insert(agreements);
 
     // ---- Contacts
     const contactIdForRow = new Map<number, string>();
@@ -205,7 +231,16 @@ export async function commitImport(raw: ImportInput & { decisions: Record<string
       for (const r of plan) {
         if (outcomes.has(r.row) || !r.contact.full_name) continue;
         if (r.company.name && !companyIdForRow.has(r.row)) continue;
-        if (r.existingContact) { contactIdForRow.set(r.row, r.existingContact.contact_id); continue; }
+        if (r.existingContact) {
+          contactIdForRow.set(r.row, r.existingContact.contact_id);
+          if (decide(r) === "update") {
+            const patch = Object.fromEntries(Object.entries({ role_title: r.contact.role_title, phone: r.contact.phone, location: r.company.location })
+              .filter(([, v]) => v !== null && v !== undefined));
+            if (Object.keys(patch).length) await supabase.from("contacts").update(patch).eq("id", r.existingContact.contact_id);
+            updatedRows.add(r.row);
+          }
+          continue;
+        }
         if (r.contact.email && createdByEmail.has(r.contact.email)) continue; // linked after insert
         const id = randomUUID();
         contactRecords.push({
@@ -234,7 +269,7 @@ export async function commitImport(raw: ImportInput & { decisions: Record<string
       const opps: { id: string; row: number; [k: string]: unknown }[] = [];
       for (const r of plan) {
         if (outcomes.has(r.row) || !companyIdForRow.has(r.row)) continue;
-        const companyName = r.existingCompany && decide(r) === "link" ? r.existingCompany.name : r.company.name;
+        const companyName = r.existingCompany && decide(r) !== "create" ? r.existingCompany.name : r.company.name;
         opps.push({
           id: randomUUID(), row: r.row, company_id: companyIdForRow.get(r.row),
           title: `${companyName}${r.opportunity.hiring_need ? ` — ${r.opportunity.hiring_need}` : " — new lead"}`.slice(0, 200),
@@ -255,12 +290,14 @@ export async function commitImport(raw: ImportInput & { decisions: Record<string
     for (const r of plan) {
       if (outcomes.has(r.row)) continue;
       const parts: string[] = [];
-      const linkedCompany = r.existingCompany && decide(r) === "link";
-      if (input.kind !== "contacts" || r.company.name) parts.push(linkedCompany ? `linked to existing company ${r.existingCompany!.name}` : "company created");
-      if (input.kind !== "companies" && r.contact.full_name) parts.push(r.existingContact ? "existing contact linked (not changed)" : "contact created");
+      const d = decide(r);
+      const linkedCompany = r.existingCompany && (d === "link" || d === "update");
+      if (input.kind !== "contacts" || r.company.name) parts.push(linkedCompany ? `${d === "update" ? "updated" : "linked to"} existing company ${r.existingCompany!.name}` : "company created");
+      if (input.kind !== "companies" && r.contact.full_name) parts.push(r.existingContact ? (d === "update" ? "existing contact updated" : "existing contact linked (not changed)") : "contact created");
       if (input.kind === "leads") parts.push("lead added to pipeline");
       if (r.warnings.length) parts.push(`notes: ${r.warnings.join("; ")}`);
-      outcomes.set(r.row, { outcome: "created", message: parts.join(" · ") });
+      const createdSomething = input.kind === "leads" || (!linkedCompany && input.kind !== "contacts") || (input.kind === "contacts" && !r.existingContact);
+      outcomes.set(r.row, { outcome: !createdSomething && updatedRows.has(r.row) ? "updated" : "created", message: parts.join(" · ") });
     }
 
     const rawByRow = new Map(input.rows.map((cells, i) => [i + 2, Object.fromEntries(input.headers.map((h, j) => [h || `Column ${j + 1}`, String(cells[j] ?? "").slice(0, 500)]))]));
@@ -271,17 +308,25 @@ export async function commitImport(raw: ImportInput & { decisions: Record<string
     const counts = {
       total: plan.length,
       created: report.filter((r) => r.outcome === "created").length,
-      updated: 0,
+      updated: report.filter((r) => r.outcome === "updated").length,
       skipped: report.filter((r) => r.outcome === "skipped").length,
       failed: report.filter((r) => r.outcome === "failed").length,
     };
 
     const { data: imp, error: impErr } = await supabase.from("imports").insert({
       entity: input.kind, filename: input.filename, created_by: member.id, total_rows: counts.total,
-      created_count: counts.created, updated_count: 0, skipped_count: counts.skipped, failed_count: counts.failed,
-      mapping: input.mapping, report,
+      created_count: counts.created, updated_count: counts.updated, skipped_count: counts.skipped, failed_count: counts.failed,
+      duplicate_count: plan.filter((r) => r.needsDecision).length, mapping: input.mapping,
     }).select("id").single();
     if (impErr) log.error("import.record_failed", { code: impErr.code });
+    if (imp) {
+      const rowsOut = report.map((r) => ({
+        import_id: imp.id, row_number: r.row, outcome: r.outcome, message: r.message.slice(0, 2000),
+        decision: plan.find((p) => p.row === r.row)?.needsDecision ? decide(plan.find((p) => p.row === r.row)!) : null,
+        company_id: companyIdForRow.get(r.row) ?? null, contact_id: contactIdForRow.get(r.row) ?? null, values: r.values ?? null,
+      }));
+      for (let s = 0; s < rowsOut.length; s += 500) await supabase.from("import_rows").insert(rowsOut.slice(s, s + 500));
+    }
     await supabase.rpc("log_security_event", { p_action: "import.completed", p_details: { kind: input.kind, ...counts } });
     log.info("import.completed", { kind: input.kind, ...counts });
 

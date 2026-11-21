@@ -15,4 +15,4 @@ export const importInputSchema = z.object({
 });
 export type ImportInput = z.infer<typeof importInputSchema>;
 
-export const importDecisionsSchema = z.record(z.string().regex(/^\d+$/), z.enum(["link", "skip", "create"]));
+export const importDecisionsSchema = z.record(z.string().regex(/^\d+$/), z.enum(["link", "update", "skip", "create"]));

@@ -65,4 +65,11 @@ export const ACTIVITY_ICON = {
   event: IconFlag,
   note: IconNote,
   task: IconTask,
+  research_update: IconSearch,
+  requirement_milestone: IconBriefcase,
+  invoice: IconNote,
+  payment: IconCheckCircle,
 } as const;
+export const IconBell = (p: IconProps) => <Svg {...p}><path d="M5.5 14V9a4.5 4.5 0 0 1 9 0v5l1.5 1.5h-12zM8.5 17h3" /></Svg>;
+export const IconRupee = (p: IconProps) => <Svg {...p}><path d="M6 4.5h8M6 8h8M9 4.5c2.5 0 3.5 1.5 3.5 3.5S11 11.5 8 11.5H6.5L12 16" /></Svg>;
+export const IconRadar = (p: IconProps) => <Svg {...p}><circle cx="10" cy="10" r="6.5" /><circle cx="10" cy="10" r="3" /><path d="m10 10 4.5-4.5" /></Svg>;

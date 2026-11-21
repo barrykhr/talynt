@@ -80,9 +80,17 @@ export async function updateOpportunity(_: ActionState, fd: FormData): Promise<A
 export async function changeStage(_: ActionState, fd: FormData): Promise<ActionState> {
   return withMember("opportunity.stage", async ({ supabase }) => {
     const parsed = stageChangeSchema.safeParse(formDataToObject(fd));
-    if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), error: fieldErrors(parsed.error).loss_reason ?? "Choose a stage." };
+    if (!parsed.success) {
+      const fe = fieldErrors(parsed.error);
+      return { fieldErrors: fe, error: fe.loss_reason ?? fe.nurture_reason ?? "Choose a stage." };
+    }
     const update: Record<string, unknown> = { stage: parsed.data.stage };
     if (parsed.data.stage === "lost") update.loss_reason = parsed.data.loss_reason;
+    if (parsed.data.stage === "nurture") {
+      update.nurture_reason = parsed.data.nurture_reason;
+      update.revisit_on = parsed.data.revisit_on;
+      if (parsed.data.revisit_on) update.next_follow_up_on = parsed.data.revisit_on;
+    }
     const { error } = await supabase.from("opportunities").update(update).eq("id", parsed.data.id).is("archived_at", null);
     if (error) return { error: friendlyDbError(error, "opportunity.stage") };
     revalidatePath("/pipeline");
@@ -123,12 +131,27 @@ export async function setOpportunityArchived(_: ActionState, fd: FormData): Prom
 
 // ------------------------------------------------------------------ Requirements
 
+type ReqInput = ReturnType<typeof requirementSchema.parse>;
+
+/** Converts the form's accepted/terms checkboxes into timestamps, keeping the original time on edit. */
+function requirementRow(v: ReqInput, existing?: { client_accepted_at: string | null; terms_agreed_at: string | null }) {
+  const { contact_ids: _c, client_accepted, terms_agreed, ...rest } = v;
+  void _c;
+  const now = new Date().toISOString();
+  return {
+    ...rest,
+    client_accepted_at: client_accepted ? existing?.client_accepted_at ?? now : null,
+    terms_agreed_at: terms_agreed ? existing?.terms_agreed_at ?? now : null,
+  };
+}
+
 export async function createRequirement(_: ActionState, fd: FormData): Promise<ActionState> {
   let newId: string | null = null;
   const result = await withMember("requirement.create", async ({ supabase }) => {
     const parsed = requirementSchema.safeParse(formDataToObject(fd, ["contact_ids"]));
     if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), error: "Please fix the highlighted fields." };
-    const { contact_ids, ...row } = parsed.data;
+    const contact_ids = parsed.data.contact_ids;
+    const row = requirementRow(parsed.data);
     if (row.opportunity_id) {
       const { data: opp } = await supabase.from("opportunities").select("company_id").eq("id", row.opportunity_id).maybeSingle();
       if (!opp || opp.company_id !== row.company_id) return { fieldErrors: { opportunity_id: "That opportunity belongs to a different company" } };
@@ -153,7 +176,9 @@ export async function updateRequirement(_: ActionState, fd: FormData): Promise<A
     if (!isUuid(id)) return { error: "Unknown requirement." };
     const parsed = requirementSchema.safeParse(formDataToObject(fd, ["contact_ids"]));
     if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), error: "Please fix the highlighted fields." };
-    const { contact_ids, ...row } = parsed.data;
+    const contact_ids = parsed.data.contact_ids;
+    const { data: current } = await supabase.from("requirements").select("client_accepted_at, terms_agreed_at").eq("id", id).maybeSingle();
+    const row = requirementRow(parsed.data, current ?? undefined);
     if (row.opportunity_id) {
       const { data: opp } = await supabase.from("opportunities").select("company_id").eq("id", row.opportunity_id).maybeSingle();
       if (!opp || opp.company_id !== row.company_id) return { fieldErrors: { opportunity_id: "That opportunity belongs to a different company" } };
@@ -171,26 +196,18 @@ export async function updateRequirement(_: ActionState, fd: FormData): Promise<A
   return result;
 }
 
-/** Quick status / placement update from the requirement page or list. */
+/** Quick delivery-status update. Placements are recorded separately (they drive the count and revenue). */
 export async function updateRequirementProgress(_: ActionState, fd: FormData): Promise<ActionState> {
   const id = str(fd, "id");
   const status = str(fd, "status");
-  const filledRaw = str(fd, "positions_filled");
   return withMember("requirement.progress", async ({ supabase }) => {
-    if (!isUuid(id)) return { error: "Unknown requirement." };
-    const update: Record<string, unknown> = {};
-    if (status) update.status = status;
-    if (filledRaw !== "") {
-      const n = Number(filledRaw);
-      if (!Number.isInteger(n) || n < 0) return { error: "Placements must be a whole number." };
-      update.positions_filled = n;
-    }
-    const { error } = await supabase.from("requirements").update(update).eq("id", id).is("archived_at", null);
+    if (!isUuid(id) || !status) return { error: "Choose a delivery status." };
+    const { error } = await supabase.from("requirements").update({ status }).eq("id", id).is("archived_at", null);
     if (error) return { error: friendlyDbError(error, "requirement.progress") };
     revalidatePath(`/requirements/${id}`);
     revalidatePath("/requirements");
     revalidatePath("/");
-    return { ok: true, message: "Progress updated." };
+    return { ok: true, message: "Delivery status updated." };
   });
 }
 

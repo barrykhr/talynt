@@ -18,7 +18,11 @@ describe.skipIf(!available)("core records, history and active-client rule", () =
   it("creates and edits a company, normalising name and domain", async () => {
     const { rows } = await q("insert into public.companies (name, website, owner_id) values ('  Acme Pvt. Ltd. ', 'https://www.Acme.com/careers', $1) returning *", [u.memberId]);
     expect(rows[0]).toMatchObject({ name: "Acme Pvt. Ltd.", normalized_name: "acme", domain: "acme.com", msa_status: "not_started" });
-    await q("update public.companies set location = 'Pune', msa_status = 'in_discussion' where id = $1", [rows[0].id]);
+    await q("update public.companies set location = 'Pune' where id = $1", [rows[0].id]);
+    // MSA status can only change through agreements.
+    const direct = await expectDbError(q("update public.companies set msa_status = 'signed' where id = $1", [rows[0].id]));
+    expect(direct.message).toMatch(/managed through the company's agreements/);
+    await q("insert into public.commercial_agreements (company_id, kind, status) values ($1, 'msa', 'in_discussion')", [rows[0].id]);
     const h = await q("select field, old_value, new_value from public.record_history where entity_id = $1 order by id", [rows[0].id]);
     expect(h.rows).toEqual(expect.arrayContaining([expect.objectContaining({ field: "msa_status", old_value: "not_started", new_value: "in_discussion" })]));
   });
@@ -71,7 +75,13 @@ describe.skipIf(!available)("core records, history and active-client rule", () =
     const err = await expectDbError(q("insert into public.requirements (company_id, role_title, hiring_volume, positions_filled) values ($1, 'QA', 2, 3)", [co.rows[0].id]));
     expect(err.message).toMatch(/requirements_filled_within_volume/);
     const r = await q("insert into public.requirements (company_id, role_title, hiring_volume) values ($1, 'QA', 3) returning id", [co.rows[0].id]);
-    await q("update public.requirements set positions_filled = 2, status = 'placed' where id = $1", [r.rows[0].id]);
+    await expectDbError(q("update public.requirements set positions_filled = 2 where id = $1", [r.rows[0].id]));
+    await q("insert into public.placements (requirement_id, offer_accepted_on) values ($1, current_date), ($1, current_date)", [r.rows[0].id]);
+    await q("update public.requirements set status = 'placed' where id = $1", [r.rows[0].id]);
+    const filled = await q("select positions_filled from public.requirements where id = $1", [r.rows[0].id]);
+    expect(filled.rows[0].positions_filled).toBe(2);
+    const over = await expectDbError(q("insert into public.placements (requirement_id, offer_accepted_on) values ($1, current_date), ($1, current_date)", [r.rows[0].id]));
+    expect(over.message).toMatch(/requirements_filled_within_volume/);
     const h = await q("select field from public.record_history where entity_id = $1", [r.rows[0].id]);
     expect(h.rows.map((x) => x.field)).toEqual(expect.arrayContaining(["status", "positions_filled"]));
   });
@@ -108,10 +118,10 @@ describe.skipIf(!available)("core records, history and active-client rule", () =
       const req = (await q("insert into public.requirements (company_id, role_title) values ($1, 'Java Dev') returning id", [co])).rows[0].id;
       expect((await status(co)).is_active_client).toBe(false); // live requirement but no MSA
 
-      await q("update public.companies set msa_status = 'in_discussion' where id = $1", [co]);
+      const msa = (await q("insert into public.commercial_agreements (company_id, kind, status) values ($1, 'msa', 'in_discussion') returning id", [co])).rows[0].id;
       expect((await status(co)).is_active_client).toBe(false);
 
-      await q("update public.companies set msa_status = 'signed' where id = $1", [co]);
+      await q("update public.commercial_agreements set status = 'signed', signed_on = current_date where id = $1", [msa]);
       expect(await status(co)).toEqual({ is_active_client: true, client_status: "active_client" });
 
       await q("update public.requirements set status = 'on_hold' where id = $1", [req]);
@@ -135,7 +145,8 @@ describe.skipIf(!available)("core records, history and active-client rule", () =
 
   it("merges duplicate companies without losing data", async () => {
     const keep = (await q("insert into public.companies (name, domain) values ('Merge Keep', 'keep.io') returning id")).rows[0].id;
-    const dup = (await q("insert into public.companies (name, domain, notes, msa_status) values ('Merge Keep Ltd', 'keep-dup.io', 'Old notes', 'signed') returning id")).rows[0].id;
+    const dup = (await q("insert into public.companies (name, domain, notes) values ('Merge Keep Ltd', 'keep-dup.io', 'Old notes') returning id")).rows[0].id;
+    await q("insert into public.commercial_agreements (company_id, kind, status, signed_on) values ($1, 'msa', 'signed', current_date)", [dup]);
     await q("insert into public.contacts (full_name, company_id) values ('Moved Person', $1)", [dup]);
     await q("select public.merge_companies($1, $2)", [keep, dup]);
     const moved = await q("select count(*)::int n from public.contacts where company_id = $1", [keep]);

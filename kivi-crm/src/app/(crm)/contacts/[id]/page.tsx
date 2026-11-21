@@ -106,6 +106,28 @@ export default async function ContactPage({ params }: { params: Promise<{ id: st
             actions={!archived ? <Disclosure summary={<><IconPlus /> Log activity</>}><ActivityForm links={{ contact_id: id, company_id: contact.company_id }} team={teamOpts} defaultOwner={member.id} back={back} /></Disclosure> : null}>
             <ActivityTimeline activities={activities} team={team} links={links} back={back} currentUserId={member.id} />
           </Card>
+          {(() => {
+            const threads = new Map<string, Activity[]>();
+            for (const a of activities) if (a.origin === "gmail" && a.external_thread_id) threads.set(a.external_thread_id, [...(threads.get(a.external_thread_id) ?? []), a]);
+            if (threads.size === 0) return null;
+            return (
+              <Card title={`Email threads · ${threads.size}`}>
+                <p className="mb-2 text-xs text-muted">From team members&apos; connected Gmail: subject, participants and dates only. Message bodies stay in Gmail.</p>
+                <ul className="divide-y divide-line">
+                  {[...threads.values()].map((msgs) => {
+                    const latest = msgs[0];
+                    const meta = latest.external_meta as { link?: string };
+                    return (
+                      <li key={latest.external_thread_id!} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
+                        <span><span className="font-medium">{latest.subject}</span> <span className="text-xs text-muted">· {msgs.length} message(s) · last {formatRelative(latest.occurred_at)}</span></span>
+                        {meta.link && latest.external_owner_id === member.id ? <a className="link text-xs" href={meta.link} target="_blank" rel="noopener noreferrer">Open in my Gmail</a> : <span className="text-xs text-faint">In {latest.external_owner_id === member.id ? "your" : "a teammate's"} mailbox</span>}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </Card>
+            );
+          })()}
           <Card title="Opportunities & requirements">
             {(opps ?? []).length === 0 && (reqs ?? []).length === 0 ? (
               <p className="text-sm text-muted">Not linked to any opportunity or requirement yet. Link contacts from the opportunity or requirement form.</p>

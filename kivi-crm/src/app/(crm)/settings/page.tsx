@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { googleConfig, googleConfigProblems } from "@/lib/env";
 import { param, type SearchParams } from "@/lib/data/query";
 import { displayName } from "@/lib/data/team";
-import { Badge, Card, DescriptionList, Notice, PageHeader, buttonClass } from "@/components/ui";
+import { Badge, Card, DescriptionList, Notice, PageHeader, Tabs, buttonClass } from "@/components/ui";
+import { SyncPreferencesForm } from "@/components/settings-forms";
 import { ConfirmAction, InlineAction } from "@/components/forms";
 import { ReviewItemForm } from "@/components/review-item";
 import { IconCalendar, IconMail } from "@/components/icons";
@@ -64,10 +65,16 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const review = (reviewData ?? []) as SyncReviewItem[];
   const [contacts, companies] = review.length ? await Promise.all([contactOptions(supabase), companyOptions(supabase)]) : [[], []];
   const error = param(sp, "error");
+  const { data: prefData } = await supabase.from("sync_preferences").select("*").maybeSingle();
+  const prefs = prefData ?? { gmail_sync_enabled: true, gmail_mode: "contacts_and_review", history_window_days: 30, calendar_sync_enabled: true };
 
   return (
     <>
-      <PageHeader title="Settings & connections" description="Your profile and your personal Google connections. Each person connects their own Gmail and Calendar." />
+      <PageHeader title="Settings" description="Your profile and your personal Google connections. Each person connects their own Gmail and Calendar." />
+      <Tabs label="Settings" current="me" tabs={[
+        { key: "me", label: "My settings & Google", href: "/settings" },
+        ...(member.role === "admin" ? [{ key: "workspace", label: "Workspace (admin)", href: "/settings/workspace" }, { key: "team", label: "Team & audit (admin)", href: "/admin" }] : []),
+      ]} />
       {error && ERRORS[error] ? <div className="mb-6"><Notice tone="danger">{ERRORS[error]}</Notice></div> : null}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -153,6 +160,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
             ]} />
             <p className="mt-3 text-xs text-muted">Names and roles are managed by an administrator{member.role === "admin" ? <> in <Link className="link" href="/admin">Team &amp; audit</Link></> : null}.</p>
           </Card>
+          <Card title="Sync & privacy"><SyncPreferencesForm p={prefs} /></Card>
           <Card title="WhatsApp">
             <p className="text-sm text-muted">There is no WhatsApp integration. Log WhatsApp conversations as activities (type “WhatsApp”) on the relevant record, and use “WhatsApp” as the lead source for leads that came in that way.</p>
           </Card>

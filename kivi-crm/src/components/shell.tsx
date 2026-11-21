@@ -5,19 +5,20 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cx } from "@/components/ui";
 import {
-  IconBriefcase, IconBuilding, IconChart, IconHome, IconPipeline, IconSettings, IconShield, IconTask,
+  IconBriefcase, IconBuilding, IconChart, IconHome, IconPipeline, IconRadar, IconRupee, IconSettings, IconShield, IconTask,
   IconUpload, IconUser, IconX,
 } from "@/components/icons";
 
 const NAV = [
-  { href: "/", label: "Overview", icon: IconHome },
+  { href: "/", label: "Home", icon: IconHome },
+  { href: "/pipeline", label: "Pipeline", icon: IconPipeline },
   { href: "/companies", label: "Companies", icon: IconBuilding },
   { href: "/contacts", label: "Contacts", icon: IconUser },
-  { href: "/pipeline", label: "Pipeline", icon: IconPipeline },
   { href: "/requirements", label: "Requirements", icon: IconBriefcase },
-  { href: "/activities", label: "Activities & tasks", icon: IconTask },
+  { href: "/activities", label: "Tasks & activity", icon: IconTask },
+  { href: "/research", label: "Research updates", icon: IconRadar },
+  { href: "/revenue", label: "Revenue", icon: IconRupee },
   { href: "/reports", label: "Reports", icon: IconChart },
-  { href: "/import", label: "Import & export", icon: IconUpload },
 ];
 
 export function SideNav({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?: () => void }) {
@@ -42,7 +43,8 @@ export function SideNav({ isAdmin, onNavigate }: { isAdmin: boolean; onNavigate?
     <nav aria-label="Main" className="flex flex-col gap-0.5">
       {NAV.map((n) => item(n.href, n.label, n.icon))}
       <div className="my-3 border-t border-line" />
-      {item("/settings", "Settings & connections", IconSettings)}
+      {item("/settings", "Settings", IconSettings)}
+      {item("/import", "Import & export", IconUpload)}
       {isAdmin ? item("/admin", "Team & audit", IconShield) : null}
     </nav>
   );
@@ -99,7 +101,57 @@ const NOTICES: Record<string, string> = {
   disconnected: "Disconnected. Tokens were revoked and deleted.",
   import_done: "Import finished. Review the results below.",
   user_invited: "Team member added. They can now sign in with Google.",
+  lead_created: "Lead added to the pipeline. Set a next action so it doesn't stall.",
+  settings_saved: "Workspace settings saved.",
 };
+
+/** Shows a calm banner when the browser goes offline; edits need a connection. */
+export function OfflineBanner() {
+  const [online, setOnline] = useState(true);
+  useEffect(() => {
+    const update = () => setOnline(navigator.onLine);
+    update();
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    return () => { window.removeEventListener("online", update); window.removeEventListener("offline", update); };
+  }, []);
+  if (online) return null;
+  return (
+    <div role="status" className="border-b border-warn/20 bg-warn-soft px-4 py-2 text-center text-[13px] text-warn">
+      You&apos;re offline. Changes can&apos;t be saved until your connection is back.
+    </div>
+  );
+}
+
+export function QuickCreate() {
+  const [open, setOpen] = useState(false);
+  const items = [
+    ["/leads/new", "Lead", "Company + contact + opportunity in one step"],
+    ["/companies/new", "Company", ""],
+    ["/contacts/new", "Contact", ""],
+    ["/requirements/new", "Requirement", ""],
+    ["/activities?view=mine&new=1", "Task or activity", ""],
+  ];
+  return (
+    <div className="relative">
+      <button type="button" aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((o) => !o)}
+        onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}
+        className="inline-flex h-9 items-center gap-1 rounded-md bg-accent px-3 text-sm font-medium text-white hover:bg-accent-hover">
+        + New
+      </button>
+      {open ? (
+        <div role="menu" className="absolute right-0 z-40 mt-1 w-64 rounded-lg border border-line bg-surface p-1 shadow-lg" onKeyDown={(e) => { if (e.key === "Escape") setOpen(false); }}>
+          {items.map(([href, label, hint]) => (
+            <Link key={href} role="menuitem" href={href} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm hover:bg-sunken focus:bg-sunken">
+              <span className="font-medium">{label}</span>
+              {hint ? <span className="block text-xs text-muted">{hint}</span> : null}
+            </Link>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 export function NoticeToast() {
   const params = useSearchParams();

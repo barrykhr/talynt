@@ -68,11 +68,11 @@ describe("duplicate handling", () => {
   const plan = planRows(normalized, companyMatches, contacts, "leads");
 
   it("flags existing companies and contacts for a user decision, never overwriting", () => {
-    expect(plan[0]).toMatchObject({ needsDecision: true, defaultDecision: "link", allowedDecisions: ["link", "skip"] });
+    expect(plan[0]).toMatchObject({ needsDecision: true, defaultDecision: "link", allowedDecisions: ["link", "update", "skip"] });
     expect(plan[0].existingContact?.contact_id).toBe("ct-priya");
   });
   it("only offers 'create anyway' for similar names, not same-domain matches", () => {
-    expect(plan[1].allowedDecisions).toEqual(["link", "create", "skip"]);
+    expect(plan[1].allowedDecisions).toEqual(["link", "update", "create", "skip"]);
     expect(plan[0].allowedDecisions).not.toContain("create");
   });
   it("detects repeats within the file and defaults them to skip", () => {
@@ -124,5 +124,16 @@ describe("import payload contract", () => {
     expect(importInputSchema.safeParse({ ...base, kind: "everything" }).success).toBe(false);
     expect(importInputSchema.safeParse({ ...base, rows: Array(2001).fill(["x"]) }).success).toBe(false);
     expect(importDecisionsSchema.safeParse({ "2": "link", "3": "overwrite" }).success).toBe(false);
+  });
+});
+
+describe("stages that need more than a spreadsheet cell", () => {
+  it("never imports Won or Lost directly (Won is gated; Lost needs a reason)", () => {
+    const h = ["Company", "Stage"];
+    const m = autoMap(h);
+    const [won, lost] = [["Acme", "Won"], ["Beta", "Closed lost"]].map((r, i) => normalizeRow(r, i + 2, m, "leads", team, null, h));
+    expect(won.opportunity.stage).toBe("proposal_msa");
+    expect(won.warnings.join(" ")).toMatch(/Won requires a signed MSA/);
+    expect(lost.opportunity.stage).toBe("nurture");
   });
 });

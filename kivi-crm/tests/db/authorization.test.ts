@@ -219,3 +219,26 @@ describe.skipIf(!available)("roles, ownership and server-only data", () => {
     expect(status.rows[0].s).toBe("disabled");
   });
 });
+
+describe.skipIf(!available)("trusted-backend detection", () => {
+  let db: TestDb;
+  beforeAll(async () => { db = await createTestDb(); });
+  afterAll(async () => { await db?.destroy(); });
+
+  it("trusts only the service role or a direct operator session — never anon or members, even inside definer functions", async () => {
+    const { authId } = await provisionAndSignIn(db.pool, "t@kivitronicsconsulting.com");
+    expect((await asService(db.pool, (c) => c.query("select private.is_trusted_backend() t"))).rows[0].t).toBe(true);
+    expect((await db.pool.query("select private.is_trusted_backend() t")).rows[0].t).toBe(true);
+    expect((await asUser(db.pool, authId, (c) => c.query("select private.is_trusted_backend() t"))).rows[0].t).toBe(false);
+    const anon = await db.pool.connect();
+    try {
+      await anon.query("begin; set local role anon; select set_config('request.jwt.claims', '{\"role\":\"anon\"}', true)");
+      // Even via a SECURITY DEFINER path (current_user = owner), anon is not trusted.
+      const r = await anon.query("select private.is_trusted_backend() t").catch((e) => ({ rows: [{ t: `denied:${e.code}` }] }));
+      expect(r.rows[0].t === false || String(r.rows[0].t).startsWith("denied")).toBe(true);
+      await anon.query("rollback");
+    } finally {
+      anon.release();
+    }
+  });
+});

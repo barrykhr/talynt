@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "KiviTronics Consulting internal CRM",
-  "engines": { "node": ">=20.9" },
+  "engines": {
+    "node": ">=20.9"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -18,9 +20,11 @@
     "dev:reset": "tsx scripts/dev-reset.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.2",
     "next": "^16.4.6",
+    "openai": "^7.62.0",
     "papaparse": "^5.7.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

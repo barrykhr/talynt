@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 import {
-  ACTIVITY_TYPES, LEAD_SOURCES, MSA_STATUSES, OPPORTUNITY_STAGES, REQUIREMENT_STATUSES,
+  ACTIVITY_TYPES, LEAD_SOURCES, OPPORTUNITY_STAGES, REQUIREMENT_STATUSES,
 } from "@/lib/constants";
 import { normalizeDomain, normalizeEmail, normalizePhone } from "@/lib/normalize";
 import { zonedLocalToUtc } from "@/lib/time";
@@ -42,6 +42,14 @@ const optInt = (min: number, max: number) =>
     (v) => (v === "" || v === null || v === undefined ? null : Number(v)),
     z.number({ error: "Enter a whole number" }).int("Enter a whole number").min(min, `Must be at least ${min}`).max(max).nullable(),
   );
+
+const optMoney = z.preprocess(
+  (v) => (v === "" || v === null || v === undefined ? null : Number(String(v).replace(/[,₹\s]/g, ""))),
+  z.number({ error: "Enter an amount" }).min(0, "Must be 0 or more").max(1e12).nullable(),
+).transform((v) => (v === null ? null : Math.round(v * 100) / 100));
+
+const currencySchema = z.preprocess((v) => (typeof v === "string" && v.trim() ? v.trim().toUpperCase() : "INR"),
+  z.string().regex(/^[A-Z]{3}$/, "Use a 3-letter currency code like INR"));
 
 const optEmail = z.preprocess(emptyToNull, z.string().nullable().optional()).transform((v, ctx) => {
   if (!v) return null;
@@ -83,8 +91,6 @@ export const companySchema = z.object({
   source: optEnum(LEAD_SOURCES.values),
   source_detail: optText(200),
   owner_id: optUuid,
-  msa_status: z.enum(MSA_STATUSES.values as [string, ...string[]]).default("not_started"),
-  msa_signed_on: optDate,
   notes: optText(20000),
 });
 
@@ -121,13 +127,28 @@ export const opportunitySchema = z
     location: optText(200),
     budget: optText(300),
     next_follow_up_on: optDate,
+    next_action: optText(300),
     loss_reason: optText(1000),
+    nurture_reason: optText(1000),
+    revisit_on: optDate,
+    priority: z.enum(["low", "normal", "high"]).default("normal"),
+    expected_close_on: optDate,
+    estimated_value: optMoney,
+    currency: currencySchema,
+    probability_override: optInt(0, 100),
+    decision_maker_contact_id: optUuid,
+    hiring_timing: optText(300),
+    fee_basis_note: optText(300),
+    next_agreed_step: optText(300),
     notes: optText(20000),
     contact_ids: z.array(z.uuid()).max(50).default([]),
   })
   .superRefine((v, ctx) => {
     if (v.stage === "lost" && !v.loss_reason) {
       ctx.addIssue({ code: "custom", path: ["loss_reason"], message: "Add a short loss reason" });
+    }
+    if (v.stage === "nurture" && !v.nurture_reason) {
+      ctx.addIssue({ code: "custom", path: ["nurture_reason"], message: "Say why this is in nurture" });
     }
   });
 
@@ -136,10 +157,15 @@ export const stageChangeSchema = z
     id: z.uuid(),
     stage: z.enum(OPPORTUNITY_STAGES.values as [string, ...string[]]),
     loss_reason: optText(1000),
+    nurture_reason: optText(1000),
+    revisit_on: optDate,
   })
   .superRefine((v, ctx) => {
     if (v.stage === "lost" && !v.loss_reason) {
       ctx.addIssue({ code: "custom", path: ["loss_reason"], message: "Add a short loss reason" });
+    }
+    if (v.stage === "nurture" && !v.nurture_reason) {
+      ctx.addIssue({ code: "custom", path: ["nurture_reason"], message: "Say why this is in nurture" });
     }
   });
 
@@ -150,8 +176,20 @@ export const requirementSchema = z
     role_title: reqText(200, "Role"),
     hiring_volume: z.preprocess((v) => (v === "" || v == null ? 1 : Number(v)),
       z.number({ error: "Enter a whole number" }).int().min(1, "At least 1").max(100000)),
-    positions_filled: z.preprocess((v) => (v === "" || v == null ? 0 : Number(v)),
-      z.number({ error: "Enter a whole number" }).int().min(0).max(100000)),
+    client_contact_id: optUuid,
+    client_accepted: z.preprocess((v) => v === "on" || v === true, z.boolean()),
+    terms_agreed: z.preprocess((v) => v === "on" || v === true, z.boolean()),
+    fee_basis: optEnum(["percent_first_year", "fixed_fee", "retainer_milestone", "contract_margin", "other"]),
+    fee_percent: optMoney.refine((v) => v === null || v <= 100, "Percent must be 0–100"),
+    expected_compensation: optMoney,
+    fee_per_hire: optMoney,
+    estimated_total_fee: optMoney,
+    currency: currencySchema,
+    commercial_terms: optText(5000),
+    probability: optInt(0, 100),
+    forecast_placement_on: optDate,
+    next_action: optText(300),
+    next_action_on: optDate,
     location: optText(200),
     budget_notes: optText(1000),
     owner_id: optUuid,
@@ -162,8 +200,8 @@ export const requirementSchema = z
     contact_ids: z.array(z.uuid()).max(50).default([]),
   })
   .superRefine((v, ctx) => {
-    if (v.positions_filled > v.hiring_volume) {
-      ctx.addIssue({ code: "custom", path: ["positions_filled"], message: "Cannot exceed the hiring volume" });
+    if (v.fee_basis === "percent_first_year" && v.fee_percent === null && v.estimated_total_fee === null) {
+      ctx.addIssue({ code: "custom", path: ["fee_percent"], message: "Add the fee percentage (or an estimated total)" });
     }
   });
 
@@ -274,3 +312,76 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
   }
   return out;
 }
+
+// ------------------------------------------------------------------ v2: agreements & revenue
+const reqMoney = z.preprocess((v) => Number(String(v ?? "").replace(/[,₹\s]/g, "")),
+  z.number({ error: "Enter an amount" }).positive("Must be more than 0").max(1e12)).transform((v) => Math.round(v * 100) / 100);
+const reqDate = z.iso.date("Use a valid date");
+
+export const agreementSchema = z.object({
+  company_id: reqUuid("company"),
+  kind: z.enum(["msa", "sow", "rate_card", "nda", "other"]).default("msa"),
+  status: z.enum(["not_started", "in_discussion", "signed", "expired", "terminated"]),
+  title: optText(200),
+  signed_on: optDate,
+  effective_on: optDate,
+  expires_on: optDate,
+  reference: optText(300),
+  terms: optText(5000),
+}).superRefine((v, ctx) => {
+  if (v.status === "signed" && !v.signed_on) ctx.addIssue({ code: "custom", path: ["signed_on"], message: "Add the signing date" });
+  if (v.expires_on && v.effective_on && v.expires_on < v.effective_on) ctx.addIssue({ code: "custom", path: ["expires_on"], message: "Expiry must be after the effective date" });
+});
+
+export const placementSchema = z.object({
+  requirement_id: reqUuid("requirement"),
+  label: optText(80),
+  status: z.enum(["offer_accepted", "joined", "fell_through"]).default("offer_accepted"),
+  offer_accepted_on: reqDate,
+  joined_on: optDate,
+  compensation: optMoney,
+  fee_amount: optMoney,
+  currency: currencySchema,
+  notes: optText(2000),
+}).superRefine((v, ctx) => {
+  if (v.joined_on && v.joined_on < v.offer_accepted_on) ctx.addIssue({ code: "custom", path: ["joined_on"], message: "Joining can't be before the offer" });
+  if (v.status === "joined" && !v.joined_on) ctx.addIssue({ code: "custom", path: ["joined_on"], message: "Add the joining date" });
+});
+
+export const revenueEventSchema = z.object({
+  requirement_id: reqUuid("requirement"),
+  kind: z.enum(["retainer_milestone", "contract_margin", "other"]),
+  amount: reqMoney,
+  currency: currencySchema,
+  earned_on: optDate,
+  description: optText(300),
+});
+
+export const invoiceSchema = z.object({
+  company_id: reqUuid("company"),
+  requirement_id: optUuid,
+  invoice_number: reqText(60, "Invoice number"),
+  issued_on: reqDate,
+  due_on: reqDate,
+  amount: reqMoney,
+  currency: currencySchema,
+  notes: optText(2000),
+}).superRefine((v, ctx) => {
+  if (v.due_on < v.issued_on) ctx.addIssue({ code: "custom", path: ["due_on"], message: "Due date must be on or after the issue date" });
+});
+
+export const paymentSchema = z.object({
+  invoice_id: reqUuid("invoice"),
+  received_on: reqDate,
+  amount: reqMoney,
+  reference: optText(120),
+  method: optText(40),
+  notes: optText(1000),
+});
+
+export const creditSchema = z.object({
+  invoice_id: reqUuid("invoice"),
+  adjusted_on: reqDate,
+  amount: reqMoney,
+  reason: reqText(500, "Reason"),
+});

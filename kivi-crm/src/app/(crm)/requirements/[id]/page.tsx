@@ -12,6 +12,8 @@ import { ConfirmAction, Disclosure } from "@/components/forms";
 import { ActivityForm } from "@/components/record-forms";
 import { ProgressForm } from "@/components/progress-form";
 import { CommunicationPanel } from "@/components/communication";
+import { RequirementRevenuePanel } from "@/components/revenue";
+import { formatMoney } from "@/lib/money";
 import { IconPlus } from "@/components/icons";
 import { setRequirementArchived } from "@/lib/actions/opportunities";
 import { isLiveRequirement } from "@/lib/domain/client-status";
@@ -79,10 +81,12 @@ export default async function RequirementPage({ params }: { params: Promise<{ id
           {!archived ? (
             <Card title="Delivery progress">
               <div className="mb-4"><Progress filled={req.positions_filled} volume={req.hiring_volume} /></div>
-              <ProgressForm id={id} status={req.status} filled={req.positions_filled} volume={req.hiring_volume} />
-              <p className="mt-3 text-xs text-muted">Status changes and placements are recorded in History. In this status since {formatDate(req.status_changed_at)}.</p>
+              <ProgressForm id={id} status={req.status} />
+              <p className="mt-3 text-xs text-muted">Placed count comes from recorded placements (below). Status changes are recorded in History. In this status since {formatDate(req.status_changed_at)}.</p>
+              {req.next_action || req.next_action_on ? <p className="mt-2 text-sm">Next action: {req.next_action ?? "—"}{req.next_action_on ? ` · due ${formatDate(req.next_action_on)}` : ""}</p> : <p className="mt-2 text-sm text-warn">No next action set.</p>}
             </Card>
           ) : null}
+          <RequirementRevenuePanel req={req} companyId={req.company_id} back={back} />
           <Card title="Activity" id="activity"
             actions={!archived ? <Disclosure summary={<><IconPlus /> Log activity</>}><ActivityForm links={{ requirement_id: id, company_id: req.company_id }} contacts={contacts.map((c) => ({ value: c.id, label: c.full_name }))} team={teamOpts} defaultOwner={member.id} back={back} /></Disclosure> : null}>
             <ActivityTimeline activities={activities} team={team} links={links} back={back} currentUserId={member.id} />
@@ -97,6 +101,8 @@ export default async function RequirementPage({ params }: { params: Promise<{ id
               { label: "Sales deal", value: opp ? <span className="flex flex-col gap-1"><Link className="link" href={`/pipeline/${opp.id}`}>{opp.title}</Link><StageBadge stage={opp.stage} /></span> : "—" },
               { label: "Owner", value: <Owner member={team.get(req.owner_id ?? "")} /> },
               { label: "Hiring volume", value: req.hiring_volume },
+              { label: "Client accepted", value: req.client_accepted_at ? formatDate(req.client_accepted_at) : "Not yet" },
+              { label: "Estimated fee", value: formatMoney(req.computed_total_fee, req.currency) },
               { label: "Expected start", value: formatDate(req.expected_start_on) },
               { label: "Timeline", value: req.timeline_notes ?? "—" },
               { label: "Budget / commercial", value: req.budget_notes ?? "—" },

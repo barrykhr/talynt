@@ -16,12 +16,14 @@ async function main() {
   const ownerId = owner?.id ?? null;
 
   const { data: companies, error } = await supabase.from("companies").insert([
-    { name: "[DEV] Example Analytics", domain: "analytics.example.com", location: "Pune", source: "referral", owner_id: ownerId, msa_status: "signed" },
+    { name: "[DEV] Example Analytics", domain: "analytics.example.com", location: "Pune", source: "referral", owner_id: ownerId },
     { name: "[DEV] Sample Robotics", domain: "robotics.example.com", location: "Bengaluru", source: "linkedin", owner_id: ownerId },
     { name: "[DEV] Demo Fintech", domain: "fintech.example.com", location: "Mumbai", source: "event", owner_id: null },
   ]).select("id, name");
   if (error || !companies) throw new Error(error?.message ?? "insert failed");
   const [a, b, c] = companies;
+  // MSA status comes from agreements (single source of truth).
+  await supabase.from("commercial_agreements").insert({ company_id: a.id, kind: "msa", status: "signed", signed_on: new Date().toISOString().slice(0, 10), title: "[DEV] MSA" });
 
   const { data: contacts } = await supabase.from("contacts").insert([
     { full_name: "[DEV] Test Person One", email: "one@analytics.example.com", role_title: "Head of Talent", company_id: a.id, owner_id: ownerId },
@@ -29,13 +31,14 @@ async function main() {
   ]).select("id");
 
   const { data: opps } = await supabase.from("opportunities").insert([
-    { company_id: a.id, title: "[DEV] Data team expansion", stage: "won", owner_id: ownerId, hiring_need: "Data engineers", hiring_volume: 4 },
+    { company_id: a.id, title: "[DEV] Data team expansion", stage: "proposal_msa", owner_id: ownerId, hiring_need: "Data engineers", hiring_volume: 4, estimated_value: 600000 },
     { company_id: b.id, title: "[DEV] Firmware hiring", stage: "qualified", owner_id: ownerId, next_follow_up_on: new Date().toISOString().slice(0, 10) },
     { company_id: c.id, title: "[DEV] Inbound enquiry", stage: "new_lead", source: "website" },
   ]).select("id");
 
   await supabase.from("requirements").insert([
-    { company_id: a.id, opportunity_id: opps?.[0]?.id, role_title: "[DEV] Senior Data Engineer", hiring_volume: 3, positions_filled: 1, status: "interviews", owner_id: ownerId, location: "Pune" },
+    { company_id: a.id, opportunity_id: opps?.[0]?.id, role_title: "[DEV] Senior Data Engineer", hiring_volume: 3, status: "interviews", owner_id: ownerId, location: "Pune",
+      fee_basis: "percent_first_year", fee_percent: 8.33, expected_compensation: 2400000, client_accepted_at: new Date().toISOString(), terms_agreed_at: new Date().toISOString() },
   ]);
   if (contacts?.[0]) {
     await supabase.from("activities").insert([

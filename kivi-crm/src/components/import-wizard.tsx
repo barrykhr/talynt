@@ -13,7 +13,7 @@ const KIND_INFO: Record<ImportKind, { label: string; help: string }> = {
   contacts: { label: "Contacts", help: "Each row becomes a contact, linked to a company when one is given." },
 };
 
-const DECISION_LABEL: Record<Decision, string> = { link: "Use existing", skip: "Skip row", create: "Create new anyway" };
+const DECISION_LABEL: Record<Decision, string> = { link: "Use existing (don't change it)", update: "Update existing with this row", skip: "Skip row", create: "Create new anyway" };
 
 export function ImportWizard() {
   const [parsed, parseAction] = useActionState(parseImportFile, {});
@@ -169,7 +169,7 @@ export function ImportWizard() {
                 ))}
               </div>
             ) : null}
-            <p className="mt-2 text-xs text-muted">Existing records are never overwritten. “Use existing” links new contacts and leads to the record already in the CRM.</p>
+            <p className="mt-2 text-xs text-muted">Nothing is overwritten unless you choose “Update existing”. “Use existing” links new contacts and leads to the record already in the CRM without changing it.</p>
           </div>
           <div className="max-h-[480px] overflow-auto">
             <table className="w-full text-sm">
@@ -227,6 +227,7 @@ export function ImportWizard() {
           <h2 id="step4" className="text-sm font-semibold">4. Import finished</h2>
           <div className="mt-2 flex flex-wrap gap-2 text-sm">
             <Badge tone="ok">{result.counts.created} imported</Badge>
+            <Badge tone="info">{result.counts.updated} updated</Badge>
             <Badge tone="warn">{result.counts.skipped} skipped</Badge>
             <Badge tone="danger">{result.counts.failed} failed</Badge>
           </div>

@@ -11,10 +11,15 @@ import { ActivityTimeline, ClientBadge, FollowUp, HistoryList, MsaBadge, Owner, 
 import { ConfirmAction, Disclosure } from "@/components/forms";
 import { ActivityForm, ContactForm } from "@/components/record-forms";
 import { CommunicationPanel } from "@/components/communication";
+import { ResearchPanel } from "@/components/research-panel";
+import { SignalsPanel } from "@/components/signals";
+import { RevenueRollup } from "@/components/revenue";
+import { AgreementForm } from "@/components/revenue-forms";
+import { AGREEMENT_KINDS, AGREEMENT_STATUSES } from "@/lib/constants";
 import { IconBriefcase, IconPipeline, IconPlus, IconUser } from "@/components/icons";
 import { mergeCompanies, setCompanyArchived } from "@/lib/actions/companies";
 import { formatDate, formatRelative } from "@/lib/time";
-import type { Activity, CompanyOverview, Contact, HistoryEntry, Opportunity, Requirement } from "@/lib/types";
+import type { Activity, Agreement, CompanyOverview, Contact, HistoryEntry, Opportunity, Requirement } from "@/lib/types";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -34,6 +39,11 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
   if (!companyData) notFound();
   const company = companyData as CompanyOverview;
 
+  const [{ data: agreementData }, { data: openTasks }] = await Promise.all([
+    supabase.from("commercial_agreements").select("*").eq("company_id", id).is("archived_at", null).order("created_at", { ascending: false }),
+    supabase.from("activities").select("id, subject, due_at, owner_id").eq("company_id", id).eq("type", "task").is("completed_at", null).is("archived_at", null).order("due_at").limit(1),
+  ]);
+  const agreements = (agreementData ?? []) as Agreement[];
   const [contactsRes, oppsRes, reqsRes, actsRes, historyRes, dupsRes, team, teamOpts, allCompanies, mergedInto] = await Promise.all([
     supabase.from("contacts").select("*").eq("company_id", id).is("archived_at", null).order("full_name"),
     supabase.from("opportunities").select("*").eq("company_id", id).is("archived_at", null).order("created_at", { ascending: false }),
@@ -124,6 +134,15 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
 
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="min-w-0 space-y-6">
+          <Card title="About this company" id="about">
+            {company.about ? (
+              <>
+                <p className="whitespace-pre-wrap text-sm text-ink-soft">{company.about}</p>
+                <p className="mt-2 text-xs text-muted">Accepted from reviewed research{company.about_updated_at ? ` on ${formatDate(company.about_updated_at)}` : ""}. Sources are on the finding in Research below; earlier versions are in History.</p>
+              </>
+            ) : <p className="text-sm text-muted">No reviewed brief yet. Run <a className="link" href="#research">Research company</a> and accept an “About” finding — every claim keeps its source.</p>}
+            {company.employee_range ? <p className="mt-2 text-xs text-muted">Employees (reported): {company.employee_range}</p> : null}
+          </Card>
           <Card title={`Contacts · ${contacts.length}`} id="contacts"
             actions={!archived ? <Disclosure summary={<><IconPlus /> Add contact</>}><ContactForm compact team={teamOpts} companies={allCompanies} defaultCompany={id} defaultOwner={company.owner_id ?? member.id} /></Disclosure> : null}>
             {contacts.length === 0 ? (
@@ -179,6 +198,8 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
             )}
           </Card>
 
+          {!archived ? <ResearchPanel companyId={id} contacts={contactOpts} member={member} back={back} /> : null}
+          {!archived ? <SignalsPanel companyId={id} back={back} /> : null}
           <Card title="Activity" id="activity"
             actions={!archived ? <Disclosure summary={<><IconPlus /> Log activity</>}><ActivityForm links={{ company_id: id }} contacts={contactOpts} team={teamOpts} defaultOwner={member.id} back={back} /></Disclosure> : null}>
             <ActivityTimeline activities={activities} team={team} links={links} back={back} currentUserId={member.id} />
@@ -186,6 +207,35 @@ export default async function CompanyPage({ params }: { params: Promise<{ id: st
         </div>
 
         <aside className="space-y-6">
+          <Card title="Next action">
+            {(() => {
+              const task = (openTasks ?? [])[0] as { id: string; subject: string; due_at: string } | undefined;
+              const follow = opps.filter((o) => o.next_follow_up_on && o.stage !== "won" && o.stage !== "lost").sort((a, b) => a.next_follow_up_on!.localeCompare(b.next_follow_up_on!))[0];
+              if (!task && !follow) return <p className="text-sm text-warn">No next action. Add a task or set a follow-up on an opportunity.</p>;
+              return (
+                <ul className="space-y-1.5 text-sm">
+                  {task ? <li>Task: {task.subject} <span className="text-muted">· due {formatDate(task.due_at)}</span></li> : null}
+                  {follow ? <li>Follow up <Link className="link" href={`/pipeline/${follow.id}`}>{follow.title}</Link> <FollowUp date={follow.next_follow_up_on} /></li> : null}
+                </ul>
+              );
+            })()}
+          </Card>
+          <Card title="Agreements (MSA & terms)" id="agreements">
+            {agreements.length === 0 ? <p className="mb-2 text-sm text-muted">No agreements recorded. MSA status comes from here.</p> : (
+              <ul className="mb-3 space-y-2 text-sm">
+                {agreements.map((a) => (
+                  <li key={a.id} className="rounded-md border border-line p-2">
+                    <div className="flex items-center justify-between gap-2"><span className="font-medium">{AGREEMENT_KINDS.label[a.kind]}</span><Badge tone={a.status === "signed" ? "ok" : a.status === "in_discussion" ? "warn" : "neutral"}>{AGREEMENT_STATUSES.label[a.status]}</Badge></div>
+                    <div className="text-xs text-muted">{a.signed_on ? `Signed ${formatDate(a.signed_on)}` : "Not signed"}{a.expires_on ? ` · expires ${formatDate(a.expires_on)}` : ""}{a.reference ? ` · ${a.reference}` : ""}</div>
+                    {a.terms ? <p className="mt-1 whitespace-pre-wrap text-xs text-ink-soft">{a.terms}</p> : null}
+                    {!archived ? <div className="mt-1"><Disclosure summary="Edit"><AgreementForm companyId={id} back={back} agreement={a} /></Disclosure></div> : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {!archived ? <Disclosure summary={<><IconPlus /> Add agreement</>}><AgreementForm companyId={id} back={back} /></Disclosure> : null}
+          </Card>
+          <Card title="Revenue" id="revenue"><RevenueRollup companyId={id} /><p className="mt-2 text-xs"><a className="link" href="/revenue?view=yield">Yield across companies</a></p></Card>
           <Card title="Details">
             <DescriptionList items={[
               { label: "Owner", value: <Owner member={team.get(company.owner_id ?? "")} /> },

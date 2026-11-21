@@ -98,17 +98,27 @@ export async function mergeCompanies(_: ActionState, fd: FormData): Promise<Acti
   return result;
 }
 
-/** Quick inline MSA change from a company or opportunity page. */
+/**
+ * Quick MSA change from a company or opportunity page. MSA status lives on
+ * the company's MSA agreement record (single source of truth); this updates
+ * the current MSA agreement or creates one.
+ */
 export async function setMsaStatus(_: ActionState, fd: FormData): Promise<ActionState> {
   const id = str(fd, "id");
   const status = str(fd, "msa_status");
   const back = str(fd, "back");
   return withMember("company.msa", async ({ supabase }) => {
     if (!isUuid(id) || !["not_started", "in_discussion", "signed"].includes(status)) return { error: "Choose an MSA status." };
-    const { error } = await supabase.from("companies").update({ msa_status: status }).eq("id", id);
+    const { data: current } = await supabase.from("commercial_agreements").select("id, signed_on")
+      .eq("company_id", id).eq("kind", "msa").is("archived_at", null).order("created_at", { ascending: false }).limit(1).maybeSingle();
+    const today = new Date().toISOString().slice(0, 10);
+    const patch = { status, signed_on: status === "signed" ? current?.signed_on ?? today : current?.signed_on ?? null };
+    const { error } = current
+      ? await supabase.from("commercial_agreements").update(patch).eq("id", current.id)
+      : await supabase.from("commercial_agreements").insert({ company_id: id, kind: "msa", title: "Master Services Agreement", ...patch });
     if (error) return { error: friendlyDbError(error, "company.msa") };
     revalidatePath(`/companies/${id}`);
     if (back.startsWith("/")) revalidatePath(back);
-    return { ok: true, message: "MSA status updated." };
+    return { ok: true, message: status === "signed" ? "MSA marked signed (dated today — edit the agreement to change the date)." : "MSA status updated." };
   });
 }

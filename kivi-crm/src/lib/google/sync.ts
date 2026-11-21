@@ -11,7 +11,6 @@ import { parseAddressList } from "./mime";
 import type { GoogleProduct } from "./scopes";
 
 const MAX_MESSAGES_PER_RUN = 300;
-const INITIAL_LOOKBACK_DAYS = 30;
 const SKIP_LABELS = new Set(["DRAFT", "SPAM", "TRASH", "CHAT"]);
 
 export interface SyncResult { checked: number; logged: number; updated: number; review: number; skipped: number }
@@ -25,6 +24,16 @@ async function lookups(emails: string[]) {
     domains.length ? admin.from("companies").select("id, domain").in("domain", domains).is("archived_at", null) : Promise.resolve({ data: [] }),
   ]);
   return { contacts: (contacts ?? []) as ContactRef[], companies: (companies ?? []) as CompanyRef[] };
+}
+
+export interface SyncPrefs { gmail_sync_enabled: boolean; gmail_mode: "contacts_only" | "contacts_and_review"; history_window_days: number; calendar_sync_enabled: boolean }
+const DEFAULT_PREFS: SyncPrefs = { gmail_sync_enabled: true, gmail_mode: "contacts_and_review", history_window_days: 30, calendar_sync_enabled: true };
+
+/** Each user's own privacy controls (Settings → Google). Defaults are conservative. */
+async function prefs(userId: string): Promise<SyncPrefs> {
+  const admin = createAdminClient();
+  const { data } = await admin.from("sync_preferences").select("gmail_sync_enabled, gmail_mode, history_window_days, calendar_sync_enabled").eq("user_id", userId).maybeSingle();
+  return { ...DEFAULT_PREFS, ...(data ?? {}) } as SyncPrefs;
 }
 
 async function exclusions(userId: string, product: GoogleProduct) {
@@ -51,6 +60,8 @@ function isUniqueViolation(error: { code?: string } | null) {
 // ------------------------------------------------------------------ Gmail
 export async function syncGmail(userId: string): Promise<SyncResult> {
   const result: SyncResult = { checked: 0, logged: 0, updated: 0, review: 0, skipped: 0 };
+  const p = await prefs(userId);
+  if (!p.gmail_sync_enabled) return result;
   const { token, connection } = await getAccessToken(userId, "gmail");
   const self = connection.google_email;
   const admin = createAdminClient();
@@ -59,7 +70,7 @@ export async function syncGmail(userId: string): Promise<SyncResult> {
   // 1. Work out which message ids are new.
   let ids: string[] = [];
   let nextCursor: string | null = connection.sync_cursor;
-  const cutoff = Date.now() - INITIAL_LOOKBACK_DAYS * 86_400_000;
+  const cutoff = Date.now() - p.history_window_days * 86_400_000;
   let initial = !connection.sync_cursor;
 
   if (!initial) {
@@ -140,7 +151,7 @@ export async function syncGmail(userId: string): Promise<SyncResult> {
       });
       if (error && !isUniqueViolation(error)) log.warn("gmail.sync.insert_failed", { code: error.code });
       else if (!error) result.logged++;
-    } else if (match.kind === "review") {
+    } else if (match.kind === "review" && p.gmail_mode === "contacts_and_review") {
       const { error } = await admin.from("sync_review_items").upsert({
         user_id: userId, product: "gmail", external_id: meta.id, external_thread_id: meta.threadId, subject,
         participants: [...from.map((a) => ({ ...a, role: "from" })), ...to.map((a) => ({ ...a, role: "to" })), ...cc.map((a) => ({ ...a, role: "cc" }))].slice(0, 30),
@@ -162,12 +173,14 @@ export async function syncGmail(userId: string): Promise<SyncResult> {
 // ------------------------------------------------------------------ Calendar
 export async function syncCalendar(userId: string): Promise<SyncResult> {
   const result: SyncResult = { checked: 0, logged: 0, updated: 0, review: 0, skipped: 0 };
+  const p = await prefs(userId);
+  if (!p.calendar_sync_enabled) return result;
   const { token, connection } = await getAccessToken(userId, "calendar");
   const self = connection.google_email;
   const admin = createAdminClient();
   const excluded = await exclusions(userId, "calendar");
   const now = Date.now();
-  const timeMin = new Date(now - INITIAL_LOOKBACK_DAYS * 86_400_000).toISOString();
+  const timeMin = new Date(now - p.history_window_days * 86_400_000).toISOString();
   const timeMax = new Date(now + 60 * 86_400_000).toISOString();
   const updatedMin = connection.last_sync_at ? new Date(new Date(connection.last_sync_at).getTime() - 10 * 60_000).toISOString() : undefined;
 
@@ -211,7 +224,7 @@ export async function syncCalendar(userId: string): Promise<SyncResult> {
         });
         if (error && !isUniqueViolation(error)) log.warn("calendar.sync.insert_failed", { code: error.code });
         else if (!error) result.logged++;
-      } else if (match.kind === "review") {
+      } else if (match.kind === "review" && p.gmail_mode === "contacts_and_review") {
         const { error } = await admin.from("sync_review_items").upsert({
           user_id: userId, product: "calendar", external_id: ev.id, subject: (ev.summary ?? "(untitled meeting)").slice(0, 300),
           participants: meta.attendees.map((email) => ({ email })), occurred_at: start, suggested_company_id: match.companyId,

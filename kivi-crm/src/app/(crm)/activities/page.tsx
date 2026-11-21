@@ -10,12 +10,15 @@ import { ActivityTimeline, FollowUp, Owner, StageBadge } from "@/components/crm"
 import { FilterBar } from "@/components/filter-bar";
 import { IconCheckCircle, IconDownload, IconTask } from "@/components/icons";
 import { ACTIVITY_TYPES, PAGE_SIZE } from "@/lib/constants";
-import { startOfZonedDay, todayInZone } from "@/lib/time";
+import { addDays, startOfZonedDay, todayInZone } from "@/lib/time";
+import { companyOptions, teamOptions } from "@/lib/data/lookups";
+import { ActivityForm } from "@/components/record-forms";
+import { RequirementBadge } from "@/components/crm";
 import type { Activity, Opportunity } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Activities & tasks" };
 
-const VIEWS = { mine: "My tasks", overdue: "Overdue follow-ups", team: "Team activity", tasks: "All open tasks", done: "Completed tasks" } as const;
+const VIEWS = { mine: "My tasks", due_today: "Due today", overdue: "Overdue", no_next_action: "No next action", tasks: "Team tasks", team: "Team activity", done: "Completed" } as const;
 type View = keyof typeof VIEWS;
 
 export default async function ActivitiesPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -37,6 +40,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
   let activities: Activity[] = [];
   let count = 0;
   let reminders: Activity[] = [];
+  let reqsNoAction: { id: string; role_title: string; status: string; owner_id: string | null; company_id: string; companies: { name: string } | null }[] = [];
   let overdueOpps: (Pick<Opportunity, "id" | "title" | "stage" | "owner_id" | "next_follow_up_on" | "company_id"> & { companies: { name: string } | null })[] = [];
 
   if (view === "mine" || view === "tasks" || view === "done") {
@@ -53,6 +57,29 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
         .is("archived_at", null).eq("reminder_state", "scheduled").lte("reminder_at", nowIso).order("reminder_at").limit(10);
       reminders = (r.data ?? []) as Activity[];
     }
+  } else if (view === "due_today") {
+    const startTomorrow = startOfZonedDay(addDays(today, 1));
+    let tq = supabase.from("activities").select("*", { count: "exact" }).eq("type", "task").is("completed_at", null).is("archived_at", null)
+      .gte("due_at", startToday).lt("due_at", startTomorrow).order("due_at");
+    let oq = supabase.from("opportunities").select("id, title, stage, owner_id, next_follow_up_on, company_id, companies(name)").is("archived_at", null)
+      .not("stage", "in", "(won,lost)").eq("next_follow_up_on", today).limit(100);
+    if (isUuid(owner)) { tq = tq.eq("owner_id", owner); oq = oq.eq("owner_id", owner); }
+    const [t, o] = await Promise.all([tq.range(from, to), oq]);
+    activities = (t.data ?? []) as Activity[];
+    count = t.count ?? 0;
+    overdueOpps = (o.data ?? []) as unknown as typeof overdueOpps;
+  } else if (view === "no_next_action") {
+    let oq = supabase.from("opportunities").select("id, title, stage, owner_id, next_follow_up_on, company_id, companies(name)").is("archived_at", null)
+      .not("stage", "in", "(won,lost)").is("next_follow_up_on", null).order("updated_at").limit(200);
+    let rq = supabase.from("requirements").select("id, role_title, status, owner_id, company_id, companies(name)").is("archived_at", null)
+      .not("status", "in", "(on_hold,closed_filled)").is("next_action_on", null).limit(200);
+    if (isUuid(owner)) { oq = oq.eq("owner_id", owner); rq = rq.eq("owner_id", owner); }
+    const [o, r] = await Promise.all([oq, rq]);
+    const opps = (o.data ?? []) as unknown as typeof overdueOpps;
+    const { data: withTask } = opps.length ? await supabase.from("activities").select("opportunity_id").eq("type", "task").is("completed_at", null).is("archived_at", null).in("opportunity_id", opps.map((x) => x.id)) : { data: [] };
+    const has = new Set((withTask ?? []).map((t: { opportunity_id: string }) => t.opportunity_id));
+    overdueOpps = opps.filter((x) => !has.has(x.id));
+    reqsNoAction = (r.data ?? []) as unknown as typeof reqsNoAction;
   } else if (view === "overdue") {
     let tq = supabase.from("activities").select("*", { count: "exact" }).eq("type", "task").is("completed_at", null).is("archived_at", null).lt("due_at", startToday).order("due_at");
     let oq = supabase.from("opportunities").select("id, title, stage, owner_id, next_follow_up_on, company_id, companies(name)").is("archived_at", null)
@@ -80,9 +107,9 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
   return (
     <>
       <PageHeader
-        title="Activities & tasks"
+        title="Tasks & activity"
         description="Every call, email, meeting, WhatsApp message, event and note — plus follow-up tasks. History is kept when owners or stages change."
-        actions={<LinkButton href="/api/export/activities"><IconDownload /> Export</LinkButton>}
+        actions={<><LinkButton href="/api/export/activities"><IconDownload /> Export</LinkButton><LinkButton variant="primary" href="/activities?view=mine&new=1">New task</LinkButton></>}
       />
       <Tabs label="Activity views" current={view} tabs={(Object.keys(VIEWS) as View[]).map((v) => ({ key: v, label: VIEWS[v], href: `/activities?view=${v}` }))} />
 
@@ -108,9 +135,36 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
         </div>
       ) : null}
 
-      {view === "overdue" ? (
-        <Card title={`Deal follow-ups past due · ${overdueOpps.length}`} className="mb-6">
-          {overdueOpps.length === 0 ? <EmptyState compact icon={<IconCheckCircle />} title="No overdue deal follow-ups" /> : (
+      {param(sp, "new") === "1" ? (
+        <Card title="New task or activity" className="mb-6">
+          <ActivityForm links={{}} companies={await companyOptions(supabase)} team={await teamOptions()} defaultOwner={member.id} back="/activities" defaultType="task" />
+        </Card>
+      ) : null}
+      {view === "no_next_action" ? (
+        <>
+          <Card title={`Open opportunities with no next action · ${overdueOpps.length}`} className="mb-6">
+            {overdueOpps.length === 0 ? <EmptyState compact icon={<IconCheckCircle />} title="Every open deal has a next step" /> : (
+              <ul className="divide-y divide-line">{overdueOpps.map((o) => (
+                <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+                  <div><Link className="font-medium hover:underline" href={`/pipeline/${o.id}`}>{o.title}</Link><div className="text-xs text-muted">{o.companies?.name}</div></div>
+                  <div className="flex items-center gap-3"><Owner member={team.get(o.owner_id ?? "")} /><StageBadge stage={o.stage} /></div>
+                </li>))}</ul>
+            )}
+          </Card>
+          <Card title={`Live requirements with no next action · ${reqsNoAction.length}`} className="mb-6">
+            {reqsNoAction.length === 0 ? <EmptyState compact icon={<IconCheckCircle />} title="Every live requirement has a next step" /> : (
+              <ul className="divide-y divide-line">{reqsNoAction.map((r) => (
+                <li key={r.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+                  <div><Link className="font-medium hover:underline" href={`/requirements/${r.id}`}>{r.role_title}</Link><div className="text-xs text-muted">{r.companies?.name}</div></div>
+                  <div className="flex items-center gap-3"><Owner member={team.get(r.owner_id ?? "")} /><RequirementBadge status={r.status as never} /></div>
+                </li>))}</ul>
+            )}
+          </Card>
+        </>
+      ) : null}
+      {view === "overdue" || view === "due_today" ? (
+        <Card title={view === "overdue" ? `Deal follow-ups past due · ${overdueOpps.length}` : `Deal follow-ups due today · ${overdueOpps.length}`} className="mb-6">
+          {overdueOpps.length === 0 ? <EmptyState compact icon={<IconCheckCircle />} title={view === "overdue" ? "No overdue deal follow-ups" : "No deal follow-ups due today"} /> : (
             <ul className="divide-y divide-line">
               {overdueOpps.map((o) => (
                 <li key={o.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
@@ -126,7 +180,8 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
         </Card>
       ) : null}
 
-      <Card title={view === "overdue" ? `Overdue tasks · ${count}` : undefined} bodyClassName="px-4 py-1">
+      {view !== "no_next_action" ? (
+      <Card title={view === "overdue" ? `Overdue tasks · ${count}` : view === "due_today" ? `Tasks due today · ${count}` : undefined} bodyClassName="px-4 py-1">
         {activities.length === 0 ? (
           <EmptyState compact icon={<IconTask />}
             title={view === "mine" ? "No open tasks" : view === "team" ? "No activity logged yet" : view === "done" ? "No completed tasks yet" : "Nothing overdue"}
@@ -135,6 +190,7 @@ export default async function ActivitiesPage({ searchParams }: { searchParams: P
           <ActivityTimeline activities={activities} team={team} links={links} back={back} currentUserId={member.id} />
         )}
       </Card>
+      ) : null}
       <Pagination page={page} total={count} pageSize={PAGE_SIZE} hrefFor={(p) => withParams("/activities", sp, { page: String(p) })} />
     </>
   );

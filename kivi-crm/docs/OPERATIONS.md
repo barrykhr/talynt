@@ -55,6 +55,8 @@ between records are not included.
     members.
   - Add `-- --include-users` to also remove team members, connections and the
     audit log.
+  - It also clears research, monitoring, revenue, agreements, imports and web
+    submissions. Workspace settings are kept.
 - Both scripts **refuse to run** unless:
   - `ALLOW_DEV_SEED=true`;
   - `NODE_ENV` and `VERCEL_ENV` are not `production`; and
@@ -80,7 +82,10 @@ between records are not included.
 - Server logs are structured JSON lines (`{ts, level, event, …}`) in the host's
   log viewer. They never contain tokens, secrets, cookies or email content;
   `src/lib/log.ts` redacts them, and tests cover it.
-- Useful events to watch:
+- Scheduled run: `GET /api/cron/sync` returns per-step results (`msa_refresh`, `earnings_refresh`,
+  `research_retries`, `monitors`, `google_sync`). A failed step is logged as `cron.step_failed` and never
+  blocks the others. Monitor and research health is visible in Research updates → Sources & jobs.
+- Useful events to watch: `research.job_failed`, `monitor.run`, `capture.rejected`,
   - `auth.access_denied`
   - `google.token_revoked`
   - `google.sync.failed`

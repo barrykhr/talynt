@@ -33,3 +33,16 @@ migrations.
 | Spreadsheet attacks | Uploads are capped at 5 MB and 2,000 rows. XLSX files are checked for the ZIP signature. Formulas are **never evaluated** (only cached values are read, and macros and `.xls`/`.xlsm` are refused). Cells are stored as text. CSV exports neutralise `= + - @` cells against CSV injection. |
 | Accidental data loss | No delete permissions on business records. Archive and restore are available. Merges archive the duplicate and record `merged_into_id`. History and audit logs are append-only. |
 | Clickjacking and sniffing | `X-Frame-Options: DENY`, `frame-ancestors 'none'`, `nosniff`, HSTS, a strict `Referrer-Policy` and a minimal `Permissions-Policy`. |
+
+## v2 additions
+
+| Area | Control |
+|---|---|
+| Identity | Members are linked by Google's immutable subject id (`google_sub`). An email rename keeps access, and a different Google account can't take over a provisioned email. |
+| Trusted backend | `private.is_trusted_backend()` trusts only the service-role JWT or a direct operator session. It never trusts anonymous or member requests, including inside SECURITY DEFINER functions (tested). |
+| Research | Only the trusted backend can store results. Snapshots and findings are immutable apart from review fields. Inputs are minimised and shown on the snapshot. LinkedIn is blocked in the web tools. There is no automatic sending. Rate limited per user. |
+| Monitoring fetches | https only, private and internal IPs blocked (checked on every redirect), 15-second timeout, 2 MB cap, polite retries. Feed text is stored as plain text and rendered escaped. |
+| Revenue | No deletes. Payments are reversed rather than edited. Currency, overpayment and cancellation guards. History and audit triggers. |
+| Settings | Members can read workspace settings; only admins can change them (RLS policy), and every change is audited with before and after values. |
+| Public capture endpoint | Disabled by default, origin allow-list, IP rate limits stored as salted hashes, honeypot, timing and Turnstile checks, payload cap, inbox review before any record is created. |
+| Notifications | In-app only, per-user RLS. Links are restricted to same-site paths. |

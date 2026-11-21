@@ -2,13 +2,16 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { requireMemberPage } from "@/lib/auth";
 import { signOut } from "../(auth)/actions";
-import { MobileNav, NoticeToast, SideNav } from "@/components/shell";
+import { MobileNav, NoticeToast, OfflineBanner, QuickCreate, SideNav } from "@/components/shell";
+import { NotificationsMenu } from "@/components/notifications";
 import { Avatar } from "@/components/ui";
 import { IconSearch, IconSignOut } from "@/components/icons";
 import { initials, displayName } from "@/lib/data/team";
 
 // Every page in this group is personalised and permission-checked per request.
 export const dynamic = "force-dynamic";
+// Research runs after the response (next/server after()); allow it time to finish.
+export const maxDuration = 300;
 
 export default async function CrmLayout({ children }: { children: React.ReactNode }) {
   const member = await requireMemberPage();
@@ -20,7 +23,7 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
         <Link href="/" className="mb-5 flex items-center gap-2 px-2.5">
           <span className="flex h-7 w-7 items-center justify-center rounded-md bg-accent text-[13px] font-bold text-white">K</span>
           <span className="text-sm font-semibold leading-tight">
-            KiviTronics<span className="block text-xs font-normal text-muted">CRM</span>
+            KiviTronics Consulting<span className="block text-xs font-normal text-muted">CRM workspace</span>
           </span>
         </Link>
         <SideNav isAdmin={isAdmin} />
@@ -55,10 +58,18 @@ export default async function CrmLayout({ children }: { children: React.ReactNod
               autoComplete="off"
             />
           </form>
-          <form action={signOut} className="ml-auto lg:hidden">
-            <button type="submit" className="whitespace-nowrap text-sm text-ink-soft">Sign out</button>
-          </form>
+          <div className="ml-auto flex items-center gap-2">
+            <QuickCreate />
+            <NotificationsMenu />
+            <span className="hidden items-center gap-2 border-l border-line pl-3 text-[13px] text-muted xl:flex" title={member.email}>
+              <Avatar label={initials(member)} /> {displayName(member)}
+            </span>
+            <form action={signOut} className="lg:hidden">
+              <button type="submit" className="whitespace-nowrap text-sm text-ink-soft">Sign out</button>
+            </form>
+          </div>
         </header>
+        <OfflineBanner />
         <main id="main" className="mx-auto w-full max-w-[1200px] flex-1 px-4 py-6 sm:px-6 sm:py-8">
           {children}
         </main>

@@ -192,6 +192,8 @@ same way.
    | `SUPABASE_SERVICE_ROLE_KEY` | from §2 (mark as *Sensitive*) |
    | `CRON_SECRET` | random, at least 16 characters (`node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"`) |
    | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `TOKEN_ENCRYPTION_KEY` | §7 (optional until Gmail and Calendar are enabled) |
+   | `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `OUTREACH_AGENT_URL` | §7a, optional (research) |
+   | `LEAD_CAPTURE_ENABLED`, `LEAD_CAPTURE_ALLOWED_ORIGINS`, `CAPTURE_IP_SALT` | §7a, optional (website form) |
 
    Never set `ALLOW_DEV_SEED` in any hosted environment.
 3. Deploy.
@@ -202,7 +204,9 @@ same way.
    - HTTPS is issued automatically once DNS resolves.
 5. Confirm that the Supabase **Site URL** and **Redirect URLs** (§4b) and the
    Google **redirect URIs** (§4a) all use the final domain.
-6. **Scheduled sync:** `vercel.json` schedules `/api/cron/sync` every 30 minutes.
+6. **Scheduled jobs:** `vercel.json` schedules `/api/cron/sync` every 30 minutes. Each run does
+   Google sync, research retries, due monitors, MSA expiry and earned-revenue refresh. Research
+   runs need long functions: the CRM routes set `maxDuration = 300`, which requires Vercel Pro.
    Vercel sends `Authorization: Bearer $CRON_SECRET` automatically. The Hobby plan
    only allows daily crons, so either use Pro or change the schedule.
 7. **Smoke test:**
@@ -216,6 +220,16 @@ Production deployment is only complete when these smoke tests pass on the real
 domain.
 
 ---
+
+## 7a. Research, monitoring and lead capture (optional)
+
+- **Research:** set one provider key. docs/RESEARCH.md covers the providers,
+  including how to use the existing outreach agent.
+- **Monitoring:** needs no keys. Set `CRON_SECRET` so the scheduler runs, then
+  configure sources per company.
+- **Website form:** see docs/LEAD_CAPTURE.md.
+- **Workspace rules:** booked rule, earned rule, stage probabilities and
+  monitoring cadence live in **Settings → Workspace** (admins).
 
 ## 7. Gmail and Google Calendar (optional, per user)
 

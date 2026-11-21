@@ -91,3 +91,9 @@ export function formatRelative(value: string | null | undefined, now = new Date(
 export function daysUntil(isoDate: string, today = todayInZone()): number {
   return Math.round((Date.parse(`${isoDate}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000);
 }
+
+/** Whole days since an ISO timestamp (0 if in the future). */
+export function daysSince(iso: string | null | undefined, now = new Date()): number {
+  if (!iso) return Infinity;
+  return Math.max(0, Math.floor((now.getTime() - new Date(iso).getTime()) / 86_400_000));
+}

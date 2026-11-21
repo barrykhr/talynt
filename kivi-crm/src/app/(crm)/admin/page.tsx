@@ -24,6 +24,13 @@ const ACTION_LABEL: Record<string, string> = {
   "record.merged": "Merged records",
   "export.csv": "Exported CSV",
   "import.completed": "Imported spreadsheet",
+  "settings.changed": "Changed workspace settings",
+  "research.finding_reviewed": "Reviewed research finding",
+  "revenue.invoice_created": "Recorded invoice",
+  "revenue.invoice_changed": "Changed invoice",
+  "revenue.payment_created": "Recorded payment",
+  "revenue.payment_changed": "Changed/reversed payment",
+  "revenue.credit_created": "Recorded credit",
 };
 
 const AUDIT_PAGE = 50;
@@ -73,7 +80,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
         <Card title="Data, exports & backups">
           <p className="mb-3 text-sm text-muted">CSV exports respect permissions and neutralise spreadsheet formulas. For full backups and restores, see docs/OPERATIONS.md. There is intentionally no “delete everything” button.</p>
           <div className="flex flex-wrap gap-2">
-            {["companies", "contacts", "opportunities", "requirements", "activities"].map((e) => (
+            {["companies", "contacts", "opportunities", "requirements", "activities", "revenue", "invoices", "payments"].map((e) => (
               <LinkButton key={e} size="sm" href={`/api/export/${e}`}><IconDownload /> {e[0].toUpperCase() + e.slice(1)}</LinkButton>
             ))}
           </div>

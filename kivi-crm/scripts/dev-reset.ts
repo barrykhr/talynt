@@ -14,12 +14,19 @@ async function main() {
   assertDevelopmentTarget("dev:reset");
   const supabase = createClient(requireEnv("NEXT_PUBLIC_SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), { auth: { persistSession: false } });
   const order = [
-    "sync_review_items", "sync_exclusions", "activities", "opportunity_contacts", "requirement_contacts",
-    "requirements", "opportunities", "contacts", "companies", "imports",
+    "notifications", "web_submissions", "sync_review_items", "sync_exclusions", "outreach_drafts", "research_findings",
+    "company_signals", "monitor_observations", "monitor_runs", "company_monitors",
+    "payments", "credit_adjustments", "invoices", "revenue_events", "placements",
+    "activities", "opportunity_contacts", "requirement_contacts", "requirements", "opportunities", "contacts",
+    "commercial_agreements", "import_rows", "imports",
   ];
-  for (const table of order) {
-    const key = table.endsWith("_contacts") ? "contact_id" : table === "sync_exclusions" ? "user_id" : "id";
-    const { error } = await supabase.from(table).delete().neq(key, NIL);
+  // Snapshots/jobs reference each other; clear the link first, then both.
+  await supabase.from("research_jobs").update({ snapshot_id: null }).neq("id", NIL);
+  for (const table of [...order.slice(0, 6), "research_snapshots", "research_jobs", ...order.slice(6), "companies"]) {
+    const key = table.endsWith("_contacts") ? "contact_id" : table === "sync_exclusions" ? "user_id" : table === "import_rows" ? "import_id" : "id";
+    const { error } = table === "import_rows"
+      ? await supabase.from(table).delete().gte("id", 0)
+      : await supabase.from(table).delete().neq(key, NIL);
     if (error) throw new Error(`${table}: ${error.message}`);
     console.log(`cleared ${table}`);
   }

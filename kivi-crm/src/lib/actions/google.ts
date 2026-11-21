@@ -68,6 +68,11 @@ export async function sendCrmEmail(_: ActionState, fd: FormData): Promise<Action
       log.error("google.send_log_failed", { code: error.code });
       return { error: "The email was sent, but logging it to the CRM failed. Sync will pick it up if the recipient is a contact." };
     }
+    const draftId = str(fd, "draft_id");
+    if (isUuid(draftId)) {
+      const { data: act } = await supabase.from("activities").select("id").eq("origin", "gmail").eq("external_owner_id", member.id).eq("external_id", sent.id).maybeSingle();
+      await supabase.from("outreach_drafts").update({ status: "sent_email", body: v.body, subject: v.subject, sent_activity_id: act?.id ?? null }).eq("id", draftId);
+    }
     back = safeRedirectPath(str(fd, "back"), "/");
     return { ok: true };
   });
