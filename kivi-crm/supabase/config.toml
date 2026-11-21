@@ -1,0 +1,27 @@
+# Local development stack (`supabase start`). Production settings are made in
+# the Supabase dashboard — see docs/SETUP.md.
+project_id = "kivi-crm"
+
+[api]
+port = 54321
+schemas = ["public"]
+
+[db]
+port = 54322
+major_version = 17
+
+# No seed data: a fresh database is genuinely empty. Development fixtures are
+# opt-in via `npm run dev:seed` only.
+[db.seed]
+enabled = false
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+enable_signup = true
+
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_OAUTH_CLIENT_ID)"
+secret = "env(GOOGLE_OAUTH_CLIENT_SECRET)"
+skip_nonce_check = false

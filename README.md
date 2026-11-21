@@ -87,3 +87,9 @@ CONTACT_WEBHOOK_URL="https://..."
   field and the convergence sequence.
 - Interactive visuals (transcript ↔ signals, shortlist, capability accordion)
   are keyboard-operable and expose `aria-pressed` / `aria-expanded`.
+
+## KiviTronics CRM
+
+`kivi-crm/` is a separate application: the internal CRM for KiviTronics
+Consulting (Next.js + Supabase). It has its own `package.json`; start with
+[`kivi-crm/README.md`](kivi-crm/README.md) and [`kivi-crm/docs/SETUP.md`](kivi-crm/docs/SETUP.md).
