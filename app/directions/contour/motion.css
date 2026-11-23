@@ -52,7 +52,7 @@
   }
 
   /* The opening glow breathes. */
-  .ct-motion #ct-main > section:first-child::before {
+  .ct-motion #ct-main > section:first-child:not(.ct-film)::before {
     animation: ct-breathe 9s ease-in-out infinite;
     transform-origin: 70% 70%;
   }
@@ -79,17 +79,17 @@
 
   /* --- 2. The first screen: an entrance, on load, without waiting for script */
 
-  .ct-motion #ct-main > :first-child :is(h1, .ct-lede, p.ct-meta, .ct-btn, figure, ul) {
+  .ct-motion #ct-main > :first-child:not(.ct-film) :is(h1, .ct-lede, p.ct-meta, .ct-btn, figure, ul) {
     animation: ct-rise 1.1s var(--ct-ease) both;
   }
 
-  .ct-motion #ct-main > :first-child p.ct-meta { animation-delay: 0.05s; }
-  .ct-motion #ct-main > :first-child h1 { animation-delay: 0.12s; }
-  .ct-motion #ct-main > :first-child h1 .ct-italic { animation: ct-rise 1.1s var(--ct-ease) 0.42s both; }
-  .ct-motion #ct-main > :first-child .ct-lede { animation-delay: 0.55s; }
-  .ct-motion #ct-main > :first-child .ct-btn { animation-delay: 0.7s; }
-  .ct-motion #ct-main > :first-child figure { animation: ct-float-in 1.4s var(--ct-ease) 0.3s both; }
-  .ct-motion #ct-main > :first-child ul { animation-delay: 0.9s; }
+  .ct-motion #ct-main > :first-child:not(.ct-film) p.ct-meta { animation-delay: 0.05s; }
+  .ct-motion #ct-main > :first-child:not(.ct-film) h1 { animation-delay: 0.12s; }
+  .ct-motion #ct-main > :first-child:not(.ct-film) h1 .ct-italic { animation: ct-rise 1.1s var(--ct-ease) 0.42s both; }
+  .ct-motion #ct-main > :first-child:not(.ct-film) .ct-lede { animation-delay: 0.55s; }
+  .ct-motion #ct-main > :first-child:not(.ct-film) .ct-btn { animation-delay: 0.7s; }
+  .ct-motion #ct-main > :first-child:not(.ct-film) figure { animation: ct-float-in 1.4s var(--ct-ease) 0.3s both; }
+  .ct-motion #ct-main > :first-child:not(.ct-film) ul { animation-delay: 0.9s; }
 
   @keyframes ct-rise {
     from { opacity: 0; transform: translateY(28px); clip-path: inset(0 0 100% 0); }

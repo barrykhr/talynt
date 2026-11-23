@@ -1014,17 +1014,23 @@ html:has(.ct-cream) body {
   background-color: #f4eee3;
 }
 
+/* The frosted navigation sits over deep blue bands too: keep it cream enough
+   that its links keep their contrast. */
+.ct-cream header > .backdrop-blur-md {
+  background-color: rgb(244 238 227 / 0.96);
+}
+
 /* --- Shared by both colourways ------------------------------------------- */
 
 /* A soft glow and a fine vertical texture behind the first section of a
    page, fading out before the content below. Decoration only. */
-.ct-v #ct-main > section:first-child {
+.ct-v #ct-main > section:first-child:not(.ct-film) {
   position: relative;
   isolation: isolate;
   overflow-x: clip; /* the glow breathes; it must never widen the page */
 }
 
-.ct-v #ct-main > section:first-child::before {
+.ct-v #ct-main > section:first-child:not(.ct-film)::before {
   content: "";
   position: absolute;
   inset: 0;

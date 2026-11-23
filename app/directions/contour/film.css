@@ -1,0 +1,1488 @@
+/* ==========================================================================
+   The hiring film (components/contour/film/HiringFilm.tsx)
+   --------------------------------------------------------------------------
+   Rendered only in the employer-only colourways. Every element's resting
+   style is its END state; animations (played only on the active scene, and
+   only when motion is welcome) start from somewhere else and arrive there.
+   So with reduced motion, or before script runs, each scene shows its result.
+   ========================================================================== */
+
+html:has(.ct-film) {
+  scroll-snap-type: y proximity;
+}
+
+.ct-film {
+  position: relative;
+}
+
+.ct-film-snap {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 100svh;
+  scroll-snap-align: start;
+  pointer-events: none;
+}
+
+/* The thread down the margin would scroll past a pinned stage; this page tells
+   its story in the stage instead. */
+.ct-motion:has(.ct-film) .ct-thread {
+  display: none;
+}
+
+.ct-film-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+  padding-top: var(--ct-nav-h);
+  isolation: isolate;
+  --tilt-y: -10deg;
+  --tilt-x: 6deg;
+}
+
+.ct-film-stage[data-scene="search"] { --tilt-y: 0deg; --tilt-x: 3deg; }
+.ct-film-stage[data-scene="relevant"] { --tilt-y: 8deg; --tilt-x: 5deg; }
+.ct-film-stage[data-scene="outreach"] { --tilt-y: -6deg; --tilt-x: 4deg; }
+.ct-film-stage[data-scene="nurture"] { --tilt-y: 4deg; --tilt-x: 6deg; }
+.ct-film-stage[data-scene="followup"] { --tilt-y: -3deg; --tilt-x: 3deg; }
+.ct-film-stage[data-scene="decide"] { --tilt-y: 0deg; --tilt-x: 0deg; }
+
+/* The glow behind the device, and a fine texture, as in the opening of every page. */
+.ct-film-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 42% 55% at 68% 58%, rgb(var(--ct-glow) / 0.32), transparent 70%),
+    radial-gradient(ellipse 20% 30% at 68% 66%, rgb(var(--ct-glow) / 0.28), transparent 70%),
+    repeating-linear-gradient(90deg, var(--ct-texture) 0 1px, transparent 1px 7px);
+}
+
+.ct-film-grid {
+  display: grid;
+  height: 100%;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 1rem;
+  padding-block: 1rem 3.5rem;
+}
+
+@media (min-width: 1024px) {
+  .ct-film-grid {
+    grid-template-columns: minmax(0, 4.4fr) minmax(0, 7.6fr);
+    grid-template-rows: 1fr;
+    align-items: center;
+    gap: 3rem;
+    padding-block: 2rem;
+  }
+}
+
+/* --- The words ------------------------------------------------------------ */
+
+.ct-film-copy {
+  position: relative;
+  min-height: 15.5rem;
+  perspective: 1100px;
+  order: 2;
+}
+
+@media (min-width: 1024px) {
+  .ct-film-copy {
+    order: 0;
+    height: 26rem;
+    min-height: 0;
+  }
+}
+
+.ct-film-card {
+  position: absolute;
+  inset: 0 0 auto 0;
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+  transition:
+    transform 0.95s var(--ct-ease),
+    opacity 0.6s ease;
+}
+
+@media (min-width: 1024px) {
+  .ct-film-card {
+    top: 50%;
+    translate: 0 -50%;
+  }
+}
+
+.ct-film-card[data-state="next"] {
+  opacity: 0;
+  transform: rotateX(-80deg) translateY(30%);
+  pointer-events: none;
+}
+
+.ct-film-card[data-state="past"] {
+  opacity: 0;
+  transform: rotateX(80deg) translateY(-30%);
+  pointer-events: none;
+}
+
+.ct-film-title {
+  margin-top: 1.1rem;
+  font-size: clamp(1.7rem, 1.05rem + 2.3vw, 3.25rem);
+  line-height: 1.04;
+}
+
+.ct-film-title.is-lead {
+  font-size: clamp(1.7rem, 1.05rem + 2.1vw, 3rem);
+}
+
+.ct-film-title .ct-italic {
+  color: var(--ct-lead);
+}
+
+.ct-film-body {
+  margin-top: 1rem;
+  max-width: 30rem;
+  font-size: clamp(0.95rem, 0.88rem + 0.3vw, 1.12rem);
+}
+
+/* --- The device ----------------------------------------------------------- */
+
+.ct-film-device {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  height: 100%;
+  perspective: 2200px;
+}
+
+.ct-laptop {
+  position: relative;
+  width: min(100%, calc((100svh - var(--ct-nav-h) - 20rem) * 1.5));
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+  transition: transform 1.3s var(--ct-ease);
+}
+
+@media (min-width: 1024px) {
+  .ct-laptop {
+    width: min(96%, 50rem, calc((100svh - var(--ct-nav-h) - 8rem) * 1.45));
+  }
+}
+
+.ct-laptop-lid {
+  container-type: inline-size;
+  position: relative;
+  padding: 2.2% 2.2% 3%;
+  border-radius: 1.4rem 1.4rem 0.4rem 0.4rem;
+  background: linear-gradient(180deg, #2a2a2c, #161618);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08) inset,
+    0 40px 90px -30px rgb(0 0 0 / 0.75),
+    0 0 120px -20px rgb(var(--ct-glow) / 0.35);
+  transform-origin: 50% 100%;
+}
+
+.ct-laptop-base {
+  position: relative;
+  height: clamp(10px, 2.2vw, 20px);
+  margin-inline: -7%;
+  border-radius: 0 0 1.6rem 1.6rem;
+  background: linear-gradient(180deg, #3a3a3d, #1f1f21 70%);
+  box-shadow: 0 30px 50px -25px rgb(0 0 0 / 0.8);
+}
+
+.ct-laptop-base::before {
+  content: "";
+  position: absolute;
+  left: 42%;
+  right: 42%;
+  top: 0;
+  height: 40%;
+  border-radius: 0 0 0.6rem 0.6rem;
+  background: rgb(0 0 0 / 0.35);
+}
+
+.ct-laptop-screen {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 0.55rem;
+  background: var(--ct-bg);
+  color: var(--ct-ink);
+  font-family: var(--ct-sans);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+/* Everything on a screen is sized from its device's width (the lid and the
+   phone are the size containers), so the interface scales as one picture. */
+.ct-laptop-screen {
+  font-size: 1.78cqi;
+  line-height: 1.35;
+}
+
+.fs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+  padding: 0.7em 1.1em;
+  border-bottom: 1px solid;
+  --ct-bc: var(--ct-line);
+  font-family: var(--ct-mono);
+  font-size: 0.72em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ct-mute);
+  background: var(--ct-bg-2);
+}
+
+.fs-lights {
+  display: flex;
+  gap: 0.45em;
+}
+
+.fs-lights i {
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 50%;
+  background: var(--ct-line-2);
+}
+
+.fs-step {
+  color: var(--ct-green);
+}
+
+.fs-illus {
+  color: var(--ct-mute);
+}
+
+.fs-viewport {
+  position: relative;
+  perspective: 1400px;
+  overflow: hidden;
+}
+
+/* The screen flips: the next scene turns up into place, the last one away. */
+.ct-screen {
+  position: absolute;
+  inset: 0;
+  padding: 1.6em 1.8em;
+  backface-visibility: hidden;
+  transform-origin: 50% 50%;
+  transition:
+    transform 0.95s var(--ct-ease),
+    opacity 0.5s ease;
+}
+
+.ct-screen[data-state="next"] {
+  opacity: 0;
+  transform: rotateX(-90deg) translateZ(40px);
+}
+
+.ct-screen[data-state="past"] {
+  opacity: 0;
+  transform: rotateX(90deg) translateZ(40px);
+}
+
+.ct-film-label {
+  position: absolute;
+  left: 0;
+  bottom: -0.25rem;
+  font-family: var(--ct-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ct-mute);
+}
+
+/* --- Pieces used across the screens -------------------------------------- */
+
+.ct-glyph {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+
+.fs-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--ct-mono);
+  font-size: 0.75em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ct-green);
+}
+
+.fs-title {
+  margin-top: 0.35em;
+  font-family: var(--ct-serif);
+  font-size: 2.3em;
+  line-height: 1.05;
+}
+
+.fs-title-s {
+  font-size: 1.5em;
+  margin-top: 0;
+}
+
+.fs-muted {
+  margin-top: 0.3em;
+  color: var(--ct-mute);
+}
+
+.fs-chip,
+.fs-reason {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.35em 0.75em;
+  border-radius: 999px;
+  border: 1px solid;
+  --ct-bc: var(--ct-line-2);
+  background: var(--ct-surface);
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+.fs-reason {
+  white-space: normal;
+  --ct-bc: transparent;
+  background: color-mix(in oklab, var(--ct-lime) 18%, transparent);
+  color: var(--ct-ink);
+  padding: 0.25em 0.6em;
+  font-size: 0.78em;
+}
+
+.fs-reason .ct-glyph {
+  color: var(--ct-lime);
+}
+
+.fs-avatar {
+  display: grid;
+  place-items: center;
+  width: 2.6em;
+  height: 2.6em;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ct-lime);
+  color: #0a0a0a;
+  font-family: var(--ct-mono);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+.fs-avatar-s {
+  width: 2em;
+  height: 2em;
+  font-size: 0.7em;
+}
+
+.fs-mark {
+  display: block;
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 0.45em;
+  background: var(--ct-ink);
+  box-shadow: inset 0 0 0 0.45em var(--ct-ink), inset 0 0 0 0.6em var(--ct-lime);
+}
+
+/* --- 01 The brief, and the one click ------------------------------------- */
+
+.fs-app {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 9.5em 1fr;
+}
+
+.fs-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  padding: 1.4em 1em;
+  border-right: 1px solid;
+  --ct-bc: var(--ct-line);
+  background: var(--ct-bg-2);
+}
+
+.fs-side .fs-mark {
+  margin-bottom: 1em;
+}
+
+.fs-nav {
+  padding: 0.45em 0.7em;
+  border-radius: 0.5em;
+  color: var(--ct-mute);
+  font-size: 0.9em;
+}
+
+.fs-nav.is-on {
+  background: var(--ct-surface);
+  color: var(--ct-ink);
+}
+
+.fs-main {
+  position: relative;
+  padding: 1.8em 2.2em;
+  align-self: center;
+}
+
+.fs-needs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-top: 1.4em;
+}
+
+.fs-cta-row {
+  margin-top: 2em;
+}
+
+.fs-cta {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  min-width: 11em;
+  padding: 0.85em 1.6em;
+  border-radius: 999px;
+  background: var(--ct-btn);
+  color: var(--ct-btn-ink);
+  font-weight: 600;
+  font-size: 1.05em;
+  box-shadow: 0 0 0 0.3em rgb(var(--ct-glow) / 0.18), 0 0.8em 2.4em -0.8em rgb(var(--ct-glow) / 0.7);
+}
+
+.fs-cta > * {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+}
+
+/* End state: the search is running. */
+.fs-cta-idle { opacity: 0; }
+.fs-cta-busy { opacity: 1; }
+
+.fs-ripple {
+  position: absolute;
+  inset: -0.4em;
+  border-radius: 999px;
+  border: 2px solid var(--ct-lime);
+  opacity: 0;
+}
+
+.fs-cursor {
+  position: absolute;
+  left: 9em;
+  top: 13.6em;
+  width: 2.2em;
+  height: 2.2em;
+  opacity: 0;
+  filter: drop-shadow(0 0.3em 0.4em rgb(0 0 0 / 0.4));
+}
+
+/* --- 02 The search across every source ----------------------------------- */
+
+.fs-search {
+  position: absolute;
+  inset: 0;
+}
+
+.fs-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fs-lines line {
+  stroke: var(--ct-lime);
+  stroke-width: 1.2;
+  stroke-dasharray: 2 4;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.55;
+}
+
+.fs-source {
+  position: absolute;
+  translate: -50% -50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.5em 0.9em;
+  border-radius: 999px;
+  border: 1px solid;
+  --ct-bc: var(--ct-line-2);
+  background: var(--ct-surface);
+  font-size: 0.9em;
+  white-space: nowrap;
+  box-shadow: 0 0.6em 1.6em -1em rgb(0 0 0 / 0.5);
+}
+
+.fs-source-dot {
+  width: 0.6em;
+  height: 0.6em;
+  border-radius: 50%;
+  background: var(--ct-lime);
+  box-shadow: 0 0 0 0.3em rgb(var(--ct-glow) / 0.2);
+}
+
+.fs-hub {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  translate: -50% -50%;
+  display: grid;
+  place-items: center;
+  width: 5.5em;
+  height: 5.5em;
+  border-radius: 1.4em;
+  background: var(--ct-surface);
+  border: 1px solid;
+  --ct-bc: var(--ct-lime);
+  box-shadow: 0 0 0 0.8em rgb(var(--ct-glow) / 0.12), 0 0 3em rgb(var(--ct-glow) / 0.45);
+}
+
+.fs-hub .fs-mark {
+  width: 2.4em;
+  height: 2.4em;
+}
+
+.fs-dot {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  width: 0.55em;
+  height: 0.55em;
+  margin: -0.275em 0 0 -0.275em;
+  border-radius: 50%;
+  background: var(--ct-lime);
+  opacity: 0;
+}
+
+.fs-ticker {
+  position: absolute;
+  left: 50%;
+  bottom: 1.2em;
+  translate: -50% 0;
+  display: grid;
+  min-width: 18em;
+  padding: 0.55em 1.2em;
+  border-radius: 999px;
+  background: var(--ct-bg-2);
+  border: 1px solid;
+  --ct-bc: var(--ct-line);
+  text-align: center;
+  font-size: 0.95em;
+}
+
+.fs-tick {
+  grid-area: 1 / 1;
+  opacity: 0;
+  color: var(--ct-mute);
+}
+
+.fs-tick b {
+  color: var(--ct-ink);
+}
+
+.fs-tick.is-last {
+  opacity: 1;
+}
+
+/* --- 03 Only the most relevant ------------------------------------------- */
+
+.fs-relevant {
+  position: absolute;
+  inset: 0;
+  padding: 1.6em 1.8em;
+  display: grid;
+  align-content: center;
+}
+
+.fs-noise {
+  position: absolute;
+  inset: 1.4em 1.8em;
+  display: grid;
+  gap: 0.55em;
+  align-content: start;
+}
+
+.fs-noise-row {
+  height: 1.5em;
+  width: var(--w);
+  border-radius: 0.4em;
+  background: var(--ct-line);
+  opacity: 0;
+}
+
+.fs-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9em;
+  margin-top: 1.1em;
+}
+
+.fs-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+  padding: 1.1em 1em;
+  border-radius: 1em;
+  border: 1px solid;
+  --ct-bc: var(--ct-line-2);
+  background: var(--ct-surface);
+  box-shadow: 0 1.4em 2.4em -1.6em rgb(0 0 0 / 0.6);
+}
+
+.fs-card-line {
+  font-size: 0.85em;
+  color: var(--ct-ink-2);
+}
+
+/* --- 04 Outreach: the email ---------------------------------------------- */
+
+.fs-mail {
+  position: absolute;
+  inset: 0;
+  padding: 1.6em 1.8em;
+  width: 74%;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+}
+
+.fs-mail .fs-field {
+  width: 100%;
+}
+
+.fs-field {
+  display: flex;
+  gap: 0.6em;
+  padding: 0.6em 0;
+  border-bottom: 1px solid;
+  --ct-bc: var(--ct-line);
+}
+
+.fs-field span {
+  width: 4.5em;
+  color: var(--ct-mute);
+}
+
+.fs-body {
+  margin-top: 1em;
+  display: grid;
+  gap: 0.25em;
+  color: var(--ct-ink-2);
+  font-size: 0.95em;
+}
+
+.fs-type {
+  white-space: nowrap;
+}
+
+.fs-send {
+  position: relative;
+  display: inline-grid;
+  margin-top: 1.4em;
+  padding: 0.6em 1.4em;
+  border-radius: 999px;
+  background: var(--ct-btn);
+  color: var(--ct-btn-ink);
+  font-weight: 600;
+}
+
+.fs-send > * {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+}
+
+.fs-send-idle { opacity: 0; }
+.fs-send-done { opacity: 1; }
+
+/* --- 05 Nurture ------------------------------------------------------------ */
+
+.fs-nurture {
+  position: absolute;
+  inset: 0;
+  padding: 1.6em 1.8em;
+  width: 72%;
+  display: grid;
+  align-content: center;
+}
+
+.fs-person {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.6em 0.9em;
+  align-items: center;
+}
+
+.fs-warm {
+  color: var(--ct-ink);
+}
+
+.fs-meter {
+  grid-column: 1 / -1;
+  height: 0.45em;
+  border-radius: 999px;
+  background: var(--ct-line);
+  overflow: hidden;
+}
+
+.fs-meter-fill {
+  display: block;
+  height: 100%;
+  width: 82%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ct-green), var(--ct-lime));
+}
+
+.fs-timeline {
+  position: relative;
+  display: grid;
+  gap: 0.5em;
+  margin-top: 1.2em;
+}
+
+.fs-timeline li {
+  display: grid;
+  grid-template-columns: auto 5.2em 1fr auto;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.55em 0.8em;
+  border-radius: 0.7em;
+  background: var(--ct-surface);
+  border: 1px solid;
+  --ct-bc: var(--ct-line);
+  font-size: 0.9em;
+}
+
+.fs-step-icon {
+  display: grid;
+  place-items: center;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--ct-lime) 20%, transparent);
+  color: var(--ct-ink);
+}
+
+.fs-step-channel {
+  font-family: var(--ct-mono);
+  font-size: 0.8em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ct-mute);
+}
+
+.fs-step-check {
+  color: var(--ct-lime);
+}
+
+/* --- 06 Follow-ups through the pipeline ---------------------------------- */
+
+.fs-pipeline {
+  position: absolute;
+  inset: 0;
+  padding: 1.6em 1.8em;
+}
+
+.fs-cols {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.8em;
+  height: 100%;
+}
+
+.fs-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  padding: 0.8em 0.6em;
+  border-radius: 0.9em;
+  background: var(--ct-bg-2);
+}
+
+.fs-col-head {
+  font-family: var(--ct-mono);
+  font-size: 0.72em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ct-mute);
+}
+
+.fs-pcard {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 3em;
+  padding: 0.5em;
+  border-radius: 0.7em;
+  background: var(--ct-surface);
+  border: 1px solid;
+  --ct-bc: var(--ct-line-2);
+  position: relative;
+  z-index: 1;
+}
+
+.fs-pcard.is-ghost {
+  opacity: 0.45;
+  --ct-bc: var(--ct-line);
+}
+
+.fs-pline {
+  flex: 1;
+  height: 0.45em;
+  border-radius: 999px;
+  background: var(--ct-line-2);
+}
+
+.fs-toasts {
+  position: absolute;
+  right: 1.6em;
+  bottom: 1.6em;
+  display: grid;
+  gap: 0.5em;
+  justify-items: end;
+}
+
+.fs-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.6em 1em;
+  border-radius: 0.8em;
+  background: var(--ct-ink);
+  color: var(--ct-bg);
+  font-size: 0.9em;
+  box-shadow: 0 1em 2em -1em rgb(0 0 0 / 0.7);
+}
+
+.fs-toast .ct-glyph {
+  color: var(--ct-lime);
+}
+
+.ct-mono .fs-toast {
+  background: #f5f5f2;
+  color: #0a0a0a;
+}
+
+.ct-mono .fs-toast .ct-glyph {
+  color: #0a0a0a;
+}
+
+/* --- 07 The decision ------------------------------------------------------ */
+
+.fs-decide {
+  position: absolute;
+  inset: 0;
+  padding: 1.6em 1.8em;
+  display: grid;
+  align-content: center;
+  gap: 0.7em;
+}
+
+.fs-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.9em;
+  padding: 0.75em 1em;
+  border-radius: 0.9em;
+  background: var(--ct-surface);
+  border: 1px solid;
+  --ct-bc: var(--ct-line-2);
+}
+
+.fs-row-text {
+  display: grid;
+  gap: 0.15em;
+  font-size: 0.92em;
+}
+
+.fs-row-text span {
+  color: var(--ct-mute);
+  font-size: 0.9em;
+}
+
+.fs-review {
+  padding: 0.4em 1em;
+  border-radius: 999px;
+  background: var(--ct-btn);
+  color: var(--ct-btn-ink);
+  font-size: 0.85em;
+  font-weight: 600;
+}
+
+/* --- The phone ------------------------------------------------------------ */
+
+.ct-phone {
+  container-type: inline-size;
+  position: absolute;
+  right: -1%;
+  bottom: 3%;
+  width: 27%;
+  aspect-ratio: 9 / 18.5;
+  padding: 1.6%;
+  border-radius: 2.2rem;
+  background: linear-gradient(180deg, #2b2b2e, #141416);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.1) inset,
+    0 40px 80px -30px rgb(0 0 0 / 0.85),
+    0 0 80px -20px rgb(var(--ct-glow) / 0.4);
+  transition:
+    transform 1s var(--ct-ease),
+    opacity 0.6s ease;
+}
+
+.ct-phone[data-on="false"] {
+  opacity: 0;
+  transform: translate(30%, 12%) rotate(8deg);
+  pointer-events: none;
+}
+
+.ct-phone[data-on="true"] {
+  transform: rotate(-4deg);
+}
+
+.ct-phone-screen {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 1.7rem;
+  background: var(--ct-bg);
+  color: var(--ct-ink);
+  font-size: 6.3cqi;
+  line-height: 1.35;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.fp-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 2.4em 0.9em 0.7em;
+  background: var(--ct-bg-2);
+  border-bottom: 1px solid;
+  --ct-bc: var(--ct-line);
+  font-size: 0.95em;
+}
+
+.fp-head b {
+  display: block;
+  font-size: 1em;
+}
+
+.fp-head span span {
+  display: block;
+  font-size: 0.8em;
+  color: var(--ct-mute);
+}
+
+.fp-avatar {
+  display: grid;
+  place-items: center;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+}
+
+.fp-body {
+  position: relative;
+  padding: 0.9em 0.8em;
+}
+
+.fp-chat,
+.fp-invite {
+  position: absolute;
+  inset: 0.9em 0.8em;
+  display: grid;
+  align-content: start;
+  gap: 0.6em;
+  transition: opacity 0.5s ease;
+}
+
+.fp-body[data-scene="outreach"] .fp-invite,
+.fp-body[data-scene="nurture"] .fp-chat {
+  opacity: 0;
+}
+
+.fp-bubble {
+  max-width: 88%;
+  padding: 0.6em 0.75em 0.5em;
+  border-radius: 0.9em;
+  font-size: 0.86em;
+  line-height: 1.35;
+}
+
+.fp-bubble.is-out {
+  justify-self: end;
+  border-bottom-right-radius: 0.25em;
+  background: color-mix(in oklab, var(--ct-lime) 26%, var(--ct-surface));
+}
+
+.fp-bubble.is-in {
+  justify-self: start;
+  border-bottom-left-radius: 0.25em;
+  background: var(--ct-surface);
+  border: 1px solid;
+  --ct-bc: var(--ct-line);
+}
+
+.fp-ticks {
+  display: block;
+  text-align: right;
+  font-size: 0.8em;
+  letter-spacing: -0.15em;
+  color: #34b7f1;
+}
+
+.fp-typing {
+  display: inline-flex;
+  gap: 0.25em;
+  justify-self: start;
+  padding: 0.6em 0.8em;
+  border-radius: 0.9em;
+  background: var(--ct-surface);
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  padding-block: 0;
+}
+
+.fp-typing span {
+  width: 0.4em;
+  height: 0.4em;
+  border-radius: 50%;
+  background: var(--ct-mute);
+}
+
+.fp-invite {
+  justify-items: start;
+  padding: 1em;
+  border-radius: 1em;
+  background: var(--ct-surface);
+  border: 1px solid;
+  --ct-bc: var(--ct-line-2);
+  inset: 1.2em 0.8em auto;
+  gap: 0.35em;
+}
+
+.fp-invite-icon {
+  display: grid;
+  place-items: center;
+  width: 2.2em;
+  height: 2.2em;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--ct-lime) 25%, transparent);
+  margin-bottom: 0.3em;
+}
+
+.fp-invite span {
+  color: var(--ct-mute);
+  font-size: 0.9em;
+}
+
+.fp-accepted {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.3em;
+  margin-top: 0.4em;
+  padding: 0.3em 0.7em;
+  border-radius: 999px;
+  background: var(--ct-lime);
+  color: #0a0a0a !important;
+  font-weight: 600;
+}
+
+/* --- Scene dots and the scroll hint -------------------------------------- */
+
+.ct-film-dots {
+  position: absolute;
+  right: max(0.5rem, calc(var(--ct-gutter) / 2 - 0.6rem));
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  gap: 0.25rem;
+  z-index: 2;
+}
+
+.ct-film-dots button {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  cursor: pointer;
+}
+
+.ct-film-dots span {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--ct-line-2);
+  transition: height 0.4s var(--ct-ease), background-color 0.3s ease;
+}
+
+.ct-film-dots [aria-current="step"] span {
+  height: 1.3rem;
+  background: var(--ct-lime);
+}
+
+.ct-film-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  translate: -50% 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  font-family: var(--ct-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ct-mute);
+  transition: opacity 0.5s ease;
+}
+
+.ct-film-hint span {
+  width: 1px;
+  height: 1.6rem;
+  background: linear-gradient(var(--ct-lime), transparent);
+}
+
+.ct-film-hint[data-on="false"] {
+  opacity: 0;
+}
+
+@media (max-width: 1023px) {
+  .ct-film-hint,
+  .ct-film-label {
+    display: none;
+  }
+
+  .ct-phone {
+    width: 30%;
+    right: 0;
+    bottom: 0;
+  }
+
+  .ct-film-label {
+    bottom: -1.1rem;
+  }
+}
+
+/* ==========================================================================
+   The animations — active scene only, and only when motion is welcome
+   ========================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The laptop opens as the page arrives. */
+  .ct-laptop-lid {
+    animation: fl-lid 1.6s var(--ct-ease) 0.15s both;
+  }
+
+  @keyframes fl-lid {
+    from { transform: rotateX(-82deg); opacity: 0.2; }
+    to { transform: none; opacity: 1; }
+  }
+
+  .ct-laptop {
+    animation: fl-float 7s ease-in-out infinite;
+  }
+
+  @keyframes fl-float {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -8px; }
+  }
+
+  .ct-film-glow {
+    animation: ct-breathe 9s ease-in-out infinite;
+  }
+
+  .ct-film-hint span {
+    animation: fl-hint 1.8s ease-in-out infinite;
+    transform-origin: top;
+  }
+
+  @keyframes fl-hint {
+    0% { transform: scaleY(0); }
+    50% { transform: scaleY(1); }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  /* Shared entrances. */
+  [data-state="active"] .fs-in {
+    animation: fl-in 0.6s var(--ct-ease) var(--d, 0s) both;
+  }
+
+  [data-state="active"] .fs-rise {
+    animation: fl-rise 0.8s var(--ct-ease) var(--d, 0s) both;
+  }
+
+  [data-state="active"] .fs-pop {
+    animation: fl-pop 0.55s var(--ct-ease) var(--d, 0s) both;
+  }
+
+  @keyframes fl-in {
+    from { opacity: 0; transform: translateY(0.8em); }
+  }
+
+  @keyframes fl-rise {
+    from { opacity: 0; transform: translateY(2.5em) scale(0.92); }
+  }
+
+  @keyframes fl-pop {
+    from { opacity: 0; transform: translateY(1em) scale(0.9); }
+  }
+
+  /* 01 The cursor glides to Find talent and clicks once. */
+  [data-state="active"] .fs-cursor {
+    animation: fl-cursor 2.3s var(--ct-ease) 0.7s both;
+  }
+
+  @keyframes fl-cursor {
+    0% { opacity: 0; transform: translate(14em, 6em); }
+    15% { opacity: 1; }
+    60% { transform: translate(0, 0) scale(1); }
+    66% { transform: translate(0, 0) scale(0.82); }
+    74%, 88% { opacity: 1; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(0.6em, 0.6em); }
+  }
+
+  [data-state="active"] .fs-cta {
+    animation: fl-press 0.35s ease 2.15s both;
+  }
+
+  @keyframes fl-press {
+    50% { transform: scale(0.94); }
+  }
+
+  [data-state="active"] .fs-cta-idle {
+    animation: fl-swap-out 0.3s ease 2.3s both;
+  }
+
+  [data-state="active"] .fs-cta-busy {
+    animation: fl-swap-in 0.3s ease 2.35s both, fl-blink 1.2s ease-in-out 2.7s infinite;
+  }
+
+  @keyframes fl-swap-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes fl-swap-in {
+    from { opacity: 0; transform: translateY(0.4em); }
+    to { opacity: 1; transform: none; }
+  }
+
+  @keyframes fl-blink {
+    50% { opacity: 0.55; }
+  }
+
+  [data-state="active"] .fs-ripple {
+    animation: fl-ripple 1.6s ease-out 2.2s infinite;
+  }
+
+  @keyframes fl-ripple {
+    from { opacity: 0.9; transform: scale(1); }
+    to { opacity: 0; transform: scale(1.5); }
+  }
+
+  /* 02 Sources light up; candidates stream in from each; the funnel counts down. */
+  [data-state="active"] .fs-lines line {
+    animation: fl-dash 1.2s linear infinite;
+  }
+
+  @keyframes fl-dash {
+    to { stroke-dashoffset: -12; }
+  }
+
+  [data-state="active"] .fs-dot {
+    animation: fl-stream 1.5s cubic-bezier(0.55, 0, 0.45, 1) var(--d) infinite;
+  }
+
+  @keyframes fl-stream {
+    0% { left: var(--sx); top: var(--sy); opacity: 0; transform: scale(0.6); }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { left: 50%; top: 44%; opacity: 0; transform: scale(1.2); }
+  }
+
+  [data-state="active"] .fs-hub {
+    animation: fl-hub 1.5s ease-in-out 0.6s infinite;
+  }
+
+  @keyframes fl-hub {
+    50% { box-shadow: 0 0 0 1.4em rgb(var(--ct-glow) / 0.06), 0 0 4.5em rgb(var(--ct-glow) / 0.65); }
+  }
+
+  [data-state="active"] .fs-tick {
+    animation: fl-swap-in 0.4s ease var(--d) both, fl-swap-out 0.4s ease var(--o) forwards;
+  }
+
+  [data-state="active"] .fs-tick.is-last {
+    animation: fl-swap-in 0.4s ease var(--d) both;
+  }
+
+  /* 03 The flood collapses; four rise with their reasons. */
+  [data-state="active"] .fs-noise-row {
+    animation: fl-noise 1.1s ease var(--d) both;
+  }
+
+  @keyframes fl-noise {
+    0% { opacity: 0; transform: scaleX(0.6); }
+    25% { opacity: 0.9; transform: none; }
+    70% { opacity: 0.9; }
+    100% { opacity: 0; transform: translateX(-2em); }
+  }
+
+  [data-state="active"] .fs-reason {
+    animation: fl-mark 0.7s ease both;
+    animation-delay: calc(var(--d, 0s) + 1.4s);
+  }
+
+  @keyframes fl-mark {
+    from { background-color: transparent; }
+  }
+
+  /* 04 The email writes itself and sends; the WhatsApp message lands and is answered. */
+  [data-state="active"] .fs-type {
+    animation: fl-type var(--t, 0.8s) steps(36, end) var(--d) both;
+  }
+
+  @keyframes fl-type {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+  }
+
+  [data-state="active"] .fs-send {
+    animation: fl-press 0.35s ease 3.6s both;
+  }
+
+  [data-state="active"] .fs-send-idle {
+    animation: fl-swap-out 0.3s ease 3.75s both;
+  }
+
+  [data-state="active"] .fs-send-done {
+    animation: fl-swap-in 0.35s ease 3.8s both;
+  }
+
+  .ct-phone[data-on="true"] .fp-body[data-scene="outreach"] .is-out {
+    animation: fl-pop 0.5s var(--ct-ease) 0.9s both;
+  }
+
+  .ct-phone[data-on="true"] .fp-body[data-scene="outreach"] .fp-ticks {
+    animation: fl-ticks 0.4s ease 2.2s both;
+  }
+
+  @keyframes fl-ticks {
+    from { color: var(--ct-mute); }
+  }
+
+  .ct-phone[data-on="true"] .fp-body[data-scene="outreach"] .fp-typing {
+    animation: fl-typing 1.5s ease 2.6s both;
+  }
+
+  @keyframes fl-typing {
+    0% { opacity: 0; height: 0; padding-block: 0; }
+    10%, 85% { opacity: 1; height: auto; padding-block: 0.6em; }
+    100% { opacity: 0; height: 0; padding-block: 0; }
+  }
+
+  .ct-phone[data-on="true"] .fp-body[data-scene="outreach"] .fp-typing span {
+    animation: fl-bounce 0.9s ease-in-out infinite;
+  }
+
+  .ct-phone[data-on="true"] .fp-body[data-scene="outreach"] .fp-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .ct-phone[data-on="true"] .fp-body[data-scene="outreach"] .fp-typing span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes fl-bounce {
+    50% { transform: translateY(-0.3em); }
+  }
+
+  .ct-phone[data-on="true"] .fp-body[data-scene="outreach"] .is-in {
+    animation: fl-pop 0.5s var(--ct-ease) 4.1s both;
+  }
+
+  /* 05 The relationship warms; the call is booked and accepted. */
+  [data-state="active"] .fs-meter-fill {
+    animation: fl-fill 2s var(--ct-ease) 0.4s both;
+  }
+
+  @keyframes fl-fill {
+    from { width: 6%; }
+  }
+
+  [data-state="active"] .fs-step-check {
+    animation: fl-pop 0.4s ease both;
+    animation-delay: calc(var(--d, 0s) + 0.5s);
+  }
+
+  .ct-phone[data-on="true"] .fp-body[data-scene="nurture"] .fp-invite {
+    animation: fl-rise 0.7s var(--ct-ease) 0.5s both;
+  }
+
+  .ct-phone[data-on="true"] .fp-body[data-scene="nurture"] .fp-accepted {
+    animation: fl-pop 0.45s var(--ct-ease) 1.9s both;
+  }
+
+  /* 06 Candidates move on a stage; the nudges go out. */
+  [data-state="active"] .fs-move {
+    animation: fl-move 1s var(--ct-ease) var(--d) both;
+  }
+
+  @keyframes fl-move {
+    from { transform: translateX(calc(-100% - 1.4em)); opacity: 0.4; }
+  }
+
+  /* 07 The shortlist settles, ready to review. */
+  [data-state="active"] .fs-review {
+    animation: fl-blink 2.4s ease-in-out 1.4s infinite;
+  }
+}
+
+/* ==========================================================================
+   Without script: an ordinary section — every scene's words, in order.
+   ========================================================================== */
+
+@media (scripting: none) {
+  html:has(.ct-film) {
+    scroll-snap-type: none;
+  }
+
+  .ct-film {
+    height: auto !important;
+  }
+
+  .ct-film-stage {
+    position: static;
+    height: auto;
+    overflow: visible;
+  }
+
+  .ct-film-copy {
+    height: auto !important;
+    display: grid;
+    gap: 2.5rem;
+  }
+
+  .ct-film-card {
+    position: static;
+    translate: none;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .ct-film-dots,
+  .ct-film-hint {
+    display: none;
+  }
+}

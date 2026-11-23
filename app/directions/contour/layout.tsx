@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import "./contour.css";
 import "./motion.css";
+import "./film.css";
 import { MotionProvider } from "@/components/contour/MotionProvider";
 import { MOTION, THEME_COLOR, VARIANT } from "@/lib/contour/variant";
 

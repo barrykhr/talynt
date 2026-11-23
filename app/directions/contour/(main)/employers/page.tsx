@@ -21,6 +21,7 @@ import { ContactForm } from "@/components/contour/ContactForm";
 import { FaqList } from "@/components/contour/FaqList";
 import { Words, wordCount, wordsStyle } from "@/components/contour/motion/Words";
 import { TalentStory } from "@/components/contour/employers/TalentStory";
+import { HiringFilm } from "@/components/contour/film/HiringFilm";
 import { EMPLOYERS_ONLY } from "@/lib/contour/variant";
 
 export const metadata: Metadata = {
@@ -41,6 +42,10 @@ export default function EmployersPage() {
 
   return (
     <>
+      {EMPLOYERS_ONLY ? (
+        <HiringFilm />
+      ) : (
+        <>
       {/* --- Hero ------------------------------------------------------------ */}
       <section aria-labelledby="employers-heading" className="relative overflow-hidden">
         <div className="ct-wrap grid gap-12 pt-10 pb-14 md:pt-16 lg:grid-cols-12 lg:items-center lg:gap-10">
@@ -96,6 +101,8 @@ export default function EmployersPage() {
       <CompactShortlist index="06" role={DEMO_ROLE} candidate={DEMO_CANDIDATE} assessment={DEMO_ASSESSMENT} responses={DEMO_RESPONSES} evaluation={shared} />
       <CompactDecision index="07" />
       <HumanSection index="08" />
+        </>
+      )}
 
       {/* --- Conversion ------------------------------------------------------ */}
       <section id="enquiry" aria-labelledby="enquiry-heading" className="ct-section scroll-mt-[var(--ct-nav-h)]">

@@ -63,6 +63,16 @@ Both colourways use the same pages and the same copy. They differ from the full 
   - **Mono:** a black page, white type and lime as the one colour.
   - **Cream:** a cream page, deep-navy type, cobalt for the system (links, numbers, primary buttons), deep blue bands, and tangerine as the touch (the person, the highlighter, the relevant few). Tangerine is never used as small text on cream.
 - **Logos.** Mono uses the approved single-colour lockups, shown white. Cream uses the full-colour light lockup, and the dark tagline lockup on the footer's blue band.
+- **The homepage is a film.** In both colourways, `/employers` is `film/HiringFilm.tsx` (styles in `film.css`), followed by the enquiry form and FAQ. It is one full-screen stage that never scrolls away: each scroll, swipe or arrow key flips it to the next of seven scenes, and nothing shows until you reach it. Proximity snapping settles each scene, and dots on the right jump to any scene. The scenes:
+  1. An HR lead's workspace on a laptop: the role brief, and one click on **Find talent**.
+  2. The search fanning out across professional networks, job boards, developer communities, portfolios and open source, referrals and TALYNT's talent pool, with the approved funnel counting down.
+  3. Only the most relevant: four candidates rising, each with their reasons.
+  4. Automated outreach: an email writing and sending itself, and a WhatsApp message landing and being answered on a phone.
+  5. Relationships: the relationship warming and the touchpoints at every step, and a call booked and accepted.
+  6. Automated follow-ups: candidates moving through the pipeline as reminders and nudges go out.
+  7. The decision: the shortlist ready for review, and the call to action.
+
+  Automated WhatsApp and email outreach and follow-ups are confirmed TALYNT capabilities. The role, candidates and messages are fictional and labelled "Illustrative". All new copy is in `FILM` in `proposed.ts`. The earlier homepage sections are not on the colourways' homepage; the long form stays on `/employers/approach`.
 - **"How we work" as a scroll story.** Section 03 of the employer homepage is `employers/TalentStory.tsx`. While the section is pinned, one drawing changes as the page scrolls, chapter by chapter through the six approved layers:
   - the role, in its context
   - defined

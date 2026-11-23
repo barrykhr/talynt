@@ -408,3 +408,131 @@ export const STORY = {
   /** Approved, from SCALE.constants. */
   shortlist: "Four people, not forty",
 } as const;
+
+/**
+ * (ours) The homepage film in the employer-only colourways
+ * (components/contour/film/HiringFilm.tsx). Seven scenes that flip as the
+ * page scrolls. The opening headline is the brief's (EMPLOYER_HERO) and the
+ * last is approved (HUMAN_AI); "Four people, not forty" and "Reasoning
+ * attached to every candidate" are approved (SCALE.constants). Automated
+ * WhatsApp and email outreach and follow-ups are confirmed TALYNT
+ * capabilities. The role, candidates and messages on the screens are
+ * fictional and labelled so.
+ */
+export const FILM = {
+  eyebrow: "Tech-first hiring",
+  label: "Illustrative · a fictional role, candidates and messages",
+  nav: "Scenes",
+  scenes: [
+    {
+      id: "brief",
+      tag: "One click",
+      body: "Tell us what the role needs. One click starts a search across every source — and TALYNT carries it all the way to the hire.",
+    },
+    {
+      id: "search",
+      tag: "Search everywhere",
+      title: "Every source.",
+      titleItalic: "At the same time.",
+      body: "Professional networks, job boards, developer communities, portfolios, referrals and our own talent pool — searched together, including people who were never going to apply.",
+    },
+    {
+      id: "relevant",
+      tag: "Only the most relevant",
+      title: "Four people,",
+      titleItalic: "not forty.",
+      body: "Everyone the search finds is read against the role. What reaches you is the shortlist — with the reasoning attached to every candidate.",
+    },
+    {
+      id: "outreach",
+      tag: "Automated outreach",
+      title: "The first message goes out",
+      titleItalic: "before your next meeting ends.",
+      body: "Personal outreach on WhatsApp and email, written from the role and from each person's own work — sent the moment they are shortlisted.",
+    },
+    {
+      id: "nurture",
+      tag: "Relationships",
+      title: "Relationships,",
+      titleItalic: "not transactions.",
+      body: "Every candidate hears from us at every step: context on the role, a call with a recruiter, preparation before interviews and feedback after.",
+    },
+    {
+      id: "followup",
+      tag: "Automated follow-ups",
+      title: "Nothing goes quiet",
+      titleItalic: "between steps.",
+      body: "Reminders, nudges and next steps go out automatically — to candidates and to your hiring managers — so the process keeps moving while you run the business.",
+    },
+    {
+      id: "decide",
+      tag: "You decide",
+      body: "TALYNT does the searching, the outreach and the follow-up. You meet the people worth meeting, and make the call.",
+      primary: "Tell us who you’re looking for",
+      secondary: "How we work, in detail",
+    },
+  ],
+  brief: {
+    app: "TALYNT · Workspace",
+    nav: ["Roles", "Candidates", "Messages", "Pipeline"],
+    eyebrow: "New role",
+    role: "Senior Backend Engineer",
+    meta: "Fintech · Bengaluru · Hybrid",
+    needs: ["Owns payments infrastructure", "Event-driven systems at scale", "Mentors other engineers"],
+    button: "Find talent",
+    busy: "Searching…",
+  },
+  sources: ["Professional networks", "Job boards", "Developer communities", "Portfolios & open source", "Referrals", "TALYNT talent pool"],
+  shortlist: {
+    header: "Shortlisted, with reasons",
+    people: [
+      { initials: "AK", line: "Backend engineer · 7 years", reasons: ["Built a payments ledger", "Kafka at scale"] },
+      { initials: "RS", line: "Platform engineer · 9 years", reasons: ["Led on-call for core APIs", "Mentors four engineers"] },
+      { initials: "MN", line: "Senior engineer · 6 years", reasons: ["Event sourcing in production", "Fintech compliance"] },
+      { initials: "PD", line: "Staff engineer · 11 years", reasons: ["Scaled a team from 3 to 12", "Owned the migration"] },
+    ],
+  },
+  outreach: {
+    compose: "New email",
+    to: "Aarav · Backend engineer",
+    subject: "A backend role built around your Kafka work",
+    lines: [
+      "Hi Aarav — I'm with TALYNT. A fintech team is hiring a Senior",
+      "Backend Engineer to own its payments platform, and your work",
+      "on event pipelines stood out. Worth a 15-minute chat this week?",
+    ],
+    send: "Send",
+    sent: "Sent",
+    chat: "TALYNT Talent",
+    channel: "WhatsApp",
+    out: "Hi Aarav 👋 Senior Backend role at a fintech scaling its payments platform — your event-pipeline work stood out. Open to a quick chat this week?",
+    reply: "Sounds interesting. Thursday works for me.",
+  },
+  nurture: {
+    who: "Aarav · Backend engineer",
+    warmth: "Relationship",
+    warm: "Warm",
+    steps: [
+      { channel: "WhatsApp", text: "Intro and the role, in two lines" },
+      { channel: "Email", text: "Role pack: the team, the work, the range" },
+      { channel: "Call", text: "Thirty minutes with a TALYNT recruiter" },
+      { channel: "Email", text: "Interview prep: who you'll meet, and why" },
+      { channel: "WhatsApp", text: "Feedback after every round" },
+    ],
+    invite: "Intro call with TALYNT",
+    when: "Thursday · 11:00",
+    accepted: "Accepted",
+  },
+  pipeline: {
+    stages: ["Sourced", "Contacted", "Screened", "Interview", "Offer"],
+    nudges: [
+      "Interview reminder sent · candidate",
+      "Feedback requested · hiring manager",
+      "Next steps shared · offer stage",
+    ],
+  },
+  decide: {
+    header: "Shortlist ready for your review",
+    review: "Review",
+  },
+} as const;
