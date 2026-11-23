@@ -845,20 +845,22 @@ html:has(.ct) body {
 }
 
 /* ==========================================================================
-   Variant: mono — black, white and lime
+   Variants: the employer site in two colourways (lib/contour/variant.ts)
    --------------------------------------------------------------------------
-   Built with NEXT_PUBLIC_CT_VARIANT=mono (lib/contour/variant.ts). The layout
-   adds .ct-mono; everything below is scoped to it, so the default build is
-   untouched. Dark first:
+   The layout adds `.ct-v` plus `.ct-mono` or `.ct-cream` (and `.ct-motion`,
+   styled in motion.css). Everything below is scoped to those classes, so the
+   default build is untouched. Each palette only remaps the existing tokens,
+   plus a few of its own:
 
-   - A black page with white type. Bands alternate between two near-blacks,
-     so sections still read as sections.
-   - Lime is the one colour: the italic turn of the opening headline, primary
-     buttons (pills), links, highlights, the person's node, focus, and a soft
-     glow behind the first section of each page.
-   - Panels and interface windows are dark cards with a hairline border.
-   - Violet, the candidate colour, has no job here and becomes grey.
+     --ct-glow        rgb triplet of the glow colour
+     --ct-texture     the fine vertical lines behind the first section
+     --ct-btn / -ink  the primary button, and the text on it
+     --ct-btn-hover / --ct-btn-hover-ink
+     --ct-lead        colour of the opening headline's italic turn
+     --ct-link        link colour
    ========================================================================== */
+
+/* --- Mono: black, white and lime ----------------------------------------- */
 
 .ct.ct-mono,
 .ct-mono .ct-tint {
@@ -885,62 +887,198 @@ html:has(.ct) body {
   --ct-lime-soft: #1f2a0c;
   --ct-signal: #c8f04a;
 
+  --ct-glow: 200 240 74;
+  --ct-texture: rgb(255 255 255 / 0.035);
+  --ct-btn: #c8f04a;
+  --ct-btn-ink: #0a0a0a;
+  --ct-btn-hover: #ffffff;
+  --ct-btn-hover-ink: #0a0a0a;
+  --ct-lead: #c8f04a;
+  --ct-link: #c8f04a;
+  --ct-card: linear-gradient(180deg, rgb(26 26 26 / 0.88), rgb(16 16 16 / 0.92));
+  --ct-card-bar: rgb(22 22 22 / 0.7);
+  --ct-card-line: #2a2a2a;
+  --ct-shadow: 0 30px 80px -40px rgb(0 0 0 / 0.9);
+  --ct-dot: rgb(255 255 255 / 0.11);
+
   color: var(--ct-ink);
   color-scheme: dark;
 }
 
-/* The second near-black, for alternate bands. */
 .ct-mono .ct-tint {
   background-color: #111111;
   --ct-bg: #111111;
   --ct-surface: #171717;
 }
 
-/* A soft lime glow and a fine vertical texture behind the first section of a
-   page, fading out before the content below. Decoration only. */
-.ct-mono #ct-main > section:first-child {
-  position: relative;
-  isolation: isolate;
+/* The single-colour lockups are drawn black; here they are white. */
+.ct-mono img[src*="talynt-"] {
+  filter: invert(1);
 }
 
-.ct-mono #ct-main > section:first-child::before {
+html:has(.ct-mono),
+html:has(.ct-mono) body {
+  background-color: #0a0a0a;
+  color-scheme: dark;
+}
+
+/* --- Cream: cream, cobalt blue and a touch of tangerine ------------------ */
+/* Cream ground and deep-navy type. Cobalt carries the system: links, numbers,
+   icons, primary buttons. The dark bands (.ct-tint) turn deep blue. Tangerine
+   is the touch — the person, the highlighter, the relevant few — and echoes
+   the logo's own orange dot. It is never small text on cream. */
+
+.ct.ct-cream {
+  --ct-bg: #f4eee3;
+  --ct-bg-2: #ece4d5;
+  --ct-bg-3: #e2d8c6;
+  --ct-surface: #fbf7ef;
+
+  --ct-ink: #0f1a40;
+  --ct-ink-2: #2a3460;
+  --ct-mute: #565e80;
+  --ct-faint: #8a8fa8;
+
+  --ct-line: #ddd3c1;
+  --ct-line-2: #c6baa4;
+
+  --ct-green: #2341c4;
+  --ct-green-deep: #18298c;
+  --ct-green-wash: #e3e8fa;
+  --ct-violet: #8a8fa8;
+  --ct-violet-ink: #3a4270;
+  --ct-violet-wash: #e9e6ee;
+  --ct-lime: #ff6a33;
+  --ct-lime-soft: #ffe1d3;
+  --ct-signal: #ff6a33;
+
+  --ct-glow: 255 106 51;
+  --ct-texture: rgb(15 26 64 / 0.04);
+  --ct-btn: #2341c4;
+  --ct-btn-ink: #fbf7ef;
+  --ct-btn-hover: #ff6a33;
+  --ct-btn-hover-ink: #0f1a40;
+  --ct-lead: #2341c4;
+  --ct-link: #2341c4;
+  --ct-card: linear-gradient(180deg, rgb(251 247 239 / 0.92), rgb(246 240 229 / 0.94));
+  --ct-card-bar: rgb(236 228 213 / 0.75);
+  --ct-card-line: #d6cbb6;
+  --ct-shadow: 0 30px 70px -40px rgb(15 26 64 / 0.35);
+  --ct-dot: rgb(15 26 64 / 0.1);
+
+  color: var(--ct-ink);
+}
+
+/* The deep blue bands. */
+.ct-cream .ct-tint {
+  background-color: #14235e;
+  --ct-bg: #14235e;
+  --ct-bg-2: #14235e;
+  --ct-bg-3: #1c2e74;
+  --ct-surface: #1b2c6e;
+
+  --ct-ink: #f6f1e7;
+  --ct-ink-2: #d9d6e4;
+  --ct-mute: #aab0cc;
+  --ct-faint: #7e86ab;
+
+  --ct-line: #26367a;
+  --ct-line-2: #3a4b92;
+
+  --ct-green: #ff8a5c;
+  --ct-green-deep: #ff6a33;
+  --ct-green-wash: #2a2f6a;
+  --ct-violet-ink: #e2dff0;
+  --ct-violet-wash: #1c2e74;
+  --ct-lime-soft: #3a2f5c;
+
+  --ct-glow: 255 138 92;
+  --ct-texture: rgb(255 255 255 / 0.04);
+  --ct-btn: #ff6a33;
+  --ct-btn-ink: #0f1a40;
+  --ct-btn-hover: #f6f1e7;
+  --ct-btn-hover-ink: #0f1a40;
+  --ct-link: #ffb08f;
+  --ct-card: linear-gradient(180deg, rgb(32 49 122 / 0.85), rgb(25 40 105 / 0.9));
+  --ct-card-bar: rgb(28 44 110 / 0.75);
+  --ct-card-line: #34468c;
+  --ct-shadow: 0 30px 80px -40px rgb(5 10 40 / 0.8);
+  --ct-dot: rgb(255 255 255 / 0.1);
+
+  color: var(--ct-ink);
+  color-scheme: dark;
+}
+
+html:has(.ct-cream),
+html:has(.ct-cream) body {
+  background-color: #f4eee3;
+}
+
+/* --- Shared by both colourways ------------------------------------------- */
+
+/* A soft glow and a fine vertical texture behind the first section of a
+   page, fading out before the content below. Decoration only. */
+.ct-v #ct-main > section:first-child {
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip; /* the glow breathes; it must never widen the page */
+}
+
+.ct-v #ct-main > section:first-child::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 55% 65% at 70% 66%, rgb(200 240 74 / 0.30), transparent 70%),
-    radial-gradient(ellipse 26% 38% at 70% 78%, rgb(200 240 74 / 0.30), transparent 70%),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 7px);
+    radial-gradient(ellipse 55% 65% at 70% 66%, rgb(var(--ct-glow) / 0.3), transparent 70%),
+    radial-gradient(ellipse 26% 38% at 70% 78%, rgb(var(--ct-glow) / 0.3), transparent 70%),
+    repeating-linear-gradient(90deg, var(--ct-texture) 0 1px, transparent 1px 7px);
   -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent);
   mask-image: linear-gradient(to bottom, #000 55%, transparent);
 }
 
+.ct-cream #ct-main > section:first-child::before {
+  background:
+    radial-gradient(ellipse 55% 65% at 70% 66%, rgb(var(--ct-glow) / 0.2), transparent 70%),
+    radial-gradient(ellipse 26% 38% at 70% 78%, rgb(35 65 196 / 0.14), transparent 70%),
+    repeating-linear-gradient(90deg, var(--ct-texture) 0 1px, transparent 1px 7px);
+}
+
 /* The closing enquiry gets the same glow, rising from the bottom. */
-.ct-mono #enquiry {
+.ct-v #enquiry {
   position: relative;
   isolation: isolate;
 }
 
-.ct-mono #enquiry::before {
+.ct-v #enquiry::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: radial-gradient(ellipse 50% 55% at 30% 100%, rgb(200 240 74 / 0.12), transparent 70%);
+  background: radial-gradient(ellipse 50% 55% at 30% 100%, rgb(var(--ct-glow) / 0.12), transparent 70%);
 }
 
-/* The opening headline's italic turn is the one lime phrase on the page. */
-.ct-mono h1 .ct-italic {
-  color: var(--ct-lime);
+/* The opening headline's italic turn is the one coloured phrase on the page. */
+.ct-v h1 .ct-italic {
+  color: var(--ct-lead);
 }
 
-/* Highlighted words and quotes sit dark on lime. */
-.ct-mono mark,
-.ct-mono .bg-\[var\(--ct-lime\)\] {
+/* Highlighted words and quotes sit dark on the highlighter. */
+.ct-v mark,
+.ct-v .bg-\[var\(--ct-lime\)\] {
   color: #0a0a0a !important;
+}
+
+.ct-cream mark,
+.ct-cream .bg-\[var\(--ct-lime\)\] {
+  color: #0f1a40 !important;
+}
+
+/* The highlighter on cream is tangerine: words on it are navy, on any band. */
+.ct-cream .ct-mark {
+  color: #0f1a40;
 }
 
 .ct-mono .ct-mark {
@@ -948,62 +1086,63 @@ html:has(.ct) body {
   color: var(--ct-lime);
 }
 
-/* Buttons: lime pills, and an outlined pill beside them. */
-.ct-mono .ct-btn {
+/* Buttons: pills, the primary one lit. */
+.ct-v .ct-btn {
   border-radius: 999px;
 }
 
-.ct-mono .ct-btn-primary {
-  background-color: var(--ct-lime);
-  color: #0a0a0a;
-  box-shadow: 0 0 0 1px rgb(200 240 74 / 0.35), 0 10px 40px -12px rgb(200 240 74 / 0.55);
+.ct-v .ct-btn-primary {
+  background-color: var(--ct-btn);
+  color: var(--ct-btn-ink);
+  box-shadow: 0 0 0 1px rgb(var(--ct-glow) / 0.3), 0 10px 40px -12px rgb(var(--ct-glow) / 0.55);
 }
 
-.ct-mono .ct-btn-primary:hover {
-  background-color: #ffffff;
-  color: #0a0a0a;
+.ct-v .ct-btn-primary:hover {
+  background-color: var(--ct-btn-hover);
+  color: var(--ct-btn-hover-ink);
 }
 
-.ct-mono .ct-btn-secondary {
-  --ct-bc: #3a3a3a;
-  background-color: rgb(255 255 255 / 0.03);
+.ct-v .ct-btn-secondary {
+  --ct-bc: var(--ct-line-2);
+  background-color: color-mix(in oklab, var(--ct-ink) 3%, transparent);
 }
 
-.ct-mono .ct-btn-secondary:hover {
-  --ct-bc: var(--ct-lime);
-  background-color: rgb(255 255 255 / 0.06);
+.ct-v .ct-btn-secondary:hover {
+  --ct-bc: var(--ct-green);
+  background-color: color-mix(in oklab, var(--ct-ink) 6%, transparent);
 }
 
-/* Cards and interface windows: dark, hairline, a faint lift. */
-.ct-mono .ct-window,
-.ct-mono .ct-panel {
-  background: linear-gradient(180deg, rgb(26 26 26 / 0.88), rgb(16 16 16 / 0.92));
+/* Cards and interface windows: a faint lift, slightly translucent so the glow
+   behind them shows through. */
+.ct-v .ct-window,
+.ct-v .ct-panel {
+  background: var(--ct-card);
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
-  --ct-bc: #2a2a2a;
-  box-shadow: 0 30px 80px -40px rgb(0 0 0 / 0.9);
+  --ct-bc: var(--ct-card-line);
+  box-shadow: var(--ct-shadow);
 }
 
-.ct-mono .ct-window-bar {
-  background: rgb(22 22 22 / 0.7);
+.ct-v .ct-window-bar {
+  background: var(--ct-card-bar);
 }
 
-.ct-mono .ct-tag {
-  background: rgb(255 255 255 / 0.03);
+.ct-v .ct-tag {
+  background: color-mix(in oklab, var(--ct-ink) 3%, transparent);
 }
 
-/* Links: lime. */
-.ct-mono .ct-link {
-  color: var(--ct-lime);
-  text-decoration-color: rgb(200 240 74 / 0.45);
+.ct-v .ct-link {
+  color: var(--ct-link);
+  text-decoration-color: color-mix(in oklab, var(--ct-link) 45%, transparent);
 }
 
-.ct-mono .ct-link:hover {
-  text-decoration-color: var(--ct-lime);
+.ct-v .ct-link:hover {
+  text-decoration-color: var(--ct-link);
 }
 
-/* Form errors in a red that reads on black. */
-.ct-mono .ct-error {
+/* Form errors in a red that reads on either ground. */
+.ct-mono .ct-error,
+.ct-cream .ct-tint .ct-error {
   color: #ff8f73;
 }
 
@@ -1012,25 +1151,13 @@ html:has(.ct) body {
   --ct-bc: #ff8f73;
 }
 
-/* Focus: a lime ring. */
-.ct-mono :focus-visible {
-  outline: 2px solid var(--ct-lime);
+.ct-v :focus-visible {
+  outline: 2px solid var(--ct-green);
 }
 
-/* The approved single-colour lockups are drawn black; here they are white. */
-.ct-mono img[src*="talynt-"] {
-  filter: invert(1);
-}
-
-.ct-mono ::selection {
+.ct-v ::selection {
   background: var(--ct-lime);
   color: #0a0a0a;
-}
-
-html:has(.ct-mono),
-html:has(.ct-mono) body {
-  background-color: #0a0a0a;
-  color-scheme: dark;
 }
 
 /* The scroll story (TalentStory). Without script it can't follow the scroll,

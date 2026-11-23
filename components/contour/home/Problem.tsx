@@ -4,6 +4,7 @@ import { FourLenses } from "@/components/contour/graphics/FourLenses";
 import { Eyebrow, Headline, Illustrative } from "@/components/contour/ui";
 import { Reveal } from "@/components/primitives/Reveal";
 import { cx } from "@/lib/utils";
+import { Words, wordCount, wordsStyle } from "@/components/contour/motion/Words";
 
 /**
  * The argument, in two beats. First the problem — volume is everywhere,
@@ -65,8 +66,11 @@ export function Problem({ index = "01" }: { index?: string } = {}) {
         </div>
 
         <Reveal>
-          <p className="ct-display ct-l mt-20 max-w-4xl md:mt-28">
-            {PROBLEM.close} <span className="ct-italic">{PROBLEM.closeItalic}</span>
+          <p className="ct-display ct-l mt-20 max-w-4xl md:mt-28" style={wordsStyle(PROBLEM.close, PROBLEM.closeItalic)}>
+            <Words text={PROBLEM.close} />{" "}
+            <span className="ct-italic">
+              <Words text={PROBLEM.closeItalic} from={wordCount(PROBLEM.close)} />
+            </span>
           </p>
         </Reveal>
       </div>

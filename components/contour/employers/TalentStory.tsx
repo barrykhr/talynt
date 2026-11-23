@@ -101,8 +101,8 @@ function Scene({ p }: { p: number }) {
   const w = (k: number) => round(weight(p, k));
   // The role's frame: centre stage while it is understood and defined, then it
   // waits below the stream for the people being evaluated.
-  const frameAt = p < 2 ? 1 : Math.max(0, 1 - (p - 2) * 1.2);
-  const smallFrame = Math.max(0, Math.min(1, (p - 2.2) * 1.5)) * (p < 4.3 ? 1 : Math.max(0, 1 - (p - 4.3) * 2.5));
+  const frameAt = p < 2.2 ? 1 : Math.max(0, 1 - (p - 2.2) * 2.5);
+  const smallFrame = Math.max(0, Math.min(1, (p - 2.6) * 2.5)) * (p < 4.3 ? 1 : Math.max(0, 1 - (p - 4.3) * 2.5));
   return (
     <svg viewBox="0 0 600 600" className="h-full w-full" role="img" aria-label={STORY.drawingLabel}>
       <defs>
@@ -231,7 +231,7 @@ export function TalentStory({ index }: { index: string }) {
       id="how-we-work"
       aria-labelledby="how-heading"
       className="ct-story scroll-mt-[var(--ct-nav-h)]"
-      style={{ height: `calc(${CHAPTERS} * 62svh + 100svh)` }}
+      style={{ height: `calc(${CHAPTERS} * 26svh + 100svh)` }}
     >
       <div className="ct-story-stage sticky top-0 flex h-[100svh] flex-col overflow-hidden pt-[var(--ct-nav-h)]">
         <div className="ct-wrap flex items-end justify-between gap-6 pt-6 md:pt-8">

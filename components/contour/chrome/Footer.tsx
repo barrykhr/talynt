@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { EMAIL, LINKEDIN, ROUTES, whatsappHref } from "@/lib/contour/site";
 import { Meeting } from "@/components/contour/graphics/Meeting";
-import { EMPLOYERS_ONLY, LOGO } from "@/lib/contour/variant";
+import { EMPLOYERS_ONLY, LOGO, VARIANT } from "@/lib/contour/variant";
 import { LinkedInIcon, WhatsAppIcon } from "./Icons";
 
 const ALL_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
@@ -131,7 +131,7 @@ export function Footer() {
         <div className="mt-16 flex flex-col gap-4 border-t ct-b2 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="ct-meta ct-mute">© {new Date().getFullYear()} TALYNT LABS. All rights reserved.</p>
           <p className="ct-meta ct-mute flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span>{EMPLOYERS_ONLY ? "Direction C — Mono, employers only · design review build" : "Direction C — Contour · design review build"}</span>
+            <span>{EMPLOYERS_ONLY ? `Direction C — ${VARIANT === "cream" ? "Cream" : "Mono"}, employers only · design review build` : "Direction C — Contour · design review build"}</span>
             <Link href="/" className="ct-green hover:underline">
               Current site →
             </Link>

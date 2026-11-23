@@ -5,6 +5,7 @@ import { useCalm } from "@/lib/contour/motion";
 import { EMPLOYER_HERO, PROGRESSION } from "@/lib/contour/proposed";
 import { flow, frame, noise, round } from "@/lib/contour/geometry";
 import { cx } from "@/lib/utils";
+import { MOTION } from "@/lib/contour/variant";
 
 /**
  * The employer hero's drawing: a role brief arrives, its requirements become
@@ -54,6 +55,17 @@ export function SourcingProgression() {
     const t = window.setTimeout(() => setStage((s) => Math.min(s + 1, last)), stage === 0 ? 700 : 1300);
     return () => window.clearTimeout(t);
   }, [calm, touched, inView, stage, last]);
+
+  // In the motion colourways, scrolling the first screen also moves the search on.
+  useEffect(() => {
+    if (!MOTION || calm || touched) return;
+    const onScroll = () => {
+      const s = Math.min(last, Math.floor(window.scrollY / (window.innerHeight * 0.1)));
+      setStage((current) => Math.max(current, s));
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [calm, touched, last]);
 
   const shown = calm && !touched ? last : stage;
   const on = (n: number) => shown >= n;

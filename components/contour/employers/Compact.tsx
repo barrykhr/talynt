@@ -11,6 +11,8 @@ import { SignalInNoise } from "@/components/contour/home/Problem";
 import { Eyebrow, Headline, SectionHead } from "@/components/contour/ui";
 import { Reveal } from "@/components/primitives/Reveal";
 import { cx } from "@/lib/utils";
+import { MOTION } from "@/lib/contour/variant";
+import { ArcSun } from "@/components/contour/motion/ArcSun";
 
 /**
  * The employer homepage's sections 02–07, told with drawings and short labels
@@ -278,6 +280,8 @@ function Sun({ phase }: { phase: number }) {
 }
 
 /** The day, the night's search and the morning, as one line the sun travels along. */
+const ARC = "M0 30C40 14 70 12 100 14S220 66 300 66 440 40 500 40 580 34 600 30";
+
 function DayArc() {
   const stops = [
     { left: "16.667%", top: "17.5%", fill: "var(--ct-signal)" },
@@ -289,7 +293,7 @@ function DayArc() {
       <svg viewBox="0 0 600 80" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
         <path d="M0 56h600" stroke="var(--ct-line-2)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
         <path
-          d="M0 30C40 14 70 12 100 14S220 66 300 66 440 40 500 40 580 34 600 30"
+          d={ARC}
           fill="none"
           stroke="var(--ct-green)"
           strokeWidth="1.25"
@@ -304,6 +308,7 @@ function DayArc() {
           style={{ left: s.left, top: s.top, backgroundColor: s.fill }}
         />
       ))}
+      {MOTION && <ArcSun d={ARC} width={600} height={80} />}
     </div>
   );
 }

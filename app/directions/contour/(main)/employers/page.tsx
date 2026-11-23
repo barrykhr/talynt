@@ -19,6 +19,7 @@ import {
 } from "@/components/contour/employers/Compact";
 import { ContactForm } from "@/components/contour/ContactForm";
 import { FaqList } from "@/components/contour/FaqList";
+import { Words, wordCount, wordsStyle } from "@/components/contour/motion/Words";
 import { TalentStory } from "@/components/contour/employers/TalentStory";
 import { EMPLOYERS_ONLY } from "@/lib/contour/variant";
 
@@ -73,8 +74,12 @@ export default function EmployersPage() {
       {/* --- The position (approved homepage statement) ----------------------- */}
       <section aria-labelledby="position-heading" className="ct-section ct-tint">
         <div className="ct-wrap grid gap-8 lg:grid-cols-12 lg:items-end lg:gap-10">
-          <h2 id="position-heading" className="ct-display ct-xl lg:col-span-7">
-            {HERO.titleLead} <span className="ct-mark ct-mark-draw" data-on="true">{HERO.titleMark}</span> {HERO.titleTail}
+          <h2 id="position-heading" className="ct-display ct-xl lg:col-span-7" style={wordsStyle(HERO.titleLead, HERO.titleMark, HERO.titleTail)}>
+            <Words text={HERO.titleLead} />{" "}
+            <span className="ct-mark ct-mark-draw" data-on="true">
+              <Words text={HERO.titleMark} from={wordCount(HERO.titleLead)} />
+            </span>{" "}
+            <Words text={HERO.titleTail} from={wordCount(HERO.titleLead, HERO.titleMark)} />
           </h2>
           <p className="ct-lede lg:col-span-5">{HERO.lede}</p>
         </div>

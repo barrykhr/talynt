@@ -37,26 +37,51 @@ Optional configuration (nothing renders, and nothing is guessed, when unset):
 
 ## Variants
 
-One design, two builds, chosen by `NEXT_PUBLIC_CT_VARIANT` (see `lib/contour/variant.ts`):
+One design, three builds, chosen by `NEXT_PUBLIC_CT_VARIANT` (see `lib/contour/variant.ts`):
 
 | Value | What it builds |
 |---|---|
-| unset | The full design: the entry choice, employers and candidates, in the editorial palette. |
-| `mono` | The employer site on its own, in black and white with a touch of lime. |
+| unset | The full design: the entry choice, employers and candidates, in the editorial palette. Unchanged. |
+| `mono` | The employer site on its own: black, white and lime, in motion. |
+| `cream` | The employer site on its own: cream, cobalt blue and a touch of tangerine, in motion. |
 
 ```bash
-NEXT_PUBLIC_CT_VARIANT=mono npm run build && npm run start   # open /directions/contour/employers
+NEXT_PUBLIC_CT_VARIANT=mono npm run build && npm run start    # open /directions/contour/employers
+NEXT_PUBLIC_CT_VARIANT=cream npm run build && npm run start
 node scripts/export-static-site.mjs . /tmp/talynt-work /tmp/talynt-mono mono
+node scripts/export-static-site.mjs . /tmp/talynt-work /tmp/talynt-cream cream
 ```
 
-The mono build uses the same pages and the same copy. It differs only as follows:
+Both colourways use the same pages and the same copy. They differ from the full design as follows:
 
-- **Colour.** The layout adds `.ct-mono`, which remaps the colour tokens to a dark page: black ground, white type, bands alternating between two near-blacks. Lime is the one colour. It marks the opening headline's italic turn, primary buttons (pills), links, highlights, focus and the person's node, and glows softly behind the first section of each page. Cards are dark and slightly translucent.
-- **Logo.** It uses the approved single-colour logo files.
-- **How we work, as a scroll story.** Section 03 of the employer homepage is `employers/TalentStory.tsx`. While the section is pinned, one drawing changes as the page scrolls, chapter by chapter through the six approved layers. It shows a role in its context, then the role is defined, the market is searched, the relevant people are drawn toward the role, the circle is calibrated, and four remain. It is labelled as a concept. With reduced motion it steps chapter by chapter with no in-between movement. Without script it is an ordinary section that lists every chapter.
-- **Employer only.** There is no entry choice: the root sends visitors to the employer homepage. The navigation has no employer/candidate switch. The footer, contact page and FAQ leave out candidate pages and questions. The static copy contains no candidate pages at all.
+- **Employer site only.**
+  - There is no entry choice: the root sends visitors to the employer homepage.
+  - The navigation has no employer/candidate switch.
+  - The footer, contact page and FAQ leave out the candidate pages and questions.
+  - The static copy contains no candidate pages at all.
+- **Colour.** The layout adds `.ct-v` plus `.ct-mono` or `.ct-cream`. These only remap the existing tokens, plus a few of their own (glow, texture, button and link colours); see `contour.css`.
+  - **Mono:** a black page, white type and lime as the one colour.
+  - **Cream:** a cream page, deep-navy type, cobalt for the system (links, numbers, primary buttons), deep blue bands, and tangerine as the touch (the person, the highlighter, the relevant few). Tangerine is never used as small text on cream.
+- **Logos.** Mono uses the approved single-colour lockups, shown white. Cream uses the full-colour light lockup, and the dark tagline lockup on the footer's blue band.
+- **"How we work" as a scroll story.** Section 03 of the employer homepage is `employers/TalentStory.tsx`. While the section is pinned, one drawing changes as the page scrolls, chapter by chapter through the six approved layers:
+  - the role, in its context
+  - defined
+  - the market searched
+  - the relevant few drawn toward the role
+  - the circle calibrated
+  - four remaining
 
-The default build is unchanged: every page renders the same HTML as before the variant was added. There is one exception, a fix: the footer's "Client visibility" link now points to that section on `/employers/approach`, where it lives.
+  It is labelled as a concept.
+- **Motion everywhere** (`components/contour/motion`, `motion.css`). Scroll drives it, so things move as the reader scrolls and stop when they stop:
+  - `MotionDirector` reveals blocks once as they arrive. It gives each section and a few figures a scroll progress `--p`, which drives the funnel bars, the thinning dot grid, the evaluation chain, marker highlights, rating bars, the shortlist card and the machine/human pairs. It also tracks the pointer for a dot field and a card glow.
+  - `ScrollThread` draws one line down the page margin, carrying a dot from section to section.
+  - `ArcSun` moves the sun along the "while you run the business" arc.
+  - `Words` lights statements word by word.
+
+  The first screen has its own entrance on load, the opening glow breathes, and a reading-progress line sits under the navigation.
+- **Accessibility.** With reduced motion, nothing is hidden or driven: every end state shows, and the story steps chapter by chapter. Without script, the same holds and the story lists every chapter. Legal pages stay still.
+
+The default build is unchanged: every page renders the same HTML as before the variants were added, apart from React's generated element ids.
 
 ## Pages
 

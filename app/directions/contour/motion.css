@@ -1,0 +1,343 @@
+/* ==========================================================================
+   Motion — the employer-only colourways (lib/contour/variant.ts, MOTION)
+   --------------------------------------------------------------------------
+   Everything here is scoped to `.ct-motion`, which only those builds carry.
+   MotionDirector (components/contour/motion) supplies:
+
+     data-reveal / data-in   blocks that rise in once, as they arrive
+     --p                     0 → 1 as a section or figure scrolls into view
+     --page-p, --sy          the whole page's progress, and scroll position
+     --cx, --cy / --gx, --gy the pointer, on the page and on the card under it
+
+   `.ct-motion-live` is added only once that is running and motion is welcome,
+   so every hidden starting state lives under it. `--p` defaults to 1, so
+   without script, and with reduced motion, everything shows its end state.
+   ========================================================================== */
+
+.ct-motion {
+  --p: 1;
+  isolation: isolate;
+}
+
+.ct-motion #ct-main {
+  position: relative;
+}
+
+/* Stagger index for the lists that build item by item. */
+.ct-motion :is(#problem ol, #human ul, #evaluation ol, #evaluation .border-dashed ol, #shortlist ul, .gap-\[3px\]) > :nth-child(1) { --k: 0; }
+.ct-motion :is(#problem ol, #human ul, #evaluation ol, #evaluation .border-dashed ol, #shortlist ul, .gap-\[3px\]) > :nth-child(2) { --k: 1; }
+.ct-motion :is(#problem ol, #human ul, #evaluation ol, #evaluation .border-dashed ol, #shortlist ul, .gap-\[3px\]) > :nth-child(3) { --k: 2; }
+.ct-motion :is(#problem ol, #human ul, #evaluation ol, #evaluation .border-dashed ol, #shortlist ul, .gap-\[3px\]) > :nth-child(4) { --k: 3; }
+.ct-motion :is(#problem ol, #human ul, #evaluation ol, #evaluation .border-dashed ol, #shortlist ul, .gap-\[3px\]) > :nth-child(5) { --k: 4; }
+.ct-motion :is(#problem ol, #human ul, #evaluation ol, #evaluation .border-dashed ol, #shortlist ul, .gap-\[3px\]) > :nth-child(6) { --k: 5; }
+.ct-motion :is(#problem ol, #human ul, #evaluation ol, #evaluation .border-dashed ol, #shortlist ul, .gap-\[3px\]) > :nth-child(7) { --k: 6; }
+.ct-motion :is(#problem ol, #human ul, #evaluation ol, #evaluation .border-dashed ol, #shortlist ul, .gap-\[3px\]) > :nth-child(8) { --k: 7; }
+.ct-motion :is(#problem ol, #human ul, #evaluation ol, #evaluation .border-dashed ol, #shortlist ul, .gap-\[3px\]) > :nth-child(9) { --k: 8; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* --- 1. Ambient ------------------------------------------------------- */
+
+  /* A field of dots, lit only near the pointer, drifting slowly with the scroll. */
+  .ct-motion::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(var(--ct-dot) 1.1px, transparent 1.6px);
+    background-size: 26px 26px;
+    background-position: 0 calc(var(--sy, 0) * -0.2px);
+    -webkit-mask-image: radial-gradient(320px circle at var(--cx, 50%) var(--cy, -400px), #000 0%, transparent 75%);
+    mask-image: radial-gradient(320px circle at var(--cx, 50%) var(--cy, -400px), #000 0%, transparent 75%);
+  }
+
+  /* The opening glow breathes. */
+  .ct-motion #ct-main > section:first-child::before {
+    animation: ct-breathe 9s ease-in-out infinite;
+    transform-origin: 70% 70%;
+  }
+
+  @keyframes ct-breathe {
+    0%, 100% { opacity: 0.8; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+  }
+
+  /* Reading progress, under the navigation. */
+  .ct-motion-live::after {
+    content: "";
+    position: fixed;
+    top: var(--ct-nav-h);
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 49;
+    pointer-events: none;
+    background: var(--ct-lime);
+    transform: scaleX(var(--page-p, 0));
+    transform-origin: left;
+  }
+
+  /* --- 2. The first screen: an entrance, on load, without waiting for script */
+
+  .ct-motion #ct-main > :first-child :is(h1, .ct-lede, p.ct-meta, .ct-btn, figure, ul) {
+    animation: ct-rise 1.1s var(--ct-ease) both;
+  }
+
+  .ct-motion #ct-main > :first-child p.ct-meta { animation-delay: 0.05s; }
+  .ct-motion #ct-main > :first-child h1 { animation-delay: 0.12s; }
+  .ct-motion #ct-main > :first-child h1 .ct-italic { animation: ct-rise 1.1s var(--ct-ease) 0.42s both; }
+  .ct-motion #ct-main > :first-child .ct-lede { animation-delay: 0.55s; }
+  .ct-motion #ct-main > :first-child .ct-btn { animation-delay: 0.7s; }
+  .ct-motion #ct-main > :first-child figure { animation: ct-float-in 1.4s var(--ct-ease) 0.3s both; }
+  .ct-motion #ct-main > :first-child ul { animation-delay: 0.9s; }
+
+  @keyframes ct-rise {
+    from { opacity: 0; transform: translateY(28px); clip-path: inset(0 0 100% 0); }
+    to { opacity: 1; transform: none; clip-path: inset(-20% -5% -30% -5%); }
+  }
+
+  @keyframes ct-float-in {
+    from { opacity: 0; transform: translateY(40px) scale(0.97); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* --- 3. Reveal: blocks rise in once as they arrive --------------------- */
+
+  .ct-motion-live [data-reveal] {
+    transition:
+      opacity 0.9s var(--ct-ease) calc(var(--ri, 0) * 70ms),
+      transform 1s var(--ct-ease) calc(var(--ri, 0) * 70ms),
+      clip-path 1.1s var(--ct-ease) calc(var(--ri, 0) * 70ms);
+  }
+
+  .ct-motion-live [data-reveal]:not([data-in]) {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  /* Headings rise out of a mask; their italic turn follows a beat later. */
+  .ct-motion-live :is(h2, h3)[data-reveal] {
+    clip-path: inset(-20% -5% -30% -5%);
+  }
+
+  .ct-motion-live :is(h2, h3)[data-reveal]:not([data-in]) {
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(0.5em);
+  }
+
+  .ct-motion-live h2[data-reveal] .ct-italic {
+    display: inline-block;
+    transition: opacity 0.9s var(--ct-ease) 0.28s, transform 1s var(--ct-ease) 0.28s;
+  }
+
+  .ct-motion-live h2[data-reveal] .ct-italic.block {
+    display: block;
+  }
+
+  .ct-motion-live h2[data-reveal]:not([data-in]) .ct-italic {
+    opacity: 0;
+    transform: translateY(0.6em);
+  }
+
+  /* Cards and windows lift in with a little depth. */
+  .ct-motion-live :is(.ct-window, .ct-panel, figure)[data-reveal]:not([data-in]) {
+    transform: perspective(1200px) translateY(48px) rotateX(10deg) scale(0.97);
+  }
+
+  /* --- 4. Scroll-driven: these move with the scroll, and stop when it stops */
+
+  /* Word by word: a statement lights up as it is read. */
+  .ct-motion .ct-w {
+    opacity: calc(0.18 + 0.82 * clamp(0, var(--p) * 1.35 * var(--n, 10) - var(--i, 0), 1));
+    transition: opacity 0.25s linear;
+  }
+
+  .ct-motion .ct-mark .ct-w {
+    color: inherit;
+  }
+
+  /* 01 The funnel: each row arrives, and a bar beneath it narrows to one person. */
+  .ct-motion #problem ol.flex-col > li {
+    --q: clamp(0, var(--p) * 6 - var(--k, 0), 1);
+    opacity: calc(0.15 + 0.85 * var(--q));
+    transform: translateX(calc((1 - var(--q)) * 24px));
+    background: linear-gradient(var(--ct-lime), var(--ct-lime)) no-repeat left bottom / calc(var(--w, 100%) * var(--q)) 2px;
+  }
+
+  .ct-motion #problem ol.flex-col > li:nth-child(1) { --w: 100%; }
+  .ct-motion #problem ol.flex-col > li:nth-child(2) { --w: 68%; }
+  .ct-motion #problem ol.flex-col > li:nth-child(3) { --w: 42%; }
+  .ct-motion #problem ol.flex-col > li:nth-child(4) { --w: 20%; }
+  .ct-motion #problem ol.flex-col > li:nth-child(5) { --w: 3%; }
+
+  .ct-motion #problem ol.flex-col > li:last-child .rounded-full {
+    animation: ct-pulse 2.4s ease-in-out infinite;
+  }
+
+  @keyframes ct-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(var(--ct-glow, 255 77 28) / 0.5); }
+    50% { box-shadow: 0 0 0 8px rgb(var(--ct-glow, 255 77 28) / 0); }
+  }
+
+  /* Drawn lines in the graphics trace themselves in as their figure arrives. */
+  .ct-motion svg.ct-graphic :is(path, line, polyline):not([stroke-dasharray]):not([class*="ct-draw"]) {
+    stroke-dasharray: 1400;
+    stroke-dashoffset: calc(1400 * (1 - clamp(0, var(--p) * 1.4, 1)));
+  }
+
+  /* 02 Sixty-four profiles thin out until one is left. */
+  .ct-motion #philosophy figure svg > circle {
+    opacity: calc(0.18 * (1 - 0.85 * clamp(0, var(--p) * 1.8 - var(--r, 0.5), 1)));
+  }
+
+  .ct-motion #philosophy figure svg > circle:nth-child(3n + 1) { --r: 0.15; }
+  .ct-motion #philosophy figure svg > circle:nth-child(5n + 2) { --r: 0.45; }
+  .ct-motion #philosophy figure svg > circle:nth-child(7n + 3) { --r: 0.75; }
+  .ct-motion #philosophy figure svg > circle:nth-child(4n) { --r: 0.3; }
+
+  .ct-motion #philosophy figure svg > g {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(calc(0.4 + 0.6 * var(--p)));
+  }
+
+  .ct-motion #philosophy figure svg > g path {
+    animation: ct-ripple 5s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  @keyframes ct-ripple {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+
+  /* 04 The sun on the day's arc (ArcSun moves it). */
+  .ct-motion .ct-sun {
+    background: var(--ct-signal);
+    box-shadow: 0 0 0 6px rgb(var(--ct-glow) / 0.18), 0 0 30px 6px rgb(var(--ct-glow) / 0.45);
+    transition: background-color 0.6s ease;
+    z-index: 1;
+  }
+
+  .ct-motion .ct-sun[data-night="true"] {
+    background: var(--ct-violet);
+    box-shadow: 0 0 0 6px rgb(255 255 255 / 0.06), 0 0 24px 4px rgb(255 255 255 / 0.12);
+  }
+
+  /* 05 The evaluation chain: each step lights, then the line to the next draws. */
+  .ct-motion #evaluation ol[aria-label] > li {
+    --q: clamp(0, var(--p) * 6.5 - var(--k, 0) * 1.1, 1);
+  }
+
+  .ct-motion #evaluation ol[aria-label] > li > span.rounded-full {
+    transform: scale(calc(0.55 + 0.45 * var(--q)));
+    box-shadow: 0 0 0 calc(var(--q) * 6px) rgb(var(--ct-glow) / calc(0.18 * var(--q)));
+  }
+
+  .ct-motion #evaluation ol[aria-label] > li > span.h-px {
+    transform: scaleX(clamp(0, var(--p) * 6.5 - var(--k, 0) * 1.1 - 0.6, 1));
+    transform-origin: left;
+    background: var(--ct-lime);
+  }
+
+  .ct-motion #evaluation ol[aria-label] > li > span.w-px {
+    transform: scaleY(clamp(0, var(--p) * 6.5 - var(--k, 0) * 1.1 - 0.6, 1));
+    transform-origin: top;
+  }
+
+  /* The example fills in cell by cell. */
+  .ct-motion #evaluation .border-dashed ol > li {
+    --q: clamp(0, var(--p) * 5 - var(--k, 0) * 0.8, 1);
+    opacity: var(--q);
+    transform: translateY(calc((1 - var(--q)) * 10px));
+  }
+
+  /* Quotes are highlighted as if by a marker, as they are read. */
+  .ct-motion :is(#evaluation, #shortlist) mark {
+    --q: clamp(0, var(--p) * 1.8 - 0.5, 1);
+    background: linear-gradient(var(--ct-lime), var(--ct-lime)) no-repeat 0 0 / calc(var(--q) * 100%) 100% !important;
+    color: color-mix(in srgb, #0a0a0a calc(var(--q) * 100%), var(--ct-ink)) !important;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  /* 06 The shortlist card tilts up into place; its ratings fill; the next question writes itself. */
+  .ct-motion #shortlist .ct-window {
+    transform: perspective(1400px) rotateX(calc((1 - var(--p)) * 16deg)) translateY(calc((1 - var(--p)) * 50px));
+    transform-origin: 50% 100%;
+  }
+
+  .ct-motion #shortlist .gap-\[3px\] > span {
+    transform: scaleX(clamp(0, var(--p) * 3 - 1 - var(--k, 0) * 0.3, 1));
+    transform-origin: left;
+  }
+
+  .ct-motion #shortlist .text-\[var\(--ct-violet-ink\)\] {
+    clip-path: inset(0 calc((1 - clamp(0, var(--p) * 2.2 - 1.1, 1)) * 100%) 0 0);
+  }
+
+  /* 07 and every icon in a circle: the strokes draw themselves. */
+  .ct-motion span.rounded-full > svg[aria-hidden="true"] :is(path, circle, rect, line) {
+    stroke-dasharray: 90;
+    stroke-dashoffset: calc(90 * (1 - clamp(0, var(--p) * 1.6 - 0.3, 1)));
+  }
+
+  /* 08 Machine and human, joined pair by pair. */
+  .ct-motion #human ul > li {
+    --q: clamp(0, var(--p) * 5 - var(--k, 0) * 0.45, 1);
+  }
+
+  .ct-motion #human ul > li > span[aria-hidden] > .flex-1 {
+    transform: scaleX(var(--q));
+    transform-origin: left;
+    background: color-mix(in oklab, var(--ct-lime) calc(var(--q) * 70%), var(--ct-line-2));
+  }
+
+  .ct-motion #human ul > li > span:last-child {
+    opacity: calc(0.2 + 0.8 * var(--q));
+  }
+
+  /* --- 5. The pointer: a glow that follows it across cards ----------------- */
+
+  @media (pointer: fine) {
+    .ct-motion :is(.ct-window, .ct-panel) {
+      background:
+        radial-gradient(380px circle at var(--gx, -999px) var(--gy, -999px), rgb(var(--ct-glow) / 0.12), transparent 65%),
+        var(--ct-card);
+    }
+  }
+
+  /* --- 6. The footer's rings breathe ------------------------------------- */
+
+  .ct-motion #ct-footer svg.ct-graphic path {
+    animation: ct-ripple 7s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .ct-motion #ct-footer svg.ct-graphic path:nth-child(2n) { animation-delay: -2.3s; }
+  .ct-motion #ct-footer svg.ct-graphic path:nth-child(3n) { animation-delay: -4.6s; }
+}
+
+/* --- The thread (ScrollThread) -------------------------------------------- */
+
+.ct-motion .ct-thread {
+  z-index: 2;
+}
+
+.ct-motion .ct-thread-node {
+  fill: var(--ct-bg);
+  stroke: var(--ct-line-2);
+  stroke-width: 1.25;
+  transition: fill 0.4s ease, stroke 0.4s ease;
+}
+
+.ct-motion .ct-thread-node[data-on="true"] {
+  fill: var(--ct-lime);
+  stroke: var(--ct-lime);
+}
+
+.ct-motion .ct-thread-halo {
+  fill: rgb(var(--ct-glow) / 0.18);
+}
