@@ -393,3 +393,18 @@ export const COMPACT = {
   ],
   more: "The full detail",
 } as const;
+
+/**
+ * (ours) The scroll story that tells the six layers in the mono variant
+ * (components/contour/employers/TalentStory.tsx). The chapter text itself is
+ * the approved HOW_WE_WORK; these are only the drawing's labels.
+ */
+export const STORY = {
+  concept: "Concept · one search, drawn",
+  drawingLabel:
+    "A drawing of one search: a role in its context, the people in the market around it, the relevant few drawn toward it, and four left, each with a reason.",
+  /** From the approved Define layer: "what this person owns, decides and inherits". */
+  define: ["Owns", "Decides", "Inherits"],
+  /** Approved, from SCALE.constants. */
+  shortlist: "Four people, not forty",
+} as const;

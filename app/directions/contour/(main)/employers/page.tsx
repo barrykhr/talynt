@@ -19,6 +19,8 @@ import {
 } from "@/components/contour/employers/Compact";
 import { ContactForm } from "@/components/contour/ContactForm";
 import { FaqList } from "@/components/contour/FaqList";
+import { TalentStory } from "@/components/contour/employers/TalentStory";
+import { EMPLOYERS_ONLY } from "@/lib/contour/variant";
 
 export const metadata: Metadata = {
   title: "For employers",
@@ -83,7 +85,7 @@ export default function EmployersPage() {
 
       {/* --- 02–07 Told in pictures; the long form is on /employers/approach -- */}
       <CompactPhilosophy index="02" />
-      <CompactHowWeWork index="03" />
+      {EMPLOYERS_ONLY ? <TalentStory index="03" /> : <CompactHowWeWork index="03" />}
       <CompactContinues index="04" />
       <CompactEvaluation index="05" role={DEMO_ROLE} assessment={DEMO_ASSESSMENT} evaluation={shared} />
       <CompactShortlist index="06" role={DEMO_ROLE} candidate={DEMO_CANDIDATE} assessment={DEMO_ASSESSMENT} responses={DEMO_RESPONSES} evaluation={shared} />

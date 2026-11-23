@@ -1032,3 +1032,28 @@ html:has(.ct-mono) body {
   background-color: #0a0a0a;
   color-scheme: dark;
 }
+
+/* The scroll story (TalentStory). Without script it can't follow the scroll,
+   so it becomes an ordinary section: every chapter listed, the drawing still. */
+@media (scripting: none) {
+  .ct-story {
+    height: auto !important;
+  }
+
+  .ct-story-stage {
+    position: static;
+    height: auto;
+  }
+
+  .ct-story-chapters {
+    display: grid !important;
+    gap: 1.5rem;
+  }
+
+  .ct-story-chapter {
+    position: static !important;
+    opacity: 1 !important;
+    transform: none !important;
+    text-align: left !important;
+  }
+}
