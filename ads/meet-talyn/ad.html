@@ -1,0 +1,502 @@
+<!doctype html>
+<!--
+  TALYNT LABS — "Meet Talyn", a 36-second ad with voiceover.
+  One composition, two shapes: ad.html?f=v (1080×1920) and ad.html?f=s (1080×1080).
+  Every movement is a CSS animation on one timeline, so render.mjs can pause the
+  page and step it frame by frame. Scene times line up with the voiceover in
+  vo.json. See README.md for the script and how to render.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>TALYNT LABS — Meet Talyn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..500;1,8..60,300..500&display=block"
+      rel="stylesheet"
+    />
+    <style>
+      @property --n { syntax: "<integer>"; initial-value: 0; inherits: true; }
+      @property --ring { syntax: "<number>"; initial-value: 0; inherits: false; }
+
+      :root {
+        --bg: #0a0a0a;
+        --card: #161616;
+        --line: #262626;
+        --line2: #383838;
+        --ink: #f5f5f2;
+        --ink2: #cfcfca;
+        --mute: #9b9b96;
+        --lime: #c8f04a;
+        --glow: 200 240 74;
+        --serif: "Source Serif 4", Georgia, serif;
+        --sans: "Geist", system-ui, sans-serif;
+        --mono: "Geist Mono", ui-monospace, monospace;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --END: 31.8s;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+      /* --- The frame ------------------------------------------------------------ */
+      .frame { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; --cap-top: 250px; --vis-top: 760px; --s: 1.12; }
+      .frame[data-f="s"] { height: 1080px; --cap-top: 120px; --vis-top: 390px; --s: 0.64; }
+
+      .bg {
+        position: absolute; inset: 0; z-index: -1;
+        background:
+          radial-gradient(ellipse 70% 42% at 50% 64%, rgb(var(--glow) / 0.24), transparent 70%),
+          radial-gradient(ellipse 30% 20% at 50% 70%, rgb(var(--glow) / 0.2), transparent 70%),
+          repeating-linear-gradient(90deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 9px);
+        animation: breathe 4s ease-in-out 0s infinite;
+      }
+      @keyframes breathe { 0%, 100% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+
+      .brand { position: absolute; top: 64px; left: 72px; display: flex; align-items: center; gap: 18px; z-index: 5; animation: fade-in 0.6s ease 0.1s both, fade-out 0.4s ease 31.4s forwards; }
+      .frame[data-f="s"] .brand { top: 44px; left: 56px; }
+      .brand img { height: 52px; filter: invert(1); }
+      .frame[data-f="s"] .brand img { height: 40px; }
+      .brand span { font-family: var(--mono); font-size: 20px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); padding-left: 18px; border-left: 1px solid var(--line2); }
+      .frame[data-f="s"] .brand span { font-size: 16px; }
+
+      .steps { position: absolute; left: 72px; right: 72px; bottom: 92px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; z-index: 5; animation: fade-in 0.6s ease 2.2s both, fade-out 0.4s ease 31.4s forwards; }
+      .frame[data-f="s"] .steps { bottom: 52px; left: 56px; right: 56px; }
+      .steps i { height: 6px; border-radius: 99px; background: var(--line2); position: relative; overflow: hidden; }
+      .steps i::after { content: ""; position: absolute; inset: 0; background: var(--lime); transform: scaleX(0); transform-origin: left; animation: fill var(--len) linear var(--at) forwards; }
+      @keyframes fill { to { transform: scaleX(1); } }
+
+      .note { position: absolute; left: 0; right: 0; bottom: 40px; text-align: center; font-family: var(--mono); font-size: 17px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); z-index: 5; animation: fade-in 0.6s ease 0.4s both, fade-out 0.4s ease 31.4s forwards; }
+      .frame[data-f="s"] .note { bottom: 18px; font-size: 13px; }
+
+      /* --- Scenes: each flips in, plays, and flips away ---------------------------- */
+      .scene { position: absolute; inset: 0; perspective: 1800px; }
+      .scene > .cap, .scene > .vis { animation: flip-in 0.6s var(--ease) var(--in) both, flip-out 0.42s cubic-bezier(0.7, 0, 0.84, 0) var(--out) forwards; }
+      .scene > .vis { animation-delay: calc(var(--in) + 0.08s), var(--out); }
+      @keyframes flip-in { from { opacity: 0; transform: rotateX(-75deg) translateY(120px); } to { opacity: 1; transform: none; } }
+      @keyframes flip-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: rotateX(75deg) translateY(-120px); } }
+
+      .cap { position: absolute; top: var(--cap-top); left: 72px; right: 72px; transform-origin: 50% 100%; }
+      .frame[data-f="s"] .cap { left: 56px; right: 56px; }
+      .num { font-family: var(--mono); font-size: 24px; letter-spacing: 0.14em; color: var(--lime); text-transform: uppercase; }
+      .num em { font-style: normal; color: var(--mute); margin-left: 14px; }
+      .title { margin-top: 22px; font-family: var(--serif); font-weight: 360; font-size: 104px; line-height: 1.02; letter-spacing: -0.025em; }
+      .title i { display: block; color: var(--lime); animation: rise 0.6s var(--ease) calc(var(--in) + 0.35s) both; }
+      .frame[data-f="s"] .num { font-size: 18px; }
+      .frame[data-f="s"] .title { font-size: 66px; margin-top: 14px; }
+
+      .vis { position: absolute; top: var(--vis-top); left: 50%; width: 900px; height: 900px; margin-left: -450px; transform-origin: 50% 0; scale: var(--s); }
+
+      @keyframes rise { from { opacity: 0; transform: translateY(26px); } }
+      @keyframes fade-in { from { opacity: 0; } }
+      @keyframes fade-out { to { opacity: 0; } }
+      @keyframes pop { from { opacity: 0; transform: translateY(24px) scale(0.9); } }
+      @keyframes slide { from { opacity: 0; transform: translateX(-40px); } }
+      @keyframes type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+
+      .a-pop { animation: pop 0.45s var(--ease) calc(var(--in) + var(--d)) both; }
+      .a-slide { animation: slide 0.45s var(--ease) calc(var(--in) + var(--d)) both; }
+      .a-rise { animation: rise 0.5s var(--ease) calc(var(--in) + var(--d)) both; }
+      .a-type { animation: type var(--t) steps(48, end) calc(var(--in) + var(--d)) both; }
+
+      /* Pieces */
+      .card { background: linear-gradient(180deg, #1a1a1a, #121212); border: 1px solid #2c2c2c; border-radius: 34px; box-shadow: 0 50px 120px -50px rgb(0 0 0 / 0.95), 0 0 140px -40px rgb(var(--glow) / 0.35); }
+      .label { font-family: var(--mono); font-size: 20px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mute); }
+      .label.lime { color: var(--lime); }
+      .chip { display: inline-flex; align-items: center; gap: 10px; padding: 12px 22px; border-radius: 99px; border: 1px solid var(--line2); background: #181818; font-size: 25px; white-space: nowrap; }
+      .chip.on { background: rgb(var(--glow) / 0.16); border-color: transparent; }
+      .chips { display: flex; flex-wrap: wrap; gap: 12px; }
+      .avatar { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--lime); color: #0a0a0a; font-family: var(--mono); font-weight: 500; font-size: 26px; flex: none; }
+      .check { color: var(--lime); }
+      svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+      /* Talyn's orb */
+      .orb { position: relative; display: grid; place-items: center; width: var(--o); height: var(--o); flex: none; }
+      .orb i { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgb(var(--glow) / 0.45); animation: ring 3.2s ease-in-out infinite; }
+      .orb i + i { inset: 18%; border-color: rgb(var(--glow) / 0.75); background: radial-gradient(circle, rgb(var(--glow) / 0.18), transparent 70%); animation-delay: 0.6s; }
+      .orb b { width: 34%; height: 34%; border-radius: 50%; background: var(--lime); box-shadow: 0 0 calc(var(--o) * 0.4) rgb(var(--glow) / 0.8); animation: core 3.2s ease-in-out infinite; }
+      @keyframes ring { 50% { transform: scale(1.1); opacity: 0.55; } }
+      @keyframes core { 50% { transform: scale(0.85); } }
+
+      /* Score ring */
+      .ring { --ring: var(--to); --n: var(--to); position: relative; display: grid; place-items: center; width: 96px; height: 96px; flex: none; border-radius: 50%; background: conic-gradient(var(--lime) calc(var(--ring) * 1%), #2a2a2a 0); animation: ringfill 0.9s var(--ease) calc(var(--in) + var(--d)) both; }
+      @keyframes ringfill { from { --ring: 0; --n: 0; } }
+      .ring > span { display: grid; place-items: center; line-height: 1; width: 80px; height: 80px; border-radius: 50%; background: #141414; font-family: var(--serif); font-size: 32px; counter-reset: n var(--n); }
+      .ring > span::before { content: counter(n); }
+      .ring small { font-family: var(--mono); font-size: 15px; color: var(--lime); letter-spacing: 0.06em; }
+
+      /* --- 00 Hook --------------------------------------------------------------- */
+      .s0 .cap { top: calc(var(--cap-top) + 40px); }
+      .s0 .title { font-size: 128px; }
+      .frame[data-f="s"] .s0 .title { font-size: 80px; }
+      .s0 .pop { position: absolute; inset: 30px 60px auto; padding: 44px; display: grid; gap: 22px; border-color: rgb(var(--glow) / 0.45); }
+      .s0 .head { display: flex; align-items: center; gap: 18px; }
+      .s0 .pop h3 { font-family: var(--serif); font-weight: 400; font-size: 58px; line-height: 1.05; }
+      .s0 .pop p { font-size: 28px; line-height: 1.45; color: var(--ink2); }
+
+      /* --- 01 Meet Talyn ----------------------------------------------------------- */
+      .s1 .core { position: absolute; inset: 10px 0 auto; display: grid; justify-items: center; text-align: center; gap: 16px; }
+      .s1 .orb { --o: 300px; animation: pop 0.8s var(--ease) calc(var(--in) + 0.2s) both; }
+      .s1 .name { margin-top: 18px; font-family: var(--serif); font-size: 104px; line-height: 1; animation: rise 0.6s var(--ease) calc(var(--in) + 0.5s) both; }
+      .s1 .chips { justify-content: center; margin-top: 26px; }
+      .s1 .chip { font-size: 30px; padding: 16px 30px; }
+      .s1 .wave { position: absolute; left: 50%; top: 160px; width: 300px; height: 300px; margin: -150px 0 0 -150px; border-radius: 50%; border: 3px solid var(--lime); opacity: 0; animation: wave 1.6s ease-out calc(var(--in) + 0.4s) 2 both; }
+      @keyframes wave { from { opacity: 0.7; transform: scale(1); } to { opacity: 0; transform: scale(2.2); } }
+
+      /* --- 02 Role Insights ---------------------------------------------------------- */
+      .s2 .panel { position: absolute; inset: 0 0 auto; padding: 40px 44px; display: grid; gap: 16px; }
+      .s2 .role { font-family: var(--serif); font-size: 46px; line-height: 1.1; }
+      .s2 .code { font-family: var(--mono); font-size: 22px; line-height: 1.55; color: var(--ink2); background: #0e0e0e; border: 1px solid var(--line); border-radius: 18px; padding: 18px 22px; }
+      .s2 .code b { color: var(--lime); font-weight: 500; }
+      .s2 .path { display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+      .s2 .path span { padding: 12px 18px; border-radius: 16px; background: #1b1b1b; border: 1px solid var(--line2); font-size: 23px; white-space: nowrap; }
+      .s2 .path em { color: var(--lime); font-style: normal; font-size: 26px; }
+      .s2 .path span.now { border-color: var(--lime); }
+
+      /* --- 03 Search ----------------------------------------------------------------- */
+      .s3 .prompt { position: absolute; inset: 0 0 auto; padding: 32px 36px; border-color: rgb(var(--glow) / 0.45); }
+      .s3 .prompt p { margin-top: 12px; font-size: 34px; line-height: 1.35; }
+      .s3 .results { position: absolute; inset: 250px 0 auto; display: grid; gap: 18px; }
+      .s3 .res { display: grid; grid-template-columns: auto 1fr auto; gap: 22px; align-items: center; padding: 22px 26px; border-radius: 26px; }
+      .s3 .res b { display: block; font-size: 29px; font-weight: 500; }
+      .s3 .res span.r { font-size: 23px; color: var(--mute); }
+
+      /* --- 04 Intent ------------------------------------------------------------------- */
+      .s4 .panel { position: absolute; inset: 0 0 auto; padding: 36px 40px; }
+      .s4 .who { display: flex; align-items: center; gap: 18px; font-size: 30px; font-weight: 500; }
+      .s4 .who small { display: block; font-size: 22px; color: var(--mute); font-weight: 400; }
+      .s4 .sig { margin-top: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .s4 .sig span { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 16px; background: #181818; border: 1px solid var(--line); font-size: 23px; color: var(--mute); }
+      .s4 .sig span i { width: 14px; height: 14px; border-radius: 50%; background: #333; flex: none; }
+      .s4 .sig span.on { color: var(--ink); border-color: rgb(var(--glow) / 0.35); }
+      .s4 .sig span.on i { background: var(--lime); box-shadow: 0 0 0 6px rgb(var(--glow) / 0.18); animation: led 0.4s ease calc(var(--in) + var(--d) + 0.3s) both; }
+      @keyframes led { from { background: #333; box-shadow: none; } }
+      .s4 .verdict { margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 26px; border-radius: 22px; background: rgb(var(--glow) / 0.14); font-size: 26px; }
+      .s4 .verdict b { padding: 10px 22px; border-radius: 99px; background: var(--lime); color: #0a0a0a; font-weight: 600; font-size: 24px; white-space: nowrap; }
+
+      /* --- 05 Outreach ------------------------------------------------------------------- */
+      .s5 .mail { position: absolute; inset: 0 40px auto 0; padding: 34px 38px; display: grid; gap: 14px; }
+      .s5 .mail b { font-size: 31px; font-weight: 500; line-height: 1.3; }
+      .s5 .mail p { font-size: 24px; line-height: 1.5; color: var(--ink2); }
+      .s5 .sent { justify-self: start; display: inline-flex; gap: 8px; align-items: center; padding: 10px 20px; border-radius: 99px; background: var(--lime); color: #0a0a0a; font-weight: 600; font-size: 22px; }
+      .s5 .wa { position: absolute; inset: 430px 0 auto 90px; padding: 30px 32px; display: grid; gap: 16px; }
+      .s5 .wa-head { display: flex; align-items: center; gap: 14px; font-size: 25px; }
+      .s5 .wa-dot { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #25d366; }
+      .s5 .optin { margin-left: auto; font-family: var(--mono); font-size: 18px; letter-spacing: 0.08em; color: var(--lime); text-transform: uppercase; }
+      .s5 .bubble { max-width: 88%; padding: 16px 20px; border-radius: 22px; font-size: 24px; line-height: 1.4; }
+      .s5 .out { justify-self: end; background: #2a3a12; border-bottom-right-radius: 6px; }
+      .s5 .in { justify-self: start; background: #1f1f1f; border: 1px solid var(--line); border-bottom-left-radius: 6px; }
+
+      /* --- 06 Questions & authenticity ------------------------------------------------------ */
+      .s6 .chat { position: absolute; inset: 0 0 auto; padding: 30px 34px; display: grid; gap: 14px; }
+      .s6 .q { display: flex; gap: 16px; align-items: flex-start; font-size: 26px; line-height: 1.4; }
+      .s6 .q .orb { --o: 52px; margin-top: 2px; }
+      .s6 .a { justify-self: end; max-width: 84%; padding: 16px 20px; border-radius: 20px; border-bottom-right-radius: 6px; background: #1f1f1f; border: 1px solid var(--line); font-size: 24px; line-height: 1.4; color: var(--ink2); }
+      .s6 .checks { position: absolute; inset: 360px 0 auto; padding: 30px 34px; display: grid; gap: 10px; }
+      .s6 .checks span.row { display: flex; align-items: center; gap: 14px; font-size: 25px; }
+      .s6 .ok { margin-top: 8px; display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 18px; background: rgb(var(--glow) / 0.14); font-size: 25px; font-weight: 500; }
+
+      /* --- 07 Hiring managers ------------------------------------------------------------------- */
+      .s7 .cand { position: absolute; inset: 0 0 auto; padding: 28px 32px; display: grid; grid-template-columns: auto 1fr auto; gap: 22px; align-items: center; }
+      .s7 .cand b { display: block; font-size: 30px; font-weight: 500; }
+      .s7 .cand span.r { display: block; font-size: 23px; color: var(--mute); margin-top: 4px; }
+      .s7 .cand .chip { margin-top: 10px; font-size: 21px; padding: 8px 16px; }
+      .s7 .kit { position: absolute; inset: 250px 0 auto; padding: 32px 34px; display: grid; gap: 14px; }
+      .s7 .qrow { display: grid; gap: 10px; padding: 18px 22px; border-radius: 20px; background: #181818; border: 1px solid var(--line); }
+      .s7 .qrow p { font-size: 25px; line-height: 1.38; }
+      .s7 .qrow small { justify-self: start; font-family: var(--mono); font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--lime); padding: 6px 12px; border-radius: 10px; background: rgb(var(--glow) / 0.12); }
+
+      /* --- 08 Hand-over ---------------------------------------------------------------------------- */
+      .s8 .hand { position: absolute; inset: 40px 0 auto; height: 520px; }
+      .s8 .side { position: absolute; top: 80px; display: grid; justify-items: center; gap: 18px; text-align: center; width: 300px; }
+      .s8 .side.l { left: 0; }
+      .s8 .side.r { right: 0; }
+      .s8 .side .orb { --o: 200px; }
+      .s8 .side p { font-size: 30px; font-weight: 500; }
+      .s8 .side small { display: block; font-size: 22px; color: var(--mute); font-weight: 400; margin-top: 6px; }
+      .s8 .person { display: grid; place-items: center; width: 200px; height: 200px; border-radius: 50%; background: #f5f5f2; color: #0a0a0a; font-family: var(--serif); font-size: 76px; box-shadow: 0 0 0 14px rgb(255 255 255 / 0.06), 0 0 90px -10px rgb(255 255 255 / 0.25); }
+      .s8 svg.link { position: absolute; left: 250px; top: 160px; width: 400px; height: 60px; overflow: visible; }
+      .s8 svg.link path { stroke: var(--lime); stroke-width: 4; stroke-dasharray: 10 12; fill: none; animation: dash 0.9s linear infinite; }
+      @keyframes dash { to { stroke-dashoffset: -44; } }
+      .s8 .baton { position: absolute; left: 250px; top: 176px; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 30px rgb(var(--glow) / 0.9); animation: baton 1.3s cubic-bezier(0.6, 0, 0.4, 1) calc(var(--in) + 0.8s) 2 both; }
+      @keyframes baton { from { transform: translateX(0); opacity: 1; } 90% { opacity: 1; } to { transform: translateX(400px); opacity: 0; } }
+      .s8 .tags { position: absolute; left: 0; right: 0; top: 420px; display: flex; justify-content: center; gap: 14px; }
+
+      /* --- End card ---------------------------------------------------------------------------------- */
+      .end { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; gap: 30px; animation: end-in 0.8s var(--ease) var(--END) both; }
+      @keyframes end-in { from { opacity: 0; transform: scale(0.94); filter: blur(8px); } }
+      .end .orb { --o: 140px; }
+      .end .logo { height: 140px; filter: invert(1); }
+      .end .tag { font-family: var(--serif); font-style: italic; font-size: 56px; color: var(--lime); animation: rise 0.6s var(--ease) calc(var(--END) + 0.45s) both; }
+      .end .kicker { font-family: var(--mono); font-size: 24px; letter-spacing: 0.18em; color: var(--mute); text-transform: uppercase; animation: rise 0.6s var(--ease) calc(var(--END) + 0.65s) both; }
+      .end .cta { margin-top: 16px; padding: 30px 58px; border-radius: 99px; background: var(--lime); color: #0a0a0a; font-weight: 600; font-size: 38px; box-shadow: 0 0 0 14px rgb(var(--glow) / 0.14), 0 30px 80px -20px rgb(var(--glow) / 0.8); animation: pop 0.6s var(--ease) calc(var(--END) + 0.9s) both; }
+      .end .url { font-family: var(--mono); font-size: 32px; letter-spacing: 0.06em; animation: rise 0.6s var(--ease) calc(var(--END) + 1.15s) both; }
+      .frame[data-f="s"] .end { gap: 18px; }
+      .frame[data-f="s"] .end .orb { --o: 90px; }
+      .frame[data-f="s"] .end .logo { height: 96px; }
+      .frame[data-f="s"] .end .tag { font-size: 42px; }
+      .frame[data-f="s"] .end .kicker { font-size: 18px; }
+      .frame[data-f="s"] .end .cta { font-size: 28px; padding: 22px 44px; }
+      .frame[data-f="s"] .end .url { font-size: 24px; }
+      .end-glow { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse 60% 40% at 50% 55%, rgb(var(--glow) / 0.35), transparent 70%); animation: fade-in 1s ease var(--END) both; }
+    </style>
+  </head>
+  <body>
+    <div class="frame" id="frame">
+      <div class="bg"></div>
+      <div class="brand"><img src="../../public/brand/talynt-primary-mono.svg" alt="TALYNT LABS" /><span>AI-native hiring</span></div>
+
+      <!-- 00 · The hook: the site's pop-up -->
+      <section class="scene s0" style="--in: 0s; --out: 1.85s">
+        <div class="cap"><h1 class="title">Got a hiring <i>problem?</i></h1></div>
+        <div class="vis">
+          <div class="card pop">
+            <div class="head"><span class="orb" style="--o: 64px"><i></i><i></i><b></b></span><span class="label">Talyn · AI hiring agent</span></div>
+            <h3>Talyn is here to help.</h3>
+            <div class="chips">
+              <span class="chip a-pop" style="--d: 0.5s">Roles take too long</span>
+              <span class="chip on a-pop" style="--d: 0.62s">Candidates drop out</span>
+              <span class="chip a-pop" style="--d: 0.74s">Profiles don’t fit</span>
+              <span class="chip a-pop" style="--d: 0.86s">Interviews go off-brief</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 01 · Meet Talyn -->
+      <section class="scene s1" style="--in: 2.1s; --out: 5.6s">
+        <div class="cap">
+          <p class="num">01 <em>Meet Talyn</em></p>
+          <h2 class="title">Meet Talyn. <i>Your AI hiring agent.</i></h2>
+        </div>
+        <div class="vis">
+          <span class="wave"></span>
+          <div class="core">
+            <span class="orb"><i></i><i></i><b></b></span>
+            <p class="name">Talyn</p>
+            <p class="label">AI hiring agent · TALYNT LABS</p>
+            <div class="chips">
+              <span class="chip on a-pop" style="--d: 1.3s">Intent</span>
+              <span class="chip on a-pop" style="--d: 1.5s">Context</span>
+              <span class="chip on a-pop" style="--d: 1.7s">Reasons</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 · Role Insights -->
+      <section class="scene s2" style="--in: 5.9s; --out: 10.3s">
+        <div class="cap">
+          <p class="num">02 <em>Role Insights</em></p>
+          <h2 class="title">Share the role. <i>Talyn reads the JD.</i></h2>
+        </div>
+        <div class="vis">
+          <div class="card panel">
+            <p class="label lime">Role Insights</p>
+            <p class="role">Senior Backend Engineer</p>
+            <p class="label a-rise" style="--d: 0.4s">Must-have</p>
+            <div class="chips">
+              <span class="chip on a-pop" style="--d: 0.5s">Payments infrastructure</span>
+              <span class="chip on a-pop" style="--d: 0.6s">Event-driven systems</span>
+              <span class="chip on a-pop" style="--d: 0.7s">On-call ownership</span>
+            </div>
+            <p class="label a-rise" style="--d: 1s">Boolean search</p>
+            <p class="code a-type" style="--d: 1.1s; --t: 1.2s">(<b>"backend"</b> OR <b>"platform"</b>) AND (payments OR ledger) AND (Kafka OR "event-driven")</p>
+            <p class="label a-rise" style="--d: 2.2s">Adjacent titles</p>
+            <div class="chips">
+              <span class="chip a-pop" style="--d: 2.3s">Platform engineer</span>
+              <span class="chip a-pop" style="--d: 2.4s">Payments engineer</span>
+              <span class="chip a-pop" style="--d: 2.5s">SDE II · fintech</span>
+            </div>
+            <p class="label a-rise" style="--d: 2.9s">Growth path</p>
+            <div class="path">
+              <span class="a-slide" style="--d: 3s">Engineer</span><em class="a-slide" style="--d: 3.05s">→</em>
+              <span class="now a-slide" style="--d: 3.15s">Senior</span><em class="a-slide" style="--d: 3.2s">→</em>
+              <span class="a-slide" style="--d: 3.3s">Staff</span><em class="a-slide" style="--d: 3.35s">→</em>
+              <span class="a-slide" style="--d: 3.45s">Principal</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 · Semantic search -->
+      <section class="scene s3" style="--in: 10.6s; --out: 13.6s">
+        <div class="cap">
+          <p class="num">03 <em>Semantic search</em></p>
+          <h2 class="title">Ask for the person. <i>Get the person.</i></h2>
+        </div>
+        <div class="vis">
+          <div class="card prompt">
+            <p class="label lime">Ask Talyn</p>
+            <p class="a-type" style="--d: 0.3s; --t: 1.1s">A backend engineer who has scaled payments at a startup</p>
+          </div>
+          <div class="results" id="results"></div>
+        </div>
+      </section>
+
+      <!-- 04 · Intent -->
+      <section class="scene s4" style="--in: 13.9s; --out: 17.1s">
+        <div class="cap">
+          <p class="num">04 <em>Hire for intent</em></p>
+          <h2 class="title">Who’s open to a move. <i>And why.</i></h2>
+        </div>
+        <div class="vis">
+          <div class="card panel">
+            <div class="who"><span class="avatar">AK</span><span>Aarav K. · Backend engineer<small>Switch intent · 8 signals</small></span></div>
+            <div class="sig" id="sig"></div>
+            <div class="verdict a-pop" style="--d: 2.2s"><span>Past usual role tenure · profile refreshed</span><b>High intent</b></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 · Outreach -->
+      <section class="scene s5" style="--in: 17.4s; --out: 19.8s">
+        <div class="cap">
+          <p class="num">05 <em>Hyperpersonalised outreach</em></p>
+          <h2 class="title">Personal outreach. <i>Email, then WhatsApp.</i></h2>
+        </div>
+        <div class="vis">
+          <div class="card mail a-pop" style="--d: 0.2s">
+            <p class="label lime">Email · to Aarav</p>
+            <b class="a-type" style="--d: 0.5s; --t: 0.8s">Your payments-ledger work, and a role built around it</b>
+            <p>Hi Aarav — the ledger you scaled at your last startup is exactly the problem this team is solving next…</p>
+            <span class="sent a-pop" style="--d: 1.2s"><svg class="i" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg> Sent</span>
+          </div>
+          <div class="card wa a-pop" style="--d: 1.4s">
+            <div class="wa-head">
+              <span class="wa-dot"><svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Z" /></svg></span>
+              <b>WhatsApp</b><span class="optin">✓ Opted in</span>
+            </div>
+            <p class="bubble out a-pop" style="--d: 1.6s">Thanks for replying, Aarav! Does Thursday suit a 20-minute call?</p>
+            <p class="bubble in a-pop" style="--d: 2s">Thursday works for me.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 · Questions and authenticity -->
+      <section class="scene s6" style="--in: 20.1s; --out: 23.9s">
+        <div class="cap">
+          <p class="num">06 <em>Questions &amp; authenticity</em></p>
+          <h2 class="title">The right questions. <i>Answers that add up.</i></h2>
+        </div>
+        <div class="vis">
+          <div class="card chat">
+            <p class="q a-pop" style="--d: 0.2s"><span class="orb"><i></i><i></i><b></b></span><span>Your profile mentions Kafka at scale — what throughput did the pipeline handle, and what broke first?</span></p>
+            <p class="a a-pop" style="--d: 0.8s">About 40k events a second. Consumer lag broke first — we re-partitioned by merchant.</p>
+          </div>
+          <div class="card checks" id="checks"><p class="label lime">Authenticity checks</p></div>
+        </div>
+      </section>
+
+      <!-- 07 · Hiring managers -->
+      <section class="scene s7" style="--in: 24.2s; --out: 28.3s">
+        <div class="cap">
+          <p class="num">07 <em>For hiring managers</em></p>
+          <h2 class="title">Hire with reasons. <i>Interview on the JD.</i></h2>
+        </div>
+        <div class="vis">
+          <div class="card cand a-pop" style="--d: 0.2s">
+            <span class="avatar">AK</span>
+            <span><b>Aarav K. · Backend engineer</b><span class="r">Built a payments ledger · Kafka at scale</span><span class="chip on">High intent · Healthy</span></span>
+            <span class="ring" style="--to: 96; --d: 0.4s"><span><small>A+</small></span></span>
+          </div>
+          <div class="card kit" id="kit"><p class="label lime">Interview kit · mapped to the JD</p></div>
+        </div>
+      </section>
+
+      <!-- 08 · AI finds, people talk -->
+      <section class="scene s8" style="--in: 28.6s; --out: 31.5s">
+        <div class="cap">
+          <p class="num">TALYNT LABS <em>AI-native hiring</em></p>
+          <h2 class="title">AI finds who to talk to. <i>People do the talking.</i></h2>
+        </div>
+        <div class="vis">
+          <div class="hand">
+            <div class="side l a-pop" style="--d: 0.2s"><span class="orb"><i></i><i></i><b></b></span><p>Talyn<small>Finds, reads, follows up</small></p></div>
+            <svg class="link" viewBox="0 0 400 60"><path d="M0 16 C 130 -20, 270 52, 400 16" /></svg>
+            <span class="baton"></span>
+            <div class="side r a-pop" style="--d: 0.45s"><span class="person">R</span><p>Your recruiter<small>Talks, judges, decides</small></p></div>
+            <div class="tags">
+              <span class="chip on a-pop" style="--d: 1.4s">Pay only when you hire</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- End card -->
+      <div class="end-glow"></div>
+      <section class="end">
+        <span class="orb"><i></i><i></i><b></b></span>
+        <img class="logo" src="../../public/brand/talynt-primary-mono.svg" alt="TALYNT LABS" />
+        <p class="tag">Talent intelligence, built for hiring.</p>
+        <p class="kicker">Meet Talyn · our AI hiring agent</p>
+        <p class="cta">Book a demo →</p>
+        <p class="url">talyntlabs.com</p>
+      </section>
+
+      <div class="steps" id="steps"></div>
+      <p class="note">Illustrative product visuals · fictional candidates</p>
+    </div>
+
+    <script>
+      const f = new URLSearchParams(location.search).get("f") === "s" ? "s" : "v";
+      document.getElementById("frame").dataset.f = f;
+
+      const el = (tag, cls, html, style) => {
+        const e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (html !== undefined) e.innerHTML = html;
+        if (style) e.setAttribute("style", style);
+        return e;
+      };
+      const check = '<svg class="i check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>';
+
+      // 03 — results, scored against the JD.
+      const results = document.getElementById("results");
+      [
+        ["AK", "Backend engineer · 7 yrs · fintech", "Built a payments ledger · Kafka at scale", 96, "A+"],
+        ["RS", "Platform engineer · 9 yrs · payments", "Led on-call for core APIs · mentors four", 91, "A"],
+        ["MN", "Senior engineer · 6 yrs · lending", "Event sourcing in production · compliance", 84, "A"],
+      ].forEach(([ini, line, r, score, grade], i) => {
+        const d = (1.25 + i * 0.18).toFixed(2);
+        results.append(el("div", "card res a-pop", `<span class="avatar">${ini}</span><span><b>${line}</b><span class="r">${r}</span></span><span class="ring" style="--to:${score};--d:${(+d + 0.1).toFixed(2)}s"><span><small>${grade}</small></span></span>`, `--d:${d}s`));
+      });
+
+      // 04 — the eight switch-intent signals (lime = present for this candidate).
+      const sig = document.getElementById("sig");
+      [
+        ["Usual tenure in the industry", 0],
+        ["Usual tenure in the role", 1],
+        ["Activity on job portals", 1],
+        ["Promotion stagnation", 1],
+        ["Company events", 0],
+        ["Profile refresh", 1],
+        ["Conversation cues", 1],
+        ["Role mismatch", 0],
+      ].forEach(([s, on], i) => sig.append(el("span", `a-pop${on ? " on" : ""}`, `<i></i>${s}`, `--d:${(0.3 + i * 0.18).toFixed(2)}s`)));
+
+      // 06 — the six authenticity checks.
+      const checks = document.getElementById("checks");
+      ["Timeline consistency", "Specificity", "Cross-channel consistency", "Public evidence", "Generated-answer detection", "Skill claim versus evidence"].forEach((c, i) =>
+        checks.append(el("span", "row a-slide", `${check} ${c}`, `--d:${(1.3 + i * 0.22).toFixed(2)}s`)),
+      );
+      checks.append(el("p", "ok a-pop", `${check} Consistent · ready for your recruiter`, "--d:2.8s"));
+
+      // 07 — the interview kit.
+      const kit = document.getElementById("kit");
+      [
+        ["Walk me through a payments outage you owned. What did you change after?", "JD · On-call ownership"],
+        ["How would you keep a ledger consistent across services?", "JD · Payments infrastructure"],
+        ["Where did event-driven design cost you more than it saved?", "Open gap · Event-driven systems"],
+      ].forEach(([q, tag], i) => kit.append(el("div", "qrow a-pop", `<p>${q}</p><small>${tag}</small>`, `--d:${(0.7 + i * 0.3).toFixed(2)}s`)));
+
+      // Steps 01–07 fill along the bottom.
+      const times = [2.1, 5.9, 10.6, 13.9, 17.4, 20.1, 24.2, 28.6];
+      const steps = document.getElementById("steps");
+      for (let i = 0; i < 7; i++) steps.append(el("i", "", "", `--at:${times[i]}s;--len:${(times[i + 1] - times[i]).toFixed(2)}s`));
+
+      window.__ready = document.fonts.ready.then(() => Promise.all([...document.images].map((im) => (im.complete ? 1 : new Promise((r) => (im.onload = r))))));
+    </script>
+  </body>
+</html>

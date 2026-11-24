@@ -7,6 +7,9 @@ import { Play } from "./Play";
 import { TourNav } from "./TourNav";
 import { CandidateScorecard, MODULE_WIDGET, RoleInsightsPanel, TalynConsole } from "./Widgets";
 import { cx } from "@/lib/utils";
+import type { CSSProperties } from "react";
+import { AskTalynButton } from "./MeetTalynPopup";
+import { TalynOrb } from "./TalynOrb";
 
 /**
  * The Talyn editions' homepage sections. Both editions use these; the film
@@ -71,6 +74,63 @@ export function TalynProblem({ index }: { index: string }) {
             </li>
           ))}
         </ul>
+      </div>
+    </section>
+  );
+}
+
+/* --- Meet Talyn: the agent that hires for intent ------------------------------------ */
+
+export function TalynMeet({ index }: { index: string }) {
+  const m = TALYN.meet;
+  return (
+    <section id="meet-talyn" aria-labelledby="meet-heading" className="ct-section tl-meet">
+      <div className="ct-wrap grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-12">
+        <div className="lg:col-span-6">
+          <SectionHead index={index} eyebrow={m.eyebrow} id="meet-heading" lead={m.title} turn={m.titleItalic} lede={m.lede} size="l" />
+          <ul className="mt-10 grid gap-5">
+            {m.pillars.map((p, i) => (
+              <li key={p.label} className="tl-meet-pillar">
+                <span className="ct-meta ct-green tabular-nums">{pad(i + 1)}</span>
+                <span>
+                  <b>{p.label}.</b> {p.body}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-10 flex flex-wrap items-center gap-3">
+            <ButtonLink href="#enquiry">{m.primary}</ButtonLink>
+            <AskTalynButton>{m.secondary}</AskTalynButton>
+          </div>
+        </div>
+        <div className="lg:col-span-6">
+          <Play threshold={0.35}>
+            <div className="tl-agent">
+              <div className="tl-agent-core">
+                <TalynOrb size="lg" />
+                <p className="tl-agent-name">Talyn</p>
+                <p className="ct-meta">AI hiring agent · TALYNT LABS</p>
+              </div>
+              <p className="tl-agent-status">
+                <span className="tw-led is-on" aria-hidden="true" /> {m.status}
+              </p>
+              <ol className="tl-agent-tasks">
+                {m.tasks.map((t, i) => (
+                  <li key={t} style={{ "--i": i } as CSSProperties}>
+                    <svg viewBox="0 0 24 24" className="tw-ic tw-ok" aria-hidden="true">
+                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                    </svg>
+                    {t}
+                  </li>
+                ))}
+              </ol>
+              <p className="tl-agent-handoff" style={{ "--i": m.tasks.length } as CSSProperties}>
+                <span aria-hidden="true">→</span> {m.handoff}
+              </p>
+              <p className="tl-agent-note">{TALYN.illustrative}</p>
+            </div>
+          </Play>
+        </div>
       </div>
     </section>
   );

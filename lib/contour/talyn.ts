@@ -281,12 +281,59 @@ export const TALYN = {
     secondary: "Talk to us",
   },
 
+  /* --- Meet Talyn: the agent, front and centre --------------------------------- */
+  meet: {
+    eyebrow: "Meet Talyn",
+    title: "Meet Talyn.",
+    titleItalic: "Our hiring agent that hires for intent.",
+    lede: "Talyn is the AI agent at the heart of TALYNT LABS. It doesn’t stop at who matches your JD — it reads who actually wants this role, in your context, right now. Then it hands our recruiters and your hiring managers the reasons, so every conversation is worth having.",
+    pillars: [
+      { label: "Intent", body: "Who is likely open to a move, and why — read from eight switch signals, not guessed from a keyword." },
+      { label: "Context", body: "Your team, your stage and the problem this hire solves — so Talyn searches for the person, not the title." },
+      { label: "Reasons", body: "Every candidate arrives with a score, the evidence behind it and the gaps still open. A person always makes the call." },
+    ],
+    status: "Talyn is working on · Senior Backend Engineer",
+    tasks: [
+      "Reading your JD",
+      "Mapping adjacent titles and the growth path",
+      "Searching our sources by meaning",
+      "Reading switch intent",
+      "Drafting personal outreach",
+      "Preparing questions for every profile",
+      "Building your interview kit",
+    ],
+    handoff: "Handing over to your recruiter",
+    primary: "Got a hiring problem? Tell us",
+    secondary: "Ask Talyn",
+  },
+
+  /* --- The pop-up: "Got a hiring problem?" ------------------------------------------ */
+  popup: {
+    label: "Talyn · AI hiring agent",
+    title: "Got a hiring problem?",
+    body: "Talyn is here to help. Share the role — Talyn finds people who fit and are open to a move, and our team does the talking.",
+    ask: "What’s getting in the way?",
+    helps: "How Talyn helps",
+    problems: [
+      { label: "Roles take too long to fill", answer: "Talyn starts searching our sources as soon as your JD is in, and keeps working around the clock — outreach and follow-ups included." },
+      { label: "Candidates drop out", answer: "Talyn tracks candidate and pipeline health at every stage, and follows up before anyone goes quiet." },
+      { label: "Profiles don’t fit", answer: "Talyn scores every profile against your JD out of 100, with the evidence and the gaps — and reads intent, so you meet people who want the role." },
+      { label: "Interviews go off-brief", answer: "Your hiring managers get an interview kit built on the JD, with questions for each candidate’s open gaps." },
+    ],
+    primary: "Book a demo",
+    secondary: "Meet Talyn",
+    launcher: "Got a hiring problem?",
+    launcherCta: "Ask Talyn",
+    close: "Close",
+  },
+
   soon: "Coming soon",
   illustrative: "Illustrative · a fictional role, candidates and data",
 } as const;
 
 /** The navigation for the Talyn editions: everything is on the homepage. */
 export const TALYN_NAV = [
+  { label: "Meet Talyn", hash: "meet-talyn" },
   { label: "How it works", hash: "how" },
   { label: "Talyn Insights", hash: "insights" },
   { label: "Capabilities", hash: "capabilities" },

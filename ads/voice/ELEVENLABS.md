@@ -6,7 +6,7 @@ Three uses, each switched on separately.
 |---|---|---|
 | **(a)** | Talyn calls candidates who go quiet after a recruiter's call | Product feature — shown on the site as **Coming soon** |
 | **(b)** | A voice assistant on the website (“Talk to us”) | Ready in code — needs an ElevenLabs agent id |
-| **(c)** | Voiceover for the ad and the film | Ready in code — needs a recorded voiceover file |
+| **(c)** | Voiceover for the ads | "Meet Talyn" has a locally generated voiceover; a studio recording can replace it |
 
 No API key is ever put into the website. (b) uses the agent's **public id**;
 the key stays in your ElevenLabs account.
@@ -82,3 +82,11 @@ VOICEOVER=/path/to/voiceover.mp3 node ads/one-click/render.mjs all ads/one-click
 
 Record it as one take with short pauses between lines; if it runs long, trim pauses
 rather than speeding the voice up.
+
+### Voiceover script — "Meet Talyn" (36 s)
+
+The lines and their start times are in `ads/meet-talyn/vo.json`. A locally
+generated voiceover (open-source Kokoro, Indian English female voice) is the
+default; see `ads/meet-talyn/README.md`. To use an ElevenLabs voice instead,
+record each line, place it at its start time, and render with
+`VOICEOVER=<file> node ads/meet-talyn/render.mjs all ads/meet-talyn/out`.

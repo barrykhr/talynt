@@ -44,9 +44,10 @@ const SOUNDS = {
 
 /**
  * `voiceover` (optional): a recorded voiceover (see ads/voice/ELEVENLABS.md).
- * The music and effects duck under it automatically.
+ * The music and effects duck under it automatically. `flips` and `cues` let
+ * another ad (ads/meet-talyn) reuse the same sounds on its own timeline.
  */
-export function renderAudio(file, seconds, voiceover) {
+export function renderAudio(file, seconds, voiceover, { flips = FLIPS, cues = CUES } = {}) {
   const inputs = [];
   const graph = [];
   let n = 0;
@@ -63,13 +64,13 @@ export function renderAudio(file, seconds, voiceover) {
   );
 
   // Whooshes: shaped pink noise, one per flip.
-  for (const at of FLIPS) {
+  for (const at of flips) {
     add(["-f", "lavfi", "-i", "anoisesrc=color=pink:amplitude=0.5:d=0.55:r=48000"], (i) =>
       `[${i}:a]highpass=f=500,lowpass=f=5000,afade=t=in:d=0.3:curve=exp,afade=t=out:st=0.3:d=0.25,volume=0.35,adelay=${Math.round(at * 1000)}|${Math.round(at * 1000)}[a${i}]`,
     );
   }
 
-  for (const [at, kind] of CUES) {
+  for (const [at, kind] of cues) {
     const s = SOUNDS[kind];
     add(["-f", "lavfi", "-i", `aevalsrc='${s.e}':s=48000:d=${s.d}`], (i) =>
       `[${i}:a]adelay=${Math.round(at * 1000)}|${Math.round(at * 1000)}[a${i}]`,
