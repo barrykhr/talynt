@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { EMAIL, LINKEDIN, ROUTES, whatsappHref } from "@/lib/contour/site";
 import { Meeting } from "@/components/contour/graphics/Meeting";
-import { EMPLOYERS_ONLY, LOGO, VARIANT } from "@/lib/contour/variant";
+import { EMPLOYERS_ONLY, LOGO, TALYN_EDITION, VARIANT } from "@/lib/contour/variant";
+import { TALYN_NAV } from "@/lib/contour/talyn";
 import { LinkedInIcon, WhatsAppIcon } from "./Icons";
 
 const ALL_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
@@ -43,7 +44,21 @@ const ALL_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: st
 ];
 
 /** The employer-only variant leaves out the candidate pages and the candidate-facing "How we evaluate". */
-const COLUMNS = EMPLOYERS_ONLY
+const TALYN_COLUMNS = [
+  { title: "Talyn", links: TALYN_NAV.slice(0, 4).map((l) => ({ label: l.label, href: `${ROUTES.employers}#${l.hash}` })) },
+  {
+    title: "Company",
+    links: [
+      { label: "FAQ", href: `${ROUTES.employers}#faq` },
+      { label: "Privacy and consent", href: `${ROUTES.employers}#privacy-consent` },
+      { label: "Contact", href: ROUTES.contact },
+      { label: "About", href: ROUTES.about },
+    ],
+  },
+  { title: "Legal", links: [{ label: "Privacy", href: ROUTES.privacy }, { label: "Terms", href: ROUTES.terms }] },
+];
+
+const COLUMNS = TALYN_EDITION ? TALYN_COLUMNS : EMPLOYERS_ONLY
   ? ALL_COLUMNS.filter((c) => c.title !== "Candidates").map((c) => ({ ...c, links: c.links.filter((l) => l.href !== ROUTES.howWeEvaluate) }))
   : ALL_COLUMNS;
 

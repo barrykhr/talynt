@@ -4,6 +4,7 @@ import { WhatsAppButton } from "@/components/contour/chrome/WhatsAppButton";
 import { MotionDirector } from "@/components/contour/motion/MotionDirector";
 import { ScrollThread } from "@/components/contour/motion/ScrollThread";
 import { MOTION } from "@/lib/contour/variant";
+import { VoiceAgent } from "@/components/contour/talyn/VoiceAgent";
 
 /** Every page except the entry screen: shared navigation, footer and contact action. */
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -20,6 +21,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
       <Footer />
       <WhatsAppButton />
       {MOTION && <MotionDirector />}
+      <VoiceAgent />
     </>
   );
 }

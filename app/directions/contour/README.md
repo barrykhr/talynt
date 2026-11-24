@@ -91,6 +91,25 @@ Both colourways use the same pages and the same copy. They differ from the full 
   The first screen has its own entrance on load, the opening glow breathes, and a reading-progress line sits under the navigation.
 - **Accessibility.** With reduced motion, nothing is hidden or driven: every end state shows, and the story steps chapter by chapter. Without script, the same holds and the story lists every chapter. Legal pages stay still.
 
+### Talyn editions (proposed, for review)
+
+Two further builds of the mono colourway present TALYNT LABS as an AI-native hiring agency, with Talyn (the AI agent) and the Talyn Insights module (Role Insights and Candidate Insights). They are chosen by `NEXT_PUBLIC_CT_EDITION` and only apply with `NEXT_PUBLIC_CT_VARIANT=mono`:
+
+| Value | What it builds |
+|---|---|
+| `film` | The seven-scene film as the opening, then the problem, Talyn Insights, capabilities, the difference, who it is for, privacy and consent, pricing, FAQ and the enquiry form. |
+| `product` | A hero with a live Talyn console, then the problem, seven steps, Talyn Insights, a product tour of every capability with a sticky index, and the same closing sections. |
+
+```bash
+node scripts/export-static-site.mjs . /tmp/talynt-work /tmp/talynt-film film
+node scripts/export-static-site.mjs . /tmp/talynt-work /tmp/talynt-product product
+```
+
+- **All of the new copy is in `lib/contour/talyn.ts`** and is proposed copy for review. The approved tagline stays. Nothing claims statistics, client logos, testimonials, accuracy, guarantees or certifications. Example roles, candidates and scores are labelled "Illustrative". Voice calls by Talyn and salary benchmarks are marked "Coming soon".
+- **Widgets** (`components/contour/talyn/`, styles in `talyn.css`) animate once when they come into view. With reduced motion or no script, they show their end state.
+- **Voice.** `NEXT_PUBLIC_ELEVENLABS_AGENT_ID` (a public agent id, never a key) adds the ElevenLabs website assistant. Without it, nothing is loaded. See `ads/voice/ELEVENLABS.md` for setup and the knowledge base.
+- The approach, assessment review and FAQ pages are not in these editions; the FAQ is on the homepage.
+
 The default build is unchanged: every page renders the same HTML as before the variants were added, apart from React's generated element ids.
 
 ## Pages

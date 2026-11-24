@@ -36,3 +36,20 @@ export const LOGO = {
 
 /** Every brand file a build of this variant links to (the static export copies these). */
 export const LOGO_FILES = Object.values(LOGO);
+
+/**
+ * Talyn editions of the mono colourway (NEXT_PUBLIC_CT_EDITION): the same
+ * black-and-lime site with the Talyn content (lib/contour/talyn.ts), in two
+ * versions of the homepage.
+ *
+ *   film     the scroll-flipped film, then Talyn Insights and the capabilities
+ *   product  a product-led page: the Talyn console, a product tour, live widgets
+ */
+const ED = process.env.NEXT_PUBLIC_CT_EDITION;
+export const EDITION: "none" | "film" | "product" = VARIANT === "mono" && (ED === "film" || ED === "product") ? ED : "none";
+export const TALYN_EDITION = EDITION !== "none";
+
+/** ElevenLabs Conversational AI agent for the website voice assistant (a public id, not a key). */
+export const VOICE_AGENT_ID = /^[A-Za-z0-9_-]{8,80}$/.test(process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID ?? "")
+  ? (process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID as string)
+  : null;

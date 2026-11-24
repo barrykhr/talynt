@@ -637,6 +637,22 @@ html:has(.ct-film) {
   box-shadow: 0 1.4em 2.4em -1.6em rgb(0 0 0 / 0.6);
 }
 
+/* Scores show on the Talyn edition's cards. */
+.fs-score {
+  display: none;
+}
+
+.is-talyn .fs-score {
+  display: inline-flex;
+  align-self: start;
+  padding: 0.2em 0.6em;
+  border-radius: 999px;
+  border: 1px solid var(--ct-lime);
+  font-family: var(--ct-mono);
+  font-size: 0.75em;
+  color: var(--ct-ink);
+}
+
 .fs-card-line {
   font-size: 0.85em;
   color: var(--ct-ink-2);

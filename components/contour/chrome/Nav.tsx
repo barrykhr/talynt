@@ -8,7 +8,8 @@ import { ROUTES } from "@/lib/contour/site";
 import { AUDIENCE_HOME, audienceOf, useAudience, type Audience } from "@/lib/contour/audience";
 import { SWITCH } from "@/lib/contour/proposed";
 import { useCandidateApplications } from "@/lib/candidate/applications";
-import { EMPLOYERS_ONLY, LOGO } from "@/lib/contour/variant";
+import { EMPLOYERS_ONLY, LOGO, TALYN_EDITION } from "@/lib/contour/variant";
+import { TALYN, TALYN_NAV } from "@/lib/contour/talyn";
 import { cx } from "@/lib/utils";
 
 /**
@@ -18,12 +19,14 @@ import { cx } from "@/lib/utils";
  * the side they picked first.
  */
 const LINKS: Record<Audience, Array<{ label: string; href: string }>> = {
-  employer: [
+  employer: TALYN_EDITION
+    ? TALYN_NAV.map((l) => ({ label: l.label, href: `${ROUTES.employers}#${l.hash}` }))
+    : [
     { label: "How it works", href: `${ROUTES.employers}#how-we-work` },
     { label: "Evaluation", href: `${ROUTES.employers}#evaluation` },
     { label: "Shortlists", href: `${ROUTES.employers}#shortlist` },
     { label: "FAQ", href: ROUTES.faq },
-  ],
+      ],
   candidate: [
     { label: "Opportunities", href: ROUTES.opportunities },
     { label: "Your profile", href: ROUTES.profile },
@@ -33,7 +36,7 @@ const LINKS: Record<Audience, Array<{ label: string; href: string }>> = {
 };
 
 const ACTION: Record<Audience, { label: string; href: string }> = {
-  employer: { label: "Tell us who you’re looking for", href: `${ROUTES.employers}#enquiry` },
+  employer: { label: TALYN_EDITION ? TALYN.hero.primary : "Tell us who you’re looking for", href: `${ROUTES.employers}#enquiry` },
   candidate: { label: "Explore opportunities", href: ROUTES.opportunities },
 };
 

@@ -17,7 +17,7 @@
  * - Review-only labels ("Direction C", links to the other directions, the
  *   FAQ's "proposed for approval" note) are removed.
  *
- * Usage: node scripts/export-static-site.mjs . <work dir> <output dir> [mono|cream]
+ * Usage: node scripts/export-static-site.mjs . <work dir> <output dir> [mono|cream|film|product]
  * The output's index.html is a hand-over page for hosts that serve one entry
  * page; every other page is a complete document.
  *
@@ -31,7 +31,9 @@ import path from "node:path";
 
 const [repo, work, dist] = process.argv.slice(2, 5).map((p) => path.resolve(p));
 if (!repo || !work || !dist) throw new Error("usage: export-static-site.mjs <repo> <work dir> <output dir> [mono|cream]");
-const VARIANT = ["mono", "cream"].includes(process.argv[5]) ? process.argv[5] : "";
+// "film" and "product" are the Talyn editions of the mono colourway.
+const EDITION = ["film", "product"].includes(process.argv[5]) ? process.argv[5] : "";
+const VARIANT = EDITION ? "mono" : ["mono", "cream"].includes(process.argv[5]) ? process.argv[5] : "";
 const MONO = VARIANT !== ""; // either colourway: the employer site on its own
 // The page the copy opens on.
 const HOME = MONO ? "employers.html" : "home.html";
@@ -84,7 +86,9 @@ fs.renameSync(path.join(app, "(site)/page.tsx"), path.join(app, "(site)/home/pag
 
 // The employer-only copy has no entry choice and no candidate pages.
 if (MONO) {
-  for (const p of ["home", "(main)/candidates", "(main)/opportunities", "(main)/profile", "(main)/applications", "(main)/dashboard"]) {
+  // The Talyn editions keep everything on the homepage: no long-form pages either.
+  const extra = EDITION ? ["(main)/employers/approach", "(main)/employers/assessment-review", "(main)/faq"] : [];
+  for (const p of ["home", "(main)/candidates", "(main)/opportunities", "(main)/profile", "(main)/applications", "(main)/dashboard", ...extra]) {
     fs.rmSync(path.join(app, "(site)", p), { recursive: true, force: true });
   }
 }
@@ -247,8 +251,10 @@ patch(
   /\n\s*<p className="ct-meta ct-mute flex flex-wrap items-center gap-x-4 gap-y-2">[^]*?<\/p>/,
   "",
 );
-patch("app/(site)/(main)/faq/page.tsx", /\n\s*<Illustrative className="mt-6 max-w-2xl">[^]*?<\/Illustrative>/, "");
-patch("app/(site)/(main)/faq/page.tsx", "import { Eyebrow, Illustrative } from", "import { Eyebrow } from");
+if (!EDITION) {
+  patch("app/(site)/(main)/faq/page.tsx", /\n\s*<Illustrative className="mt-6 max-w-2xl">[^]*?<\/Illustrative>/, "");
+  patch("app/(site)/(main)/faq/page.tsx", "import { Eyebrow, Illustrative } from", "import { Eyebrow } from");
+}
 patch("app/(site)/layout.tsx", /absolute: "[^"]*",\n\s*template: "[^"]*",/, `absolute: "TALYNT LABS — Talent intelligence, built for hiring",
     template: "%s — TALYNT LABS",`);
 patch(
@@ -269,7 +275,7 @@ for (const [from, to] of [
 /* 6. Build ----------------------------------------------------------------- */
 sh("npx next build", {
   cwd: work,
-  env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", NEXT_PUBLIC_CT_VARIANT: VARIANT },
+  env: { ...process.env, NEXT_TELEMETRY_DISABLED: "1", NEXT_PUBLIC_CT_VARIANT: VARIANT, NEXT_PUBLIC_CT_EDITION: EDITION },
 });
 
 /* 7. Flatten --------------------------------------------------------------- */

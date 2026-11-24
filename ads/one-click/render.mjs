@@ -32,7 +32,8 @@ try {
 }
 
 const audio = path.join(out, "talynt-one-click-audio.wav");
-renderAudio(audio, SECONDS);
+// VOICEOVER=/path/to/voiceover.mp3 mixes a recorded voiceover in (ads/voice/ELEVENLABS.md).
+renderAudio(audio, SECONDS, process.env.VOICEOVER);
 
 const browser = await chromium.launch();
 for (const key of which === "all" ? Object.keys(SHAPES) : [which]) {

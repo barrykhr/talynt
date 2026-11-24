@@ -42,7 +42,7 @@ const REVEAL = [
 ].join(", ");
 
 /** Never revealed: the first screen (it has its own entrance), the pinned story, legal text. */
-const SKIP = "#ct-main > section:first-child, .ct-story, .ct-film, [data-no-reveal], nav";
+const SKIP = "#ct-main > section:first-child, .ct-story, .ct-film, .tw-play, .tl-faq, [data-no-reveal], nav";
 
 /** Elements with their own scroll progress, beyond the top-level sections. */
 const SCRUB = [

@@ -22,7 +22,8 @@ import { FaqList } from "@/components/contour/FaqList";
 import { Words, wordCount, wordsStyle } from "@/components/contour/motion/Words";
 import { TalentStory } from "@/components/contour/employers/TalentStory";
 import { HiringFilm } from "@/components/contour/film/HiringFilm";
-import { EMPLOYERS_ONLY } from "@/lib/contour/variant";
+import { EMPLOYERS_ONLY, TALYN_EDITION } from "@/lib/contour/variant";
+import { TalynHome } from "@/components/contour/talyn/TalynHome";
 
 export const metadata: Metadata = {
   title: "For employers",
@@ -38,6 +39,7 @@ export const metadata: Metadata = {
  * /employers/approach.
  */
 export default function EmployersPage() {
+  if (TALYN_EDITION) return <TalynHome />;
   const shared = clientView(DEMO_EVALUATION);
 
   return (

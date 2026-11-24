@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { EMPLOYER_HERO, FILM } from "@/lib/contour/proposed";
+import { TALYN } from "@/lib/contour/talyn";
 import { HUMAN_AI, PROBLEM } from "@/lib/contour/content";
 import { ROUTES } from "@/lib/contour/site";
 import { useCalm } from "@/lib/contour/motion";
@@ -177,6 +178,7 @@ function ScreenRelevant() {
           <div key={p.initials} className="fs-card fs-rise" style={v({ "--d": `${0.75 + i * 0.15}s` })}>
             <span className="fs-avatar">{p.initials}</span>
             <span className="fs-card-line">{p.line}</span>
+            <span className="fs-score">{["96 · A+", "91 · A", "84 · A", "81 · A"][i]}</span>
             {p.reasons.map((r) => (
               <span key={r} className="fs-reason">
                 <Glyph name="check" /> {r}
@@ -364,7 +366,23 @@ function Phone({ active }: { active: number }) {
 
 /* --- The film -------------------------------------------------------------- */
 
-export function HiringFilm() {
+type Card = { id: string; tag: string; title: string; titleItalic: string; body: string; primary?: string; secondary?: string };
+
+/** The scene cards: the original film's words, or the Talyn edition's. */
+function cardsFor(talyn: boolean): Card[] {
+  if (talyn) return FILM.scenes.map((s, i) => ({ id: s.id, ...TALYN.film[i] }));
+  return FILM.scenes.map((s, i) => ({
+    id: s.id,
+    tag: i === 0 ? FILM.eyebrow : s.tag,
+    title: i === 0 ? EMPLOYER_HERO.title : i === N - 1 ? HUMAN_AI.title : "title" in s ? s.title : "",
+    titleItalic: i === 0 ? EMPLOYER_HERO.titleItalic : i === N - 1 ? HUMAN_AI.titleItalic : "titleItalic" in s ? s.titleItalic : "",
+    body: s.body,
+    ...("primary" in s ? { primary: s.primary, secondary: s.secondary } : {}),
+  }));
+}
+
+export function HiringFilm({ talyn = false }: { talyn?: boolean } = {}) {
+  const cards = cardsFor(talyn);
   const calm = useCalm();
   const ref = useRef<HTMLElement | null>(null);
   const [active, setActive] = useState(0);
@@ -407,35 +425,39 @@ export function HiringFilm() {
         <span key={s.id} aria-hidden="true" className="ct-film-snap" style={{ top: `calc(${i} * 100svh)` }} />
       ))}
 
-      <div className="ct-film-stage" data-scene={FILM.scenes[active].id}>
+      <div className={cx("ct-film-stage", talyn && "is-talyn")} data-scene={FILM.scenes[active].id}>
         <div className="ct-film-glow" aria-hidden="true" />
 
         <div className="ct-wrap ct-film-grid">
           {/* The words: one scene at a time, flipping like title cards. */}
           <div className="ct-film-copy">
-            {FILM.scenes.map((s, i) => {
+            {cards.map((s, i) => {
               const Heading = i === 0 ? "h1" : "h2";
-              const title = i === 0 ? EMPLOYER_HERO.title : i === N - 1 ? HUMAN_AI.title : "title" in s ? s.title : "";
-              const turn = i === 0 ? EMPLOYER_HERO.titleItalic : i === N - 1 ? HUMAN_AI.titleItalic : "titleItalic" in s ? s.titleItalic : "";
               return (
                 <article key={s.id} className="ct-film-card" data-state={stateOf(i, active)} onFocusCapture={() => i !== active && go(i)}>
                   <p className="ct-meta flex items-center gap-3">
                     <span className="ct-green tabular-nums">{String(i + 1).padStart(2, "0")}</span>
                     <span aria-hidden="true" className="h-px w-6 bg-[var(--ct-line-2)]" />
-                    <span className="ct-mute">{i === 0 ? FILM.eyebrow : s.tag}</span>
+                    <span className="ct-mute">{s.tag}</span>
                   </p>
                   <Heading id={i === 0 ? "film-heading" : undefined} className={cx("ct-display ct-film-title", i === 0 && "is-lead")}>
-                    {title} <span className="ct-italic block">{turn}</span>
+                    {s.title} <span className="ct-italic block">{s.titleItalic}</span>
                   </Heading>
                   <p className="ct-lede ct-film-body">{s.body}</p>
-                  {"primary" in s && (
+                  {s.primary && (
                     <div className="mt-7 flex flex-wrap gap-3">
                       <a href="#enquiry" className="ct-btn ct-btn-primary">
                         {s.primary} <span aria-hidden="true">→</span>
                       </a>
-                      <Link href={ROUTES.approach} className="ct-btn ct-btn-secondary">
-                        {s.secondary}
-                      </Link>
+                      {talyn ? (
+                        <a href="#enquiry" className="ct-btn ct-btn-secondary">
+                          {s.secondary}
+                        </a>
+                      ) : (
+                        <Link href={ROUTES.approach} className="ct-btn ct-btn-secondary">
+                          {s.secondary}
+                        </Link>
+                      )}
                     </div>
                   )}
                 </article>
@@ -444,7 +466,7 @@ export function HiringFilm() {
           </div>
 
           {/* The laptop, and the phone beside it. */}
-          <div className="ct-film-device" role="img" aria-label={`${FILM.label}. ${FILM.scenes[active].tag}.`}>
+          <div className="ct-film-device" role="img" aria-label={`${FILM.label}. ${cards[active].tag}.`}>
             <div className="ct-laptop" aria-hidden="true">
               <div className="ct-laptop-lid">
                 <div className="ct-laptop-screen">

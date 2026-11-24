@@ -42,7 +42,11 @@ const SOUNDS = {
   hit: { d: 2.2, e: "0.9*sin(2*PI*(46+70*exp(-9*t))*t)*exp(-2.2*t)+0.12*sin(2*PI*1760*t)*exp(-3*t)" },
 };
 
-export function renderAudio(file, seconds) {
+/**
+ * `voiceover` (optional): a recorded voiceover (see ads/voice/ELEVENLABS.md).
+ * The music and effects duck under it automatically.
+ */
+export function renderAudio(file, seconds, voiceover) {
   const inputs = [];
   const graph = [];
   let n = 0;
@@ -73,7 +77,15 @@ export function renderAudio(file, seconds) {
   }
 
   const mix = Array.from({ length: n }, (_, i) => `[a${i}]`).join("");
-  graph.push(`${mix}amix=inputs=${n}:normalize=0:duration=longest,atrim=0:${seconds},aformat=channel_layouts=stereo,loudnorm=I=-16:TP=-1.5:LRA=11[out]`);
+  if (voiceover) {
+    inputs.push("-i", voiceover);
+    graph.push(`${mix}amix=inputs=${n}:normalize=0:duration=longest,aformat=channel_layouts=stereo[fx]`);
+    graph.push(`[${n}:a]aresample=48000,aformat=channel_layouts=stereo,volume=1.6,apad=whole_dur=${seconds},asplit=2[vo][key]`);
+    graph.push(`[fx][key]sidechaincompress=threshold=0.03:ratio=8:attack=20:release=300[duck]`);
+    graph.push(`[duck][vo]amix=inputs=2:normalize=0:duration=first,atrim=0:${seconds},loudnorm=I=-16:TP=-1.5:LRA=11[out]`);
+  } else {
+    graph.push(`${mix}amix=inputs=${n}:normalize=0:duration=longest,atrim=0:${seconds},aformat=channel_layouts=stereo,loudnorm=I=-16:TP=-1.5:LRA=11[out]`);
+  }
 
   execFileSync("ffmpeg", ["-v", "error", "-y", ...inputs, "-filter_complex", graph.join(";"), "-map", "[out]", "-ar", "48000", file]);
 }
