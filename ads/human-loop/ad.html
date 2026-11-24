@@ -256,8 +256,8 @@
       @keyframes bob { 0%, 100% { transform: none; } 50% { transform: translateY(-8%) rotate(-3deg); } }
 
       .loop { position: absolute; width: 800px; height: 400px; }
-      .loop svg { position: absolute; inset: 0; overflow: visible; }
-      .loop path { fill: none; stroke: rgb(255 255 255 / 0.18); stroke-width: 6; }
+      .loop > svg { position: absolute; inset: 0; overflow: visible; }
+      .loop > svg path { fill: none; stroke: rgb(255 255 255 / 0.18); stroke-width: 6; }
       .loop path.draw { stroke: var(--lime); opacity: 0.6; }
       .s9 .loop path.draw { stroke-dasharray: 2200; stroke-dashoffset: 2200; animation: draw 1s var(--ease) calc(var(--in) + 0.1s) forwards; }
       @keyframes draw { to { stroke-dashoffset: 0; } }
