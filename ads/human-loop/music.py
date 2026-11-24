@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-The "Human in the loop" music: a 120 BPM funk groove, synthesised from scratch
+The "Meet Talyn" funk-edit music: a 120 BPM funk groove, synthesised from scratch
 with numpy (nothing to license). Cuts in ad.html land on its beats.
 
     python3 ads/human-loop/music.py ads/human-loop/out/music.wav
@@ -8,9 +8,9 @@ with numpy (nothing to license). Cuts in ad.html land on its beats.
 - Swung 16th hats, a kick on 1 and the "and" of 2, claps on 2 and 4, ghost snares.
 - A syncopated, octave-popping slap-style bass and a cowbell.
 - Wah-style chord stabs on the off-beats.
-- A brass-style hit every time the human voice comes in (HUMAN), so the
-  hand-off from Talyn to a person is something you hear.
-- 0–3 s: hats and filtered bass only; 3 s: the drop. 42.5 s: the end card.
+- A brass-style hit when the recruiter's voice comes in (HUMAN), in the
+  Relationships step.
+- 0–2 s: hats and filtered bass under the loop; 2 s: the drop. 38 s: the end card.
 
 Needs numpy and soundfile.
 """
@@ -22,11 +22,11 @@ import soundfile as sf
 SR = 48000
 BEAT = 0.5
 SWING = 0.035
-LENGTH = 47.0
-DROP = 3.0
-END = 42.5
-CUTS = [3.0, 7.5, 11.5, 16.5, 21.0, 25.5, 31.0, 35.5, 39.0, 42.5]
-HUMAN = [5.13, 9.3, 14.15, 18.6, 23.23, 28.0, 32.99, 37.36, 40.96]
+LENGTH = 43.0
+DROP = 2.0
+END = 38.0
+CUTS = [2.0, 6.0, 11.0, 14.5, 18.0, 21.0, 26.0, 30.0, 34.5, 38.0]
+HUMAN = [23.3]
 
 rng = np.random.default_rng(11)
 n = int(LENGTH * SR)

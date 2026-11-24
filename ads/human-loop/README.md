@@ -1,58 +1,46 @@
-# TALYNT LABS — "Human in the loop" (47-second funk ad, two voices)
+# TALYNT LABS — "Meet Talyn", funk edit (43 seconds, with voiceover)
 
-A funkier companion to "Meet Talyn": the same black-and-lime look, with white
-as the colour of people. Every step of hiring is a hand-off. Talyn (lime, a
-female voice) does the work, then a person (white, a male voice) checks,
-approves, calls or decides.
+The "Meet Talyn" steps, recut with a funk groove, opening and closing on the
+infinity loop: Talyn's lime dot and a person's white dot chasing round it.
 
 - 9:16 (1080×1920): Reels, Shorts, Status
 - 1:1 (1080×1080): feed posts
 
-On screen there are only the step names, two-word stamps and the TALYN / HUMAN
-tags; the voices say the rest. The music is a 120 BPM funk groove
-(music.py), with a brass hit every time the human voice comes in. Cuts land on
-the beat.
+**The first frame is the loop.** Then the steps, by name only (no numbers).
+A person appears in one step only, **Relationships**: Talyn keeps every
+candidate warm, and a recruiter nurtures the relationship. Everything else is
+Talyn. The loop returns for "AI finds who to talk to. People do the talking."
 
-## Where the human is
-
-These are the checkpoints the site already describes (`lib/contour/talyn.ts`:
-"Human in the loop", authenticity, hiring managers):
-
-| Step | Talyn | The person |
-|---|---|---|
-| 01 Brief | Reads your JD | The hiring manager signs off the must-haves |
-| 02 Shortlist | Searches and scores every profile | A recruiter reviews every pick |
-| 03 Outreach | Drafts a personal message | A recruiter checks it before it goes |
-| 04 First call | Keeps every candidate warm | A recruiter makes the first call |
-| 05 Checks | Flags anything that doesn't add up | A person takes a look; no auto-rejects |
-| 06 Interview | Builds the interview kit | The hiring manager runs it |
-| 07 Decision | Lays out the reasons | You make the call |
+On screen there are only the step names (plus the TALYN / HUMAN tags in
+Relationships); the voiceover says the rest. The music is a 120 BPM funk
+groove (music.py) with a brass hit as the recruiter comes in. Cuts land on
+the beat, with lime and white wipes, flashes and a camera shake; the step
+names' letters hop in and bob to the groove.
 
 ## Script
 
-| Time | Voice | Line | On screen |
-|---|---|---|---|
-| 0.3 s | Talyn | Hiring with AI? Keep humans in the loop. | An infinity loop; Talyn's lime dot and a person's white dot chase round it. |
-| 3.2 s | Talyn | Meet Talyn, from TALYNT LABS. | **Meet Talyn**: Talyn's orb flies in. |
-| 5.1 s | Human | It does the work. We make the calls. | A person flies in from the other side: high five. TALYN · PEOPLE. |
-| 7.7 / 9.3 s | Talyn / Human | Talyn reads your JD. / Your hiring manager signs off. | **01 Brief** · must-haves → **Signed off** |
-| 11.7 / 14.2 s | | Talyn searches and scores every profile. / A recruiter reviews every pick. | **02 Shortlist** · three scored candidates → **Reviewed** |
-| 16.7 / 18.6 s | | Talyn drafts a personal message. / A recruiter checks it before it goes. | **03 Outreach** · a message drafting → **Approved** |
-| 21.2 / 23.2 s | | Talyn keeps every candidate warm. / A recruiter makes the first call. | **04 First call** · engagement warming → **On the call** |
-| 25.7 / 28.0 s | | Talyn flags anything that doesn't add up. / A person takes a look. No auto-rejects. | **05 Checks** · six checks, one flagged → **Taking a look** |
-| 31.2 / 33.0 s | | Talyn builds the interview kit. / Your hiring manager runs it. | **06 Interview** · questions tagged to the JD → **Interviewing** |
-| 35.7 / 37.4 s | | Talyn lays out the reasons. / And you make the call. | **07 Decision** · the reasons and a 96 → **Your call** |
-| 39.2 / 41.0 s | | AI finds who to talk to. / People do the talking. | The loop again; the person's dot pulses. |
-| 42.7 s | Talyn | TALYNT LABS. Talent intelligence, built for hiring. | Talyn + person, the logo, **Book a demo →**, talyntlabs.com, confetti. |
+| Time | On screen | Voiceover |
+|---|---|---|
+| 0–2 s | The infinity loop (first frame) | Got a hiring problem? |
+| 2–6 s | **Meet Talyn** | Meet Talyn. Your AI hiring agent, from TALYNT LABS. |
+| 6–11 s | **Role Insights** | Share the role. Talyn reads the JD, maps the market, and builds the search. |
+| 11–14.5 s | **Semantic search** | Ask for what you want in a candidate. Talyn finds it. |
+| 14.5–18 s | **Hire for intent** | It hires for intent. Who is open to a move, and why. |
+| 18–21 s | **Outreach** | Personal outreach, on email and WhatsApp. |
+| 21–26 s | **Relationships**: Talyn's touchpoints warm up, then a recruiter's card: **On the call** | Talyn keeps every candidate warm. *(Recruiter's voice:)* And a recruiter nurtures the relationship. |
+| 26–30 s | **Authenticity** | The right questions for every profile, and a check that it all adds up. |
+| 30–34.5 s | **Interview kit** | Hiring managers get the reasons, and an interview kit built on the JD. |
+| 34.5–38 s | The infinity loop again | AI finds who to talk to. People do the talking. |
+| 38–43 s | Logo, **Book a demo →**, talyntlabs.com | TALYNT LABS. Talent intelligence, built for hiring. |
 
-The lines are drawn from the Talyn editions' proposed copy and the approved
-tagline, and need the same approval. The people (DV, PR), candidates and scores
-are fictional, and the ad says so on screen.
+Every line comes from the Talyn editions' proposed copy and the approved
+tagline, and needs the same approval. The candidates, the recruiter (PR) and
+the scores are fictional, and the ad says so on screen.
 
 ## Render
 
 ```bash
-# voiceover (two voices, from vo.json) — see ../meet-talyn/README.md for the venv and model files
+# voiceover (from vo.json) — see ../meet-talyn/README.md for the venv and model files
 .venv/bin/python ads/meet-talyn/voiceover.py <model dir> ads/human-loop/out/voiceover.wav ads/human-loop/vo.json
 # music
 .venv/bin/python ads/human-loop/music.py ads/human-loop/out/music.wav
@@ -61,8 +49,7 @@ VOICEOVER=ads/human-loop/out/voiceover.wav node ads/human-loop/render.mjs all ad
 ```
 
 Output: `talynt-human-loop-9x16.mp4` and `talynt-human-loop-1x1.mp4` (H.264, 30 fps,
-AAC at −16 LUFS; the music ducks under the voices).
+AAC at −16 LUFS; the music ducks under the voice).
 
-The voices are synthetic (Kokoro, open source, run locally): `af_heart` for
-Talyn and `am_michael` for the human. "Talyn" is spoken "Talin", "TALYNT LABS"
-"Talent Labs".
+Voices are synthetic (Kokoro, open source, run locally): `af_heart` for the
+narrator and `am_michael` for the recruiter's one line.

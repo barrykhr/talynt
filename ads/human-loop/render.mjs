@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Renders the "Human in the loop" ad to MP4, frame by frame, with the shared sound
+ * Renders the "Meet Talyn" funk edit to MP4, frame by frame, with the shared sound
  * design (../one-click/audio.mjs), the music (music.py) and the voiceover
  * (voiceover.py).
  *
@@ -19,19 +19,19 @@ import { renderAudio } from "../one-click/audio.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FPS = 30;
-const SECONDS = 47;
-// Music: music.py (120 BPM funk; a brass hit on every human line). UI sounds on top.
+const SECONDS = 43;
+// Music: music.py (120 BPM funk; a brass hit as the recruiter comes in). UI sounds on top.
 const MUSIC = process.env.MUSIC ?? path.join(here, "out", "music.wav");
 const FLIPS = [];
-const STEPS = [7.5, 11.5, 16.5, 21, 25.5, 31, 35.5];
-const HUMAN = [5.13, 9.3, 14.15, 18.6, 23.23, 28.0, 32.99, 37.36];
+const STEPS = [2, 6, 11, 14.5, 18, 21, 26, 30];
 const CUES = [
-  [0.75, "ping-soft"],
-  [1.65, "ping-in"],
-  ...STEPS.flatMap((s) => [[s + 0.65, "tick"], [s + 0.9, "tick"], [s + 1.05, "tick"], [s + 1.2, "tick"]]),
-  ...HUMAN.map((h) => [h + 0.42, "click"]),
-  [39.35, "ping-soft"],
-  [40.95, "ping-in"],
+  ...STEPS.flatMap((s) => [[s + 1.0, "tick"], [s + 1.15, "tick"], [s + 1.3, "tick"], [s + 1.45, "tick"]]),
+  [12.45, "ping"], [12.65, "ping"], [12.85, "ping"],
+  [17.2, "click"],
+  [19.45, "ping"], [20.2, "ping-in"],
+  [23.72, "click"],
+  [28.65, "click"],
+  [34.8, "ping-soft"], [36.1, "ping-in"],
 ];
 const SHAPES = { v: { w: 1080, h: 1920, name: "9x16" }, s: { w: 1080, h: 1080, name: "1x1" } };
 
