@@ -255,7 +255,7 @@
       .frame[data-f="s"] .end .url { font-size: 26px; }
       .end-glow { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse 60% 40% at 50% 52%, rgb(var(--glow) / 0.4), transparent 70%); animation: fade-in 0.5s ease var(--END) both; }
       .confetti { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; border-radius: 3px; background: var(--lime); opacity: 0; animation: burst 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) calc(var(--END) + 0.15s) both; }
-      @keyframes burst { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)); } }
+      @keyframes burst { 0% { opacity: 0; transform: translate(0, 0) rotate(0); } 4%, 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)); } }
     </style>
   </head>
   <body>

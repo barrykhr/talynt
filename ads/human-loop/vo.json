@@ -1,0 +1,135 @@
+{
+  "voice": "af_heart",
+  "speed": 1.15,
+  "lines": [
+    {
+      "at": 0.3,
+      "who": "Talyn",
+      "text": "Hiring with AI? Keep humans in the loop.",
+      "say": "Hiring with A.I.? Keep humans in the loop."
+    },
+    {
+      "at": 3.2,
+      "who": "Talyn",
+      "text": "Meet Talyn, from TALYNT LABS.",
+      "say": "Meet Talin, from Talent Labs."
+    },
+    {
+      "at": 5.13,
+      "who": "Human",
+      "text": "It does the work. We make the calls.",
+      "say": "It does the work. We make the calls.",
+      "voice": "am_michael"
+    },
+    {
+      "at": 7.7,
+      "who": "Talyn",
+      "text": "Talyn reads your JD",
+      "say": "Talin reads your J.D."
+    },
+    {
+      "at": 9.3,
+      "who": "Human",
+      "text": "Your hiring manager signs off.",
+      "say": "Your hiring manager signs off.",
+      "voice": "am_michael"
+    },
+    {
+      "at": 11.7,
+      "who": "Talyn",
+      "text": "Talyn searches and scores every profile.",
+      "say": "Talin searches and scores every profile."
+    },
+    {
+      "at": 14.15,
+      "who": "Human",
+      "text": "A recruiter reviews every pick.",
+      "say": "A recruiter reviews every pick.",
+      "voice": "am_michael"
+    },
+    {
+      "at": 16.7,
+      "who": "Talyn",
+      "text": "Talyn drafts a personal message.",
+      "say": "Talin drafts a personal message."
+    },
+    {
+      "at": 18.6,
+      "who": "Human",
+      "text": "A recruiter checks it before it goes.",
+      "say": "A recruiter checks it before it goes.",
+      "voice": "am_michael"
+    },
+    {
+      "at": 21.2,
+      "who": "Talyn",
+      "text": "Talyn keeps every candidate warm.",
+      "say": "Talin keeps every candidate warm."
+    },
+    {
+      "at": 23.23,
+      "who": "Human",
+      "text": "A recruiter makes the first call.",
+      "say": "A recruiter makes the first call.",
+      "voice": "am_michael"
+    },
+    {
+      "at": 25.7,
+      "who": "Talyn",
+      "text": "Talyn flags anything that doesn't add up.",
+      "say": "Talin flags anything that doesn't add up."
+    },
+    {
+      "at": 28.0,
+      "who": "Human",
+      "text": "A person takes a look. No auto-rejects.",
+      "say": "A person takes a look. No auto-rejects.",
+      "voice": "am_michael"
+    },
+    {
+      "at": 31.2,
+      "who": "Talyn",
+      "text": "Talyn builds the interview kit.",
+      "say": "Talin builds the interview kit."
+    },
+    {
+      "at": 32.99,
+      "who": "Human",
+      "text": "Your hiring manager runs it.",
+      "say": "Your hiring manager runs it.",
+      "voice": "am_michael"
+    },
+    {
+      "at": 35.7,
+      "who": "Talyn",
+      "text": "Talyn lays out the reasons.",
+      "say": "Talin lays out the reasons."
+    },
+    {
+      "at": 37.36,
+      "who": "Human",
+      "text": "And you make the call.",
+      "say": "And you make the call.",
+      "voice": "am_michael"
+    },
+    {
+      "at": 39.2,
+      "who": "Talyn",
+      "text": "AI finds who to talk to.",
+      "say": "A.I. finds who to talk to."
+    },
+    {
+      "at": 40.96,
+      "who": "Human",
+      "text": "People do the talking.",
+      "say": "People do the talking.",
+      "voice": "am_michael"
+    },
+    {
+      "at": 42.7,
+      "who": "Talyn",
+      "text": "TALYNT LABS. Talent intelligence, built for hiring.",
+      "say": "Talent Labs. Talent intelligence, built for hiring."
+    }
+  ]
+}

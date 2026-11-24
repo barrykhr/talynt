@@ -1,0 +1,367 @@
+<!doctype html>
+<!--
+  TALYNT LABS — "Human in the loop", a 47-second funk ad with a two-voice voiceover.
+  One composition, two shapes: ad.html?f=v (1080×1920) and ad.html?f=s (1080×1080).
+
+  Talyn (lime, the female voice) does the work at each step; a person (white,
+  the male voice) checks, approves, calls or decides. Every step is a hand-off:
+  Talyn's card springs in, then the human card squashes in with a stamp as the
+  human voice answers. A small infinity loop in the corner carries both dots.
+  On screen there are only the step names and two-word stamps; the voices say
+  the rest. Cuts land on the beat of music.py (120 BPM funk).
+
+  Times (seconds) follow vo.json: each scene has --in, --h (the human line)
+  and --out. render.mjs pauses the page and steps it frame by frame.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>TALYNT LABS — Human in the loop</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..500;1,8..60,300..500&display=block"
+      rel="stylesheet"
+    />
+    <style>
+      @property --n { syntax: "<integer>"; initial-value: 0; inherits: true; }
+      @property --ring { syntax: "<number>"; initial-value: 0; inherits: false; }
+
+      :root {
+        --bg: #0a0a0a;
+        --line: #262626;
+        --line2: #383838;
+        --ink: #f5f5f2;
+        --ink2: #cfcfca;
+        --mute: #9b9b96;
+        --lime: #c8f04a;
+        --paper: #f5f5f2;
+        --glow: 200 240 74;
+        --amber: #ffb547;
+        --serif: "Source Serif 4", Georgia, serif;
+        --sans: "Geist", system-ui, sans-serif;
+        --mono: "Geist Mono", ui-monospace, monospace;
+        --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --END: 42.5s;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
+
+      .frame { position: relative; width: 1080px; height: 1920px; overflow: hidden; isolation: isolate; --mid: 960px; --head: 380px; --vis-top: 640px; --s: 1.16; --loop-s: 1.1; }
+      .frame[data-f="s"] { height: 1080px; --mid: 540px; --head: 150px; --vis-top: 250px; --s: 0.68; --loop-s: 0.8; }
+      .cam { position: absolute; inset: 0; }
+      .groove { position: absolute; inset: 0; transform-origin: 50% 60%; animation: sway 1s ease-in-out 3s infinite; }
+      @keyframes sway { 0%, 100% { transform: rotate(-0.7deg); } 50% { transform: rotate(0.7deg); } }
+      @keyframes shake { 0% { transform: none; } 20% { transform: translate(-14px, 9px) rotate(-0.6deg); } 40% { transform: translate(12px, -10px) rotate(0.5deg); } 60% { transform: translate(-8px, 6px); } 80% { transform: translate(5px, -3px); } 100% { transform: none; } }
+
+      /* Funk background: spinning sunburst, halftone, a glow that pumps on the beat, sparks. */
+      .rays { position: absolute; left: 50%; top: 58%; width: 3200px; height: 3200px; margin: -1600px 0 0 -1600px; z-index: -3; background: repeating-conic-gradient(rgb(var(--glow) / 0.07) 0 6deg, transparent 6deg 15deg); mask-image: radial-gradient(circle, #000 10%, transparent 55%); animation: spin 24s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .halftone { position: absolute; inset: 0; z-index: -2; background-image: radial-gradient(rgb(255 255 255 / 0.09) 2px, transparent 2.6px); background-size: 26px 26px; mask-image: linear-gradient(180deg, transparent 50%, #000 100%); }
+      .pump { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse 70% 40% at 50% 60%, rgb(var(--glow) / 0.3), transparent 70%); opacity: 0.5; animation: pump 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 3s infinite; }
+      @keyframes pump { 0% { opacity: 1; transform: scale(1.08); } 100% { opacity: 0.5; transform: none; } }
+      .spark { position: absolute; bottom: -20px; width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 14px var(--c); opacity: 0; animation: spark var(--t) linear var(--d) infinite; }
+      @keyframes spark { 0% { opacity: 0; transform: none; } 10% { opacity: 0.9; } 100% { opacity: 0; transform: translate(var(--x), calc(-1 * var(--h))); } }
+
+      .brand { position: absolute; top: 64px; left: 72px; z-index: 6; animation: fade-in 0.4s ease 0.1s both, fade-out 0.2s ease 42.4s forwards; }
+      .frame[data-f="s"] .brand { top: 40px; left: 50px; }
+      .brand img { height: 50px; filter: invert(1); }
+      .frame[data-f="s"] .brand img { height: 38px; }
+      .steps { position: absolute; left: 72px; right: 72px; bottom: 92px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; z-index: 6; animation: fade-in 0.4s ease 7.5s both, fade-out 0.2s ease 38.9s forwards; }
+      .frame[data-f="s"] .steps { bottom: 50px; left: 50px; right: 50px; }
+      .steps i { height: 8px; border-radius: 99px; background: var(--line2); position: relative; overflow: hidden; }
+      .steps i::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--lime) 55%, var(--paper) 55%); transform: scaleX(0); transform-origin: left; animation: fill var(--len) linear var(--at) forwards; }
+      @keyframes fill { to { transform: scaleX(1); } }
+      .note { position: absolute; left: 0; right: 0; bottom: 40px; text-align: center; font-family: var(--mono); font-size: 17px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mute); z-index: 6; animation: fade-in 0.4s ease 0.4s both; }
+      .frame[data-f="s"] .note { bottom: 18px; font-size: 13px; }
+
+      .wipe { position: absolute; top: -10%; bottom: -10%; left: 0; width: 70%; z-index: 20; background: var(--c, var(--lime)); transform: translateX(-160%) skewX(-16deg); animation: wipe 0.34s cubic-bezier(0.7, 0, 0.3, 1) var(--at) both; }
+      @keyframes wipe { from { transform: translateX(-160%) skewX(-16deg); } to { transform: translateX(260%) skewX(-16deg); } }
+      .flash { position: absolute; inset: 0; z-index: 19; background: #fff; opacity: 0; animation: flash 0.22s ease-out var(--at) both; }
+      @keyframes flash { 25% { opacity: 0.3; } }
+
+      /* The loop: an infinity track, Talyn's lime dot and a person's white dot chasing round it. */
+      .loop { position: absolute; width: 800px; height: 400px; }
+      .loop svg { position: absolute; inset: 0; overflow: visible; }
+      .loop path { fill: none; stroke: rgb(255 255 255 / 0.18); stroke-width: 6; }
+      .loop path.draw { stroke: var(--lime); stroke-width: 6; stroke-dasharray: 2200; stroke-dashoffset: 2200; animation: draw 1s var(--ease) var(--din, 0.15s) forwards; opacity: 0.6; }
+      @keyframes draw { to { stroke-dashoffset: 0; } }
+      .loop .dot { position: absolute; left: 0; top: 0; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; offset-path: path("M400,200 C520,40 760,40 760,200 C760,360 520,360 400,200 C280,40 40,40 40,200 C40,360 280,360 400,200 Z"); offset-rotate: 0deg; animation: run 2s linear var(--o, 0s) infinite; }
+      .loop .dot.ai { background: var(--lime); box-shadow: 0 0 30px rgb(var(--glow) / 0.95); }
+      .loop .dot.hu { background: var(--paper); box-shadow: 0 0 30px rgb(255 255 255 / 0.8); --o: -1s; }
+      @keyframes run { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+      .mini { position: absolute; top: 40px; right: 40px; width: 800px; height: 400px; transform-origin: 100% 0; scale: 0.2; z-index: 6; animation: fade-in 0.4s ease 7.5s both, fade-out 0.2s ease 38.9s forwards; }
+      .frame[data-f="s"] .mini { top: 30px; right: 30px; scale: 0.15; }
+
+      /* --- Scenes ------------------------------------------------------------------ */
+      .scene { position: absolute; inset: 0; animation: cut 0.12s ease-in var(--out) forwards; }
+      @keyframes cut { to { opacity: 0; transform: scale(1.12); filter: blur(6px); } }
+
+      .step { position: absolute; left: 50%; top: var(--mid); z-index: 4; display: grid; justify-items: center; white-space: nowrap; animation: slam 0.85s linear var(--in) both; }
+      .step b { font-family: var(--mono); font-weight: 600; font-size: 150px; line-height: 1; color: var(--lime); text-shadow: 0 0 60px rgb(var(--glow) / 0.6); }
+      .step span { margin-top: 8px; font-weight: 900; font-size: 118px; line-height: 1; letter-spacing: -0.04em; text-transform: uppercase; }
+      .step span em { display: inline-block; font-style: normal; animation: hop 0.5s var(--spring) calc(var(--in) + var(--k) * 0.035s) both, bob 1s ease-in-out calc(var(--in) + 1s + var(--k) * 0.07s) infinite; }
+      .frame[data-f="s"] .step b { font-size: 110px; }
+      .frame[data-f="s"] .step span { font-size: 88px; }
+      @keyframes hop { from { opacity: 0; transform: translateY(-90%) rotate(-25deg) scale(0.6); } }
+      @keyframes bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8%) rotate(-3deg); } }
+      @keyframes slam {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(2.6) rotate(-6deg); filter: blur(10px); animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.5); }
+        15% { opacity: 1; transform: translate(-50%, -50%) scale(0.92) rotate(1.5deg); filter: blur(0); }
+        24% { transform: translate(-50%, -50%) scale(1.05); }
+        32%, 48% { transform: translate(-50%, -50%) scale(1); animation-timing-function: cubic-bezier(0.7, 0, 0.2, 1); }
+        100% { opacity: 1; transform: translate(-50%, calc(-50% - var(--mid) + var(--head))) scale(0.42); }
+      }
+
+      .vis { position: absolute; top: var(--vis-top); left: 50%; width: 900px; height: 900px; margin-left: -450px; transform-origin: 50% 0; scale: var(--s); }
+      .beat { position: absolute; inset: 0; transform-origin: 50% 40%; animation: beat 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 3s infinite; }
+      @keyframes beat { 0% { transform: scale(1.025); } 100% { transform: none; } }
+
+      /* Talyn's card: springs in after the step name lifts. */
+      .ai { position: absolute; left: 0; top: 0; width: 790px; padding: 32px 36px 36px; border-radius: 36px; background: linear-gradient(180deg, #1c1c1c, #121212); border: 2px solid rgb(var(--glow) / 0.55); box-shadow: 0 40px 100px -40px #000, 0 0 120px -30px rgb(var(--glow) / 0.55); rotate: -2.5deg; animation: boing 0.7s linear calc(var(--in) + 0.62s) both; }
+      @keyframes boing { 0% { opacity: 0; transform: translateY(260px) scale(0.6) rotate(5deg); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1); } 45% { opacity: 1; transform: translateY(-30px) scale(1.05) rotate(-1deg); } 70% { transform: translateY(10px) scale(0.98); } 100% { opacity: 1; transform: none; } }
+      .who { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+      .badge { display: inline-flex; align-items: center; gap: 10px; padding: 8px 18px; border-radius: 99px; font-family: var(--mono); font-weight: 600; font-size: 20px; letter-spacing: 0.14em; text-transform: uppercase; }
+      .ai .badge { background: var(--lime); color: #0a0a0a; }
+      .orb { position: relative; display: grid; place-items: center; width: var(--o, 56px); height: var(--o, 56px); flex: none; }
+      .orb i { position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgb(var(--glow) / 0.5); animation: ring 1s ease-in-out infinite; }
+      .orb i + i { inset: 18%; border-color: rgb(var(--glow) / 0.85); background: radial-gradient(circle, rgb(var(--glow) / 0.2), transparent 70%); animation-delay: 0.25s; }
+      .orb b { width: 34%; height: 34%; border-radius: 50%; background: var(--lime); box-shadow: 0 0 calc(var(--o, 56px) * 0.45) rgb(var(--glow) / 0.9); animation: core 0.5s ease-out infinite; }
+      @keyframes ring { 50% { transform: scale(1.12); opacity: 0.5; } }
+      @keyframes core { 0% { transform: scale(1.18); } 100% { transform: scale(0.92); } }
+
+      /* The person's card: white, squashes in from the right as the human voice answers. */
+      .hu { position: absolute; right: 20px; top: 380px; width: 620px; padding: 30px 34px 34px; border-radius: 36px; background: var(--paper); color: #0a0a0a; box-shadow: 0 40px 100px -30px #000, 0 0 0 10px rgb(255 255 255 / 0.08); rotate: 3deg; animation: squash 0.75s linear calc(var(--h) - 0.12s) both; }
+      @keyframes squash { 0% { opacity: 0; transform: translateX(560px) scale(1.3, 0.7); animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1); } 40% { opacity: 1; transform: translateX(-30px) scale(0.85, 1.18); } 62% { transform: translateX(8px) scale(1.08, 0.94); } 80% { transform: scale(0.98, 1.02); } 100% { opacity: 1; transform: none; } }
+      .hu .badge { background: #0a0a0a; color: var(--paper); }
+      .hu .person { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: #0a0a0a; color: var(--paper); font-family: var(--mono); font-weight: 600; font-size: 22px; flex: none; }
+      .hu .role { font-size: 25px; font-weight: 600; color: #333; }
+      .stamp { display: inline-flex; align-items: center; gap: 14px; margin-top: 6px; font-weight: 900; font-size: 64px; letter-spacing: -0.035em; text-transform: uppercase; line-height: 1; animation: thump 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) calc(var(--h) + 0.4s) both; }
+      .stamp svg { width: 58px; height: 58px; fill: none; stroke: #0a0a0a; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; padding: 6px; border-radius: 50%; background: var(--lime); }
+      @keyframes thump { 0% { opacity: 0; transform: scale(2.6) rotate(-12deg); } 60% { opacity: 1; transform: scale(0.92) rotate(2deg); } 100% { opacity: 1; transform: rotate(-2deg); } }
+
+      /* The hand-off: a dashed arrow from Talyn's card to the person's. */
+      .hand { position: absolute; left: 110px; top: 300px; width: 240px; height: 180px; overflow: visible; }
+      .hand path { fill: none; stroke: var(--lime); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 14 12; stroke-dashoffset: 0; opacity: 0; animation: fade-in 0.2s ease calc(var(--h) - 0.35s) both, dash 0.5s linear calc(var(--h) - 0.35s) infinite; }
+      @keyframes dash { to { stroke-dashoffset: -52; } }
+
+      .sp { animation: spring 0.5s var(--spring) calc(var(--in) + 0.85s + var(--d, 0s)) both; }
+      @keyframes spring { from { opacity: 0; transform: translateY(40px) scale(0.5); } }
+      @keyframes fade-in { from { opacity: 0; } }
+      @keyframes fade-out { to { opacity: 0; } }
+
+      .chip { display: inline-flex; align-items: center; gap: 10px; padding: 13px 22px; border-radius: 99px; border: 1px solid rgb(var(--glow) / 0.3); background: rgb(var(--glow) / 0.14); font-size: 26px; white-space: nowrap; }
+      .chips { display: flex; flex-wrap: wrap; gap: 12px; }
+      .row { display: flex; align-items: center; gap: 18px; padding: 14px 18px; border-radius: 20px; background: #181818; border: 1px solid var(--line); }
+      .row + .row { margin-top: 12px; }
+      .av { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 50%; background: var(--lime); color: #0a0a0a; font-family: var(--mono); font-weight: 600; font-size: 22px; flex: none; }
+      .bar { flex: 1; height: 16px; border-radius: 99px; background: #2c2c2c; overflow: hidden; }
+      .bar i { display: block; height: 100%; width: var(--w); border-radius: 99px; background: var(--lime); animation: grow 0.7s var(--ease) calc(var(--in) + 0.95s + var(--d, 0s)) both; }
+      @keyframes grow { from { width: 0; } }
+      .ring { --ring: var(--to); --n: var(--to); display: grid; place-items: center; width: 84px; height: 84px; flex: none; border-radius: 50%; background: conic-gradient(var(--lime) calc(var(--ring) * 1%), #2a2a2a 0); animation: ringfill 0.8s var(--ease) calc(var(--in) + 0.95s + var(--d, 0s)) both; }
+      @keyframes ringfill { from { --ring: 0; --n: 0; } }
+      .ring > span { display: grid; place-items: center; width: 68px; height: 68px; border-radius: 50%; background: #141414; font-family: var(--serif); font-size: 28px; counter-reset: n var(--n); }
+      .ring > span::before { content: counter(n); }
+      .tagx { font-family: var(--mono); font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; color: #0a0a0a; background: var(--lime); padding: 6px 12px; border-radius: 9px; white-space: nowrap; }
+      .flag { border-color: var(--amber) !important; color: var(--amber); }
+      svg.i { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+      /* --- Hook & statement: the big loop -------------------------------------------- */
+      .bigloop { left: 50%; top: calc(var(--mid) - 200px); margin-left: -400px; scale: var(--loop-s); }
+      .bigloop .end-ai, .bigloop .end-hu { position: absolute; top: 200px; width: 150px; height: 150px; margin: -75px 0 0 -75px; display: grid; place-items: center; border-radius: 50%; }
+      .bigloop .end-ai { left: 220px; animation: spring 0.6s var(--spring) var(--ea) both; }
+      .bigloop .end-hu { left: 580px; background: var(--paper); color: #0a0a0a; animation: spring 0.6s var(--spring) var(--eh) both; box-shadow: 0 0 0 12px rgb(255 255 255 / 0.08); }
+      .bigloop .end-hu svg { width: 80px; height: 80px; }
+      .bigloop .end-ai .orb { --o: 150px; }
+      .s0 .bigloop { animation: zoomy 2.9s linear 0s both; }
+      @keyframes zoomy { 0% { opacity: 0; transform: scale(0.5) rotate(-12deg); } 8% { opacity: 1; } 25% { transform: scale(1.05) rotate(2deg); } 35% { transform: scale(1); } 100% { transform: scale(1.12) rotate(-2deg); } }
+      .s9 .bigloop { animation: zoomy 3.4s linear var(--in) both; }
+      .pulse-h { animation: spring 0.6s var(--spring) var(--eh) both, hpulse 0.5s ease-out calc(var(--eh) + 0.6s) infinite !important; }
+      @keyframes hpulse { 0% { box-shadow: 0 0 0 0 rgb(255 255 255 / 0.5); } 100% { box-shadow: 0 0 0 40px rgb(255 255 255 / 0); } }
+
+      /* Meet: Talyn and a person bounce together; high five. */
+      .meet { position: absolute; inset: 0; }
+      .meet .lft, .meet .rgt { position: absolute; top: 80px; width: 300px; height: 300px; display: grid; place-items: center; border-radius: 50%; }
+      .meet .lft { left: 40px; animation: from-l 0.7s var(--spring) calc(var(--in) + 0.6s) both; }
+      .meet .lft .orb { --o: 300px; }
+      .meet .rgt { right: 40px; background: var(--paper); color: #0a0a0a; box-shadow: 0 0 0 16px rgb(255 255 255 / 0.08), 0 0 90px -10px rgb(255 255 255 / 0.35); animation: from-r 0.7s var(--spring) calc(var(--h) - 0.15s) both; }
+      .meet .rgt svg { width: 150px; height: 150px; }
+      @keyframes from-l { from { opacity: 0; transform: translateX(-500px) rotate(-30deg); } }
+      @keyframes from-r { from { opacity: 0; transform: translateX(500px) rotate(30deg); } }
+      .meet .five { position: absolute; left: 50%; top: 230px; width: 10px; height: 10px; }
+      .meet .five i { position: absolute; left: 0; top: 0; width: 120px; height: 10px; border-radius: 9px; background: var(--lime); transform-origin: 0 50%; rotate: var(--a); opacity: 0; animation: ray 0.6s ease-out calc(var(--h) + 0.5s) both; }
+      .meet .five i:nth-child(even) { background: var(--paper); }
+      @keyframes ray { 0% { opacity: 0; transform: translateX(10px) scaleX(0.2); } 10% { opacity: 1; } 100% { opacity: 0; transform: translateX(120px) scaleX(1); } }
+      .meet .tags { position: absolute; left: 0; right: 0; top: 440px; display: flex; justify-content: space-between; padding: 0 90px; }
+      .meet .tags .badge:first-child { background: var(--lime); color: #0a0a0a; animation: spring 0.5s var(--spring) calc(var(--in) + 1s) both; }
+      .meet .tags .badge:last-child { background: var(--paper); color: #0a0a0a; animation: spring 0.5s var(--spring) calc(var(--h) + 0.3s) both; }
+
+      /* --- End card ----------------------------------------------------------------------- */
+      .end { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; text-align: center; gap: 44px; }
+      .end .pair { display: flex; align-items: center; gap: 30px; animation: spring 0.6s var(--spring) var(--END) both; }
+      .end .pair .orb { --o: 130px; }
+      .end .pair .p { display: grid; place-items: center; width: 110px; height: 110px; border-radius: 50%; background: var(--paper); color: #0a0a0a; }
+      .end .pair .p svg { width: 60px; height: 60px; }
+      .end .pair em { font-style: normal; font-weight: 900; font-size: 64px; color: var(--mute); }
+      .end .logo { height: 160px; filter: invert(1); animation: slam-logo 0.7s linear calc(var(--END) + 0.15s) both; }
+      @keyframes slam-logo { 0% { opacity: 0; transform: scale(2.6); filter: invert(1) blur(10px); } 35% { opacity: 1; transform: scale(0.92); filter: invert(1); } 60% { transform: scale(1.05); } 100% { opacity: 1; transform: none; filter: invert(1); } }
+      .end .cta { padding: 34px 64px; border-radius: 99px; background: var(--lime); color: #0a0a0a; font-weight: 800; font-size: 44px; box-shadow: 0 0 0 16px rgb(var(--glow) / 0.15), 0 30px 90px -20px rgb(var(--glow) / 0.9); animation: spring 0.6s var(--spring) calc(var(--END) + 0.7s) both, bounce 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--END) + 1.5s) infinite; }
+      @keyframes bounce { 0% { transform: scale(1.07) rotate(-1.5deg); } 100% { transform: none; } }
+      .end .url { font-family: var(--mono); font-size: 34px; letter-spacing: 0.06em; animation: spring 0.6s var(--spring) calc(var(--END) + 1s) both; }
+      .frame[data-f="s"] .end { gap: 26px; }
+      .frame[data-f="s"] .end .pair { scale: 0.7; }
+      .frame[data-f="s"] .end .logo { height: 110px; }
+      .frame[data-f="s"] .end .cta { font-size: 32px; padding: 24px 48px; }
+      .frame[data-f="s"] .end .url { font-size: 26px; }
+      .end-glow { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse 60% 40% at 50% 52%, rgb(var(--glow) / 0.4), transparent 70%); animation: fade-in 0.5s ease var(--END) both; }
+      .confetti { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; border-radius: 3px; background: var(--lime); opacity: 0; animation: burst 1.4s cubic-bezier(0.1, 0.8, 0.3, 1) calc(var(--END) + 0.15s) both; }
+      @keyframes burst { 0% { opacity: 0; transform: none; } 4%, 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)); } }
+    </style>
+  </head>
+  <body>
+    <template id="person"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg></template>
+
+    <div class="frame" id="frame">
+      <div class="cam" id="cam">
+        <div class="groove">
+          <div class="rays"></div>
+          <div class="halftone"></div>
+          <div class="pump"></div>
+          <div id="sparks"></div>
+          <div id="scenes"></div>
+          <div class="end-glow"></div>
+          <section class="end" id="end">
+            <div class="pair"><span class="orb"><i></i><i></i><b></b></span><em>+</em><span class="p" data-person></span></div>
+            <img class="logo" src="../../public/brand/talynt-primary-mono.svg" alt="TALYNT LABS" />
+            <p class="cta">Book a demo →</p>
+            <p class="url">talyntlabs.com</p>
+          </section>
+        </div>
+      </div>
+      <div class="loop mini" id="mini"></div>
+      <div id="cuts"></div>
+      <div class="brand"><img src="../../public/brand/talynt-primary-mono.svg" alt="TALYNT LABS" /></div>
+      <div class="steps" id="steps"></div>
+      <p class="note">Illustrative visuals · fictional people</p>
+    </div>
+
+    <script>
+      const f = new URLSearchParams(location.search).get("f") === "s" ? "s" : "v";
+      document.getElementById("frame").dataset.f = f;
+      const PERSON = document.getElementById("person").innerHTML;
+      const CHECK = '<svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>';
+      const PHONE = '<svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2" /></svg>';
+      const EYE = '<svg viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg>';
+      const MIC = '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></svg>';
+      const ORB = '<span class="orb"><i></i><i></i><b></b></span>';
+      const LOOP_PATH = "M400,200 C520,40 760,40 760,200 C760,360 520,360 400,200 C280,40 40,40 40,200 C40,360 280,360 400,200 Z";
+      const loop = (extra = "") => `<svg viewBox="0 0 800 400"><path d="${LOOP_PATH}" /><path class="draw" d="${LOOP_PATH}" /></svg><span class="dot ai"></span><span class="dot hu"></span>${extra}`;
+      document.querySelectorAll("[data-person]").forEach((e) => (e.innerHTML = PERSON));
+      document.getElementById("mini").innerHTML = loop();
+
+      // Scene timings follow vo.json (in = cut, h = the human line, out = next cut − 0.12 s).
+      const T = {
+        hook: { in: 0, h: 1.6, out: 2.88 },
+        meet: { in: 3, h: 5.13, out: 7.38 },
+        steps: [
+          [7.5, 9.3], [11.5, 14.15], [16.5, 18.6], [21, 23.23], [25.5, 28.0], [31, 32.99], [35.5, 37.36],
+        ],
+        state: { in: 39, h: 40.96, out: 42.38 },
+      };
+      const NEXT = [11.5, 16.5, 21, 25.5, 31, 35.5, 39];
+
+      const scenes = document.getElementById("scenes");
+      const add = (html, vars, cls = "") => {
+        const s = document.createElement("section");
+        s.className = `scene ${cls}`;
+        s.setAttribute("style", vars);
+        s.innerHTML = html;
+        scenes.append(s);
+      };
+      const letters = (w) => [...w].map((c, k) => (c === " " ? " " : `<em style="--k:${k}">${c}</em>`)).join("");
+      const stepName = (num, name) => `<div class="step">${num ? `<b>${num}</b>` : ""}<span>${letters(name)}</span></div>`;
+
+      // Hook: the loop, Talyn on one side, a person on the other.
+      add(
+        `<div class="loop bigloop" style="--ea: 0.6s; --eh: 1.5s">${loop(`<span class="end-ai">${ORB}</span><span class="end-hu">${PERSON}</span>`)}</div>`,
+        `--in:0s;--out:2.88s`, "s0",
+      );
+
+      // Meet Talyn — and the people.
+      add(
+        `${stepName("", "Meet Talyn")}<div class="vis"><div class="beat"><div class="meet">
+          <span class="lft">${ORB}</span><span class="rgt">${PERSON}</span>
+          <span class="five">${[...Array(8)].map((_, i) => `<i style="--a:${i * 45}deg"></i>`).join("")}</span>
+          <div class="tags"><span class="badge">Talyn</span><span class="badge">People</span></div>
+        </div></div></div>`,
+        `--in:3s;--h:5.13s;--out:7.38s`,
+      );
+
+      // The seven hand-offs.
+      const ai = (body) => `<div class="ai"><div class="who">${ORB}<span class="badge">Talyn</span></div>${body}</div>`;
+      const hu = (ini, role, icon, word) =>
+        `<svg class="hand" viewBox="0 0 240 180"><path d="M10 10 C 40 150, 150 160, 230 150" /></svg>
+         <div class="hu"><div class="who"><span class="person">${ini}</span><span class="badge">Human</span><span class="role">${role}</span></div><p class="stamp">${icon}${word}</p></div>`;
+      const STEPS = [
+        ["01", "Brief",
+          ai(`<div class="chips">${["Payments infra", "Event-driven", "On-call"].map((c, i) => `<span class="chip sp" style="--d:${i * 0.12}s">${c}</span>`).join("")}</div>`),
+          hu("DV", "Hiring manager", CHECK, "Signed off")],
+        ["02", "Shortlist",
+          ai([["AK", 96], ["RS", 91], ["MN", 84]].map(([a, s], i) => `<div class="row sp" style="--d:${i * 0.15}s"><span class="av">${a}</span><span class="bar"><i style="--w:${s - 10}%;--d:${i * 0.15}s"></i></span><span class="ring" style="--to:${s};--d:${i * 0.15}s"><span></span></span></div>`).join("")),
+          hu("PR", "Recruiter", CHECK, "Reviewed")],
+        ["03", "Outreach",
+          ai(`<div class="row sp" style="--d:0s; flex-direction: column; align-items: stretch; gap: 14px; padding: 22px">${[92, 100, 76, 58].map((w, i) => `<span class="bar" style="flex: none; height: ${i ? 14 : 20}px"><i style="--w:${w}%;--d:${0.2 + i * 0.25}s;${i ? "background:#555" : ""}"></i></span>`).join("")}</div>`),
+          hu("PR", "Recruiter", CHECK, "Approved")],
+        ["04", "First call",
+          ai(`<div class="row sp" style="--d:0s"><span class="av">AK</span><span class="bar"><i style="--w:82%;--d:0.1s"></i></span><span class="tagx">Warm</span></div><div class="chips" style="margin-top:16px">${["Email", "WhatsApp", "Follow-up"].map((c, i) => `<span class="chip sp" style="--d:${0.3 + i * 0.15}s">${c}</span>`).join("")}</div>`),
+          hu("PR", "Recruiter", PHONE, "On the call")],
+        ["05", "Checks",
+          ai(`<div class="chips">${["Timeline", "Specificity", "Cross-channel", "Evidence", "Generated?", "Skills"].map((c, i) => `<span class="chip sp ${i === 0 ? "flag" : ""}" style="--d:${i * 0.12}s">${i === 0 ? "⚠" : "✓"} ${c}</span>`).join("")}</div>`),
+          hu("PR", "Recruiter", EYE, "Taking a look")],
+        ["06", "Interview",
+          ai([["On-call", 70], ["Payments", 86], ["Open gap", 60]].map(([t, w], i) => `<div class="row sp" style="--d:${i * 0.15}s"><span class="bar"><i style="--w:${w}%;--d:${i * 0.15}s;background:#555"></i></span><span class="tagx">${t}</span></div>`).join("")),
+          hu("DV", "Hiring manager", MIC, "Interviewing")],
+        ["07", "Decision",
+          ai(`<div class="row sp" style="--d:0s"><span class="av">AK</span><span style="flex:1;display:grid;gap:10px">${[88, 72, 64].map((w, i) => `<span class="bar"><i style="--w:${w}%;--d:${0.1 + i * 0.15}s"></i></span>`).join("")}</span><span class="ring" style="--to:96;--d:0.1s"><span></span></span></div>`),
+          hu("YOU", "Your team", CHECK, "Your call")],
+      ];
+      STEPS.forEach(([num, name, a, h], i) => {
+        const [tin, th] = T.steps[i];
+        add(`${stepName(num, name)}<div class="vis"><div class="beat">${a}${h}</div></div>`, `--in:${tin}s;--h:${th}s;--out:${(NEXT[i] - 0.12).toFixed(2)}s`);
+      });
+
+      // "AI finds who to talk to. People do the talking." — the loop again.
+      add(
+        `<div class="loop bigloop" style="--ea: 39.3s; --eh: 40.9s; --din: 39.1s">${loop(`<span class="end-ai">${ORB}</span><span class="end-hu pulse-h">${PERSON}</span>`)}</div>`,
+        `--in:39s;--out:42.38s`, "s9",
+      );
+
+      // Cuts: wipes (lime into Talyn's steps, white into the closing), flashes, shakes.
+      const CUTS = [3, 7.5, 11.5, 16.5, 21, 25.5, 31, 35.5, 39, 42.5];
+      const cuts = document.getElementById("cuts");
+      const el = (tag, cls, style) => { const e = document.createElement(tag); e.className = cls; e.setAttribute("style", style); return e; };
+      CUTS.forEach((c, i) => cuts.append(el("span", "wipe", `--at:${c - 0.17}s;${i % 2 ? "--c:#f5f5f2" : ""}`), el("span", "flash", `--at:${c}s`)));
+      // A shake on every cut, and a smaller one as each person's card lands.
+      const shakes = CUTS.map((c) => `shake 0.32s linear ${c}s`);
+      [T.meet.h, ...T.steps.map((s) => s[1])].forEach((h) => shakes.push(`shake 0.2s linear ${(h + 0.4).toFixed(2)}s`));
+      document.getElementById("cam").style.animation = shakes.join(", ");
+
+      const sparks = document.getElementById("sparks");
+      for (let i = 0; i < 30; i++) {
+        sparks.append(el("span", "spark", `left:${(i * 37.7) % 100}%;--c:${i % 3 ? "#c8f04a" : "#f5f5f2"};--x:${((i % 5) - 2) * 30}px;--h:${900 + (i % 7) * 140}px;--t:${(2.4 + (i % 4) * 0.7).toFixed(1)}s;--d:${((i * 0.37) % 3).toFixed(2)}s`));
+      }
+      const end = document.getElementById("end");
+      for (let i = 0; i < 40; i++) {
+        const a = (i / 40) * Math.PI * 2, r = 380 + (i % 4) * 90;
+        end.append(el("span", "confetti", `--x:${Math.round(Math.cos(a) * r)}px;--y:${Math.round(Math.sin(a) * r * 0.8)}px;--r:${(i % 2 ? 1 : -1) * (180 + i * 10)}deg;${i % 2 ? "background:#f5f5f2;" : ""}`));
+      }
+      const times = [7.5, 11.5, 16.5, 21, 25.5, 31, 35.5, 39];
+      const steps = document.getElementById("steps");
+      for (let i = 0; i < 7; i++) steps.append(el("i", "", `--at:${times[i]}s;--len:${(times[i + 1] - times[i]).toFixed(2)}s`));
+
+      window.__ready = document.fonts.ready.then(() => Promise.all([...document.images].map((im) => (im.complete ? 1 : new Promise((r) => (im.onload = r))))));
+    </script>
+  </body>
+</html>
