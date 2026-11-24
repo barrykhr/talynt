@@ -83,10 +83,10 @@ VOICEOVER=/path/to/voiceover.mp3 node ads/one-click/render.mjs all ads/one-click
 Record it as one take with short pauses between lines; if it runs long, trim pauses
 rather than speeding the voice up.
 
-### Voiceover script — "Meet Talyn" (36 s)
+### Voiceover script — "Meet Talyn" (38 s)
 
 The lines and their start times are in `ads/meet-talyn/vo.json`. A locally
-generated voiceover (open-source Kokoro, Indian English female voice) is the
+generated voiceover (open-source Kokoro, American English female voice) is the
 default; see `ads/meet-talyn/README.md`. To use an ElevenLabs voice instead,
 record each line, place it at its start time, and render with
 `VOICEOVER=<file> node ads/meet-talyn/render.mjs all ads/meet-talyn/out`.

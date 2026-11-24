@@ -11,7 +11,7 @@ the machine), and places each line at its time in the ad.
 
 `say` is the text as spoken: "Talin" and "Talent Labs" so the names are
 pronounced the way TALYNT says them, "J.D." and "A.I." as letters. The voice is
-Kokoro's Indian English female voice (hf_beta). For a studio voice, record the
+Kokoro's American English female voice (af_heart). For a studio voice, record the
 same lines (see ads/voice/ELEVENLABS.md) and pass that file as VOICEOVER instead.
 """
 import json, os, subprocess, sys, tempfile

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Renders the "Meet Talyn" ad to MP4, frame by frame, with the shared sound
- * design (../one-click/audio.mjs) and the voiceover (voiceover.py).
+ * design (../one-click/audio.mjs), the music (music.py) and the voiceover
+ * (voiceover.py).
  *
  *   VOICEOVER=ads/meet-talyn/out/voiceover.wav node ads/meet-talyn/render.mjs [v|s|all] [out dir]
  *
@@ -18,31 +19,28 @@ import { renderAudio } from "../one-click/audio.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FPS = 30;
-const SECONDS = 36.5;
-// Sound cues on this ad's timeline (seconds), in the shared palette.
-const FLIPS = [1.95, 5.7, 10.4, 13.7, 17.2, 19.9, 24.0, 28.4, 31.6];
+const SECONDS = 38;
+// Music: music.py (120 BPM, risers and impacts on every cut). UI sounds on top.
+const MUSIC = process.env.MUSIC ?? path.join(here, "out", "music.wav");
+const FLIPS = [];
 const CUES = [
-  [0.6, "ping-soft"],
-  [2.4, "chime"],
-  [3.5, "tick"], [3.7, "tick"], [3.9, "tick"],
-  [6.5, "ping-soft"],
-  [8.3, "tick"], [8.4, "tick"], [8.5, "tick"],
-  [9.0, "ping-soft"],
-  [12.2, "chime"],
-  ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => [14.5 + i * 0.18, "tick"]),
-  [16.2, "ping"],
-  [18.8, "ping"],
-  [19.1, "ping-in"],
-  [19.5, "ping-in"],
-  [20.4, "ping-soft"],
-  [20.95, "ping-in"],
-  ...[0, 1, 2, 3, 4, 5].map((i) => [21.45 + i * 0.22, "tick"]),
-  [23.0, "chime"],
-  [24.6, "ping-soft"],
-  [25.0, "tick"], [25.3, "tick"], [25.6, "tick"],
-  [29.5, "ping-soft"],
-  [31.85, "hit"],
-  [32.8, "ping-soft"],
+  ...[0.55, 0.7, 0.85, 1.0].map((t) => [t, "tick"]),
+  ...[3.25, 3.5, 3.75].map((t) => [t, "ping-soft"]),
+  ...[6.85, 6.95, 7.05, 8.65, 8.75, 8.85].map((t) => [t, "tick"]),
+  ...[9.35, 9.55, 9.75, 9.95].map((t) => [t, "tick"]),
+  ...[12.45, 12.67, 12.89].map((t) => [t, "ping"]),
+  ...[0, 1, 2, 3, 4, 5, 6, 7].map((i) => [15.3 + i * 0.16, "tick"]),
+  [17.15, "click"],
+  [18.75, "ping"],
+  [19.2, "ping"],
+  [19.75, "ping"],
+  [20.15, "ping-in"],
+  ...[0, 1, 2, 3, 4, 5].map((i) => [22.65 + i * 0.2, "tick"]),
+  [24.15, "click"],
+  [25.95, "chime"],
+  ...[26.35, 26.75, 27.15].map((t) => [t, "tick"]),
+  [30.5, "ping-soft"],
+  [31.5, "ping-soft"],
 ];
 const SHAPES = { v: { w: 1080, h: 1920, name: "9x16" }, s: { w: 1080, h: 1080, name: "1x1" } };
 
@@ -59,7 +57,7 @@ try {
 
 const audio = path.join(out, "talynt-meet-talyn-audio.wav");
 // VOICEOVER=/path/to/voiceover.mp3 mixes a recorded voiceover in (ads/voice/ELEVENLABS.md).
-renderAudio(audio, SECONDS, process.env.VOICEOVER, { flips: FLIPS, cues: CUES });
+renderAudio(audio, SECONDS, process.env.VOICEOVER, { flips: FLIPS, cues: CUES, bed: MUSIC });
 
 const browser = await chromium.launch();
 for (const key of which === "all" ? Object.keys(SHAPES) : [which]) {

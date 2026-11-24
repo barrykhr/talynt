@@ -1,16 +1,56 @@
 {
-  "voice": "hf_beta",
-  "speed": 1.05,
+  "voice": "af_heart",
+  "speed": 1.1,
   "lines": [
-    { "at": 0.4, "text": "Got a hiring problem?", "say": "Got a hiring problem?" },
-    { "at": 2.3, "text": "Meet Talyn. Your AI hiring agent, from TALYNT LABS.", "say": "Meet Talin. Your A.I. hiring agent, from Talent Labs." },
-    { "at": 6.1, "text": "Share the role. Talyn reads the JD, maps the market, and builds the search.", "say": "Share the role. Talin reads the J.D., maps the market, and builds the search." },
-    { "at": 10.8, "text": "Ask for what you want in a candidate. Talyn finds it.", "say": "Ask for what you want in a candidate. Talin finds it." },
-    { "at": 14.1, "text": "It hires for intent. Who is open to a move, and why.", "say": "It hires for intent. Who is open to a move, and why." },
-    { "at": 17.6, "text": "Personal outreach, on email and WhatsApp.", "say": "Personal outreach, on email and WhatsApp." },
-    { "at": 20.3, "text": "The right questions for every profile, and a check that it all adds up.", "say": "The right questions for every profile, and a check that it all adds up." },
-    { "at": 24.4, "text": "Hiring managers get the reasons, and an interview kit built on the JD.", "say": "Hiring managers get the reasons, and an interview kit built on the J.D." },
-    { "at": 28.8, "text": "AI finds who to talk to. People do the talking.", "say": "A.I. finds who to talk to. People do the talking." },
-    { "at": 32.1, "text": "TALYNT LABS. Talent intelligence, built for hiring.", "say": "Talent Labs. Talent intelligence, built for hiring." }
+    {
+      "at": 0.3,
+      "text": "Got a hiring problem?",
+      "say": "Got a hiring problem?"
+    },
+    {
+      "at": 2.2,
+      "text": "Meet Talyn. Your AI hiring agent, from TALYNT LABS.",
+      "say": "Meet Talin. Your A.I. hiring agent, from Talent Labs."
+    },
+    {
+      "at": 6.2,
+      "text": "Share the role. Talyn reads the JD, maps the market, and builds the search.",
+      "say": "Share the role. Talin reads the J.D., maps the market, and builds the search."
+    },
+    {
+      "at": 11.2,
+      "text": "Ask for what you want in a candidate. Talyn finds it.",
+      "say": "Ask for what you want in a candidate. Talin finds it."
+    },
+    {
+      "at": 14.7,
+      "text": "It hires for intent. Who is open to a move, and why.",
+      "say": "It hires for intent. Who is open to a move, and why."
+    },
+    {
+      "at": 18.2,
+      "text": "Personal outreach, on email and WhatsApp.",
+      "say": "Personal outreach, on email and WhatsApp."
+    },
+    {
+      "at": 21.2,
+      "text": "The right questions for every profile, and a check that it all adds up.",
+      "say": "The right questions for every profile, and a check that it all adds up."
+    },
+    {
+      "at": 25.2,
+      "text": "Hiring managers get the reasons, and an interview kit built on the JD.",
+      "say": "Hiring managers get the reasons, and an interview kit built on the J.D."
+    },
+    {
+      "at": 29.7,
+      "text": "AI finds who to talk to. People do the talking.",
+      "say": "A.I. finds who to talk to. People do the talking."
+    },
+    {
+      "at": 33.2,
+      "text": "TALYNT LABS. Talent intelligence, built for hiring.",
+      "say": "Talent Labs. Talent intelligence, built for hiring."
+    }
   ]
 }

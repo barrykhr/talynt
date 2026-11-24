@@ -45,9 +45,10 @@ const SOUNDS = {
 /**
  * `voiceover` (optional): a recorded voiceover (see ads/voice/ELEVENLABS.md).
  * The music and effects duck under it automatically. `flips` and `cues` let
- * another ad (ads/meet-talyn) reuse the same sounds on its own timeline.
+ * another ad (ads/meet-talyn) reuse the same sounds on its own timeline, and
+ * `bed` replaces the low tone with a music file.
  */
-export function renderAudio(file, seconds, voiceover, { flips = FLIPS, cues = CUES } = {}) {
+export function renderAudio(file, seconds, voiceover, { flips = FLIPS, cues = CUES, bed } = {}) {
   const inputs = [];
   const graph = [];
   let n = 0;
@@ -57,11 +58,16 @@ export function renderAudio(file, seconds, voiceover, { flips = FLIPS, cues = CU
     n++;
   };
 
-  // The bed: a soft, slowly pulsing low tone.
-  add(
-    ["-f", "lavfi", "-i", `aevalsrc='0.10*sin(2*PI*55*t)*(0.65+0.35*sin(2*PI*0.5*t))+0.05*sin(2*PI*110*t)':s=48000:d=${seconds}`],
-    (i) => `[${i}:a]afade=t=in:d=0.8,afade=t=out:st=${seconds - 1.4}:d=1.4[a${i}]`,
-  );
+  if (bed) {
+    // A music track of the ad's own (e.g. ads/meet-talyn/music.py).
+    add(["-i", bed], (i) => `[${i}:a]aresample=48000,aformat=channel_layouts=stereo,volume=0.55[a${i}]`);
+  } else {
+    // The bed: a soft, slowly pulsing low tone.
+    add(
+      ["-f", "lavfi", "-i", `aevalsrc='0.10*sin(2*PI*55*t)*(0.65+0.35*sin(2*PI*0.5*t))+0.05*sin(2*PI*110*t)':s=48000:d=${seconds}`],
+      (i) => `[${i}:a]afade=t=in:d=0.8,afade=t=out:st=${seconds - 1.4}:d=1.4[a${i}]`,
+    );
+  }
 
   // Whooshes: shaped pink noise, one per flip.
   for (const at of flips) {
