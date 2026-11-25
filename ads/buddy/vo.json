@@ -1,0 +1,68 @@
+{
+  "voice": "af_heart",
+  "speed": 1.1,
+  "lines": [
+    {
+      "at": 0.3,
+      "text": "Got a hiring problem?",
+      "say": "Got a hiring problem?"
+    },
+    {
+      "at": 2.2,
+      "text": "Meet Buddy. Your AI hiring agent, by TALYNT LABS.",
+      "say": "Meet Buddy. Your A.I. hiring agent, by Talent Labs."
+    },
+    {
+      "at": 6.2,
+      "text": "Share the role. Buddy reads the JD, maps the market, and builds the search.",
+      "say": "Share the role. Buddy reads the J.D., maps the market, and builds the search."
+    },
+    {
+      "at": 11.2,
+      "text": "Ask for what you want in a candidate. Buddy finds it.",
+      "say": "Ask for what you want in a candidate. Buddy finds it."
+    },
+    {
+      "at": 14.7,
+      "text": "It hires for intent. Who is open to a move, and why.",
+      "say": "It hires for intent. Who is open to a move, and why."
+    },
+    {
+      "at": 18.2,
+      "text": "Personal outreach, on email and WhatsApp.",
+      "say": "Personal outreach, on email and WhatsApp."
+    },
+    {
+      "at": 21.2,
+      "text": "Buddy keeps every candidate warm.",
+      "say": "Buddy keeps every candidate warm."
+    },
+    {
+      "at": 23.3,
+      "text": "And a recruiter nurtures the relationship.",
+      "say": "And a recruiter nurtures the relationship.",
+      "voice": "am_michael",
+      "who": "Recruiter"
+    },
+    {
+      "at": 26.2,
+      "text": "The right questions for every profile, and a check that it all adds up.",
+      "say": "The right questions for every profile, and a check that it all adds up."
+    },
+    {
+      "at": 30.2,
+      "text": "Hiring managers get the reasons, and an interview kit built on the JD",
+      "say": "Hiring managers get the reasons, and an interview kit built on the J.D."
+    },
+    {
+      "at": 34.7,
+      "text": "AI finds who to talk to. People do the talking.",
+      "say": "A.I. finds who to talk to. People do the talking."
+    },
+    {
+      "at": 38.2,
+      "text": "TALYNT LABS. Talent intelligence, built for hiring.",
+      "say": "Talent Labs. Talent intelligence, built for hiring."
+    }
+  ]
+}
