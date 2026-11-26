@@ -139,8 +139,24 @@ export function RoleInsightsPanel() {
           <p className="tw-code tw-type" style={v({ "--d": "1.3s", "--t": "1.6s" })}>
             (&quot;backend engineer&quot; OR &quot;platform engineer&quot;) AND (payments OR ledger OR settlement) AND (kafka OR &quot;event-driven&quot;)
           </p>
+          <p className="tw-label">Adjacent titles</p>
+          <div className="tw-tags">
+            {["Platform Engineer", "SDE III", "Payments Engineer"].map((t, i) => (
+              <span key={t} className="tw-chip tw-pop" style={v({ "--d": `${2.9 + i * 0.1}s` })}>
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
         <div className="tw-role-col">
+          <p className="tw-label">Growth path</p>
+          <div className="tw-path">
+            {["SDE II", "Senior Backend", "Staff / Lead"].map((t, i) => (
+              <span key={t} className={cx("tw-path-node tw-pop", i === 1 && "is-now")} style={v({ "--d": `${0.6 + i * 0.25}s` })}>
+                {t}
+              </span>
+            ))}
+          </div>
           <p className="tw-label">Wording check</p>
           <ul className="tw-flags">
             <li className="tw-in" style={v({ "--d": "1.6s" })}>
@@ -370,6 +386,7 @@ export function CampaignPanel() {
         </div>
         <ol className="tw-seq">
           {[
+            ["WhatsApp", "Continues on WhatsApp once they opt in"],
             ["Interest", "“Would you like to hear more?” → “Yes, I’m interested” → Confirmed interest"],
             ["Schedule", "“Pick a time” → “You’re booked”"],
             ["Voice", `Call if they go quiet · ${TALYN.soon}`],
@@ -381,6 +398,98 @@ export function CampaignPanel() {
           ))}
         </ol>
       </div>
+    </Win>
+  );
+}
+
+/* --- Gap-closing chat ---------------------------------------------------------- */
+
+export function GapChat() {
+  return (
+    <Win title="Gap-closing · chat with AK">
+      <div className="tw-chat">
+        <p className="tw-bubble is-out tw-pop" style={v({ "--d": "0.3s" })}>
+          Your CV matches the JD well. One thing it doesn’t show: have you owned on-call for a payments service? What broke, and what did you change?
+        </p>
+        <p className="tw-typing tw-blip" style={v({ "--d": "1.3s" })}>
+          <i />
+          <i />
+          <i />
+        </p>
+        <p className="tw-bubble is-in tw-pop" style={v({ "--d": "2.2s" })}>
+          Yes — I ran the settlement rotation for two years. A duplicate-event bug double-posted refunds; I added idempotency keys and cut pages by 60%.
+        </p>
+        <p className="tw-evidence tw-pop" style={v({ "--d": "3s" })}>
+          <Check /> Gap closed · evidence added · specific, consistent with profile
+        </p>
+      </div>
+    </Win>
+  );
+}
+
+/* --- Intent and health ------------------------------------------------------------- */
+
+export function IntentPanel() {
+  const on = new Set([0, 1, 3, 4, 6]);
+  const signals = TALYN.capabilities.modules.find((m) => m.id === "intent")!;
+  return (
+    <Win title="Intent and health · AK">
+      <div className="tw-intent">
+        <ul className="tw-signals">
+          {("signals" in signals ? signals.signals : []).map((s, i) => (
+            <li key={s} className={cx("tw-in", on.has(i) && "is-on")} style={v({ "--d": `${0.2 + i * 0.15}s` })}>
+              <span className="tw-led" />
+              {s}
+            </li>
+          ))}
+        </ul>
+        <div className="tw-gauges">
+          <div className="tw-gauge tw-in" style={v({ "--d": "1.5s" })}>
+            <small>Switch intent</small>
+            <b className="tw-strong">High</b>
+            <span>5 of 8 signals</span>
+          </div>
+          <div className="tw-gauge tw-in" style={v({ "--d": "1.7s" })}>
+            <small>Candidate health</small>
+            <b>
+              <Count to={82} d="1.7s" />
+            </b>
+            <span className="tw-band is-good">Healthy</span>
+          </div>
+          <div className="tw-gauge tw-in" style={v({ "--d": "1.9s" })}>
+            <small>Pipeline health</small>
+            <b>
+              <Count to={68} d="1.9s" />
+            </b>
+            <span className="tw-band is-watch">Watch · 2 drifting</span>
+          </div>
+        </div>
+      </div>
+    </Win>
+  );
+}
+
+/* --- Engagement timeline -------------------------------------------------------------- */
+
+export function EngagementPanel() {
+  const touches = [
+    ["Email", "Intro, from their profile", "Day 1"],
+    ["WhatsApp", "Role pack after opt-in", "Day 2"],
+    ["Email", "Interview reminder", "Day 6"],
+    ["WhatsApp", "Feedback within the week", "Day 9"],
+    ["Alert", "Drifting · recruiter re-engages", "Day 11"],
+  ];
+  return (
+    <Win title="Engagement · every stage">
+      <ol className="tw-touch">
+        {touches.map(([ch, t, day], i) => (
+          <li key={t} className={cx("tw-in", ch === "Alert" && "is-alert")} style={v({ "--d": `${0.3 + i * 0.3}s` })}>
+            <span className="tw-ch">{ch}</span>
+            <span>{t}</span>
+            <small>{day}</small>
+          </li>
+        ))}
+      </ol>
     </Win>
   );
 }
@@ -502,9 +611,12 @@ export function HumanPanel() {
 export const MODULE_WIDGET: Record<string, () => React.JSX.Element> = {
   search: SearchPanel,
   timing: TimingPanel,
+  intent: IntentPanel,
   calibration: CalibrationPanel,
   screening: ScreeningPanel,
   outreach: CampaignPanel,
+  followups: EngagementPanel,
+  gaps: GapChat,
   managers: InterviewKit,
   calls: CallCheckPanel,
   authenticity: AuthenticityPanel,

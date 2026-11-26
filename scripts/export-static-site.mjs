@@ -84,6 +84,9 @@ fs.rmSync(path.join(app, "(site)/README.md"), { force: true });
 fs.mkdirSync(path.join(app, "(site)/home"));
 fs.renameSync(path.join(app, "(site)/page.tsx"), path.join(app, "(site)/home/page.tsx"));
 
+// Meet Buddy (the spoken intake) exists only in the Buddy editions.
+if (!EDITION) fs.rmSync(path.join(app, "(site)/(main)/buddy"), { recursive: true, force: true });
+
 // The employer-only copy has no entry choice and no candidate pages.
 if (MONO) {
   // The Talyn editions keep everything on the homepage: no long-form pages either.
@@ -212,7 +215,9 @@ for (const file of walk(work).filter((f) => /\/(app|components|lib)\//.test(f) &
     .replace(/from "next\/link";/g, 'from "@/lib/demo/link";')
     .replace(/from "next\/image";/g, 'from "@/lib/demo/image";')
     // Brand files, whether written as an attribute or a string (lib/contour/variant.ts).
-    .replace(/(["'])\/brand\//g, "$1brand/");
+    .replace(/(["'])\/brand\//g, "$1brand/")
+    // Buddy's recorded voice (the Meet Buddy page).
+    .replace(/(["'])\/buddy-voice\//g, "$1buddy-voice/");
   if (s !== before) fs.writeFileSync(file, s);
 }
 
@@ -321,7 +326,8 @@ const logos = {
   mono: ["brand/talynt-tagline-mono.svg", "brand/talynt-primary-mono.svg"],
   cream: ["brand/talynt-tagline-dark.svg", "brand/talynt-primary-light.svg"],
 }[VARIANT];
-for (const asset of ["icon.svg", ...logos]) {
+const voice = EDITION ? fs.readdirSync(path.join(out, "buddy-voice")).map((f) => `buddy-voice/${f}`) : [];
+for (const asset of ["icon.svg", ...logos, ...voice]) {
   const target = path.join(dist, asset);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.copyFileSync(path.join(out, asset), target);
@@ -334,7 +340,7 @@ fs.writeFileSync(path.join(dist, "index.html"), `<title>TALYNT LABS — Talent i
 <meta name="description" content="TALYNT LABS combines deep talent sourcing, human conversations and intelligent technology to help companies make better hiring decisions.">
 <meta http-equiv="refresh" content="0; url=${HOME}">
 <style>
-  :root { ${{ "": "--bg: #fafaf7; --ink: #202321; --mute: #5f6560; --green: #257461;", mono: "--bg: #0a0a0a; --ink: #f5f5f2; --mute: #9b9b96; --green: #c8f04a;", cream: "--bg: #f4eee3; --ink: #0f1a40; --mute: #586083; --green: #2341c4;" }[VARIANT]} }
+  :root { ${EDITION ? "--bg: #f4f3ee; --ink: #0d0d0d; --mute: #5c5c56; --green: #3f5a00;" : { "": "--bg: #fafaf7; --ink: #202321; --mute: #5f6560; --green: #257461;", mono: "--bg: #0a0a0a; --ink: #f5f5f2; --mute: #9b9b96; --green: #c8f04a;", cream: "--bg: #f4eee3; --ink: #0f1a40; --mute: #586083; --green: #2341c4;" }[VARIANT]} }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) { --bg: #121413; --ink: #ecefea; --mute: #9aa19a; --green: ${{ "": "#5fc2a2", mono: "#d4f24c", cream: "#ff8a5c" }[VARIANT]}; }
   }

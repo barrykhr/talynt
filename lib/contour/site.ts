@@ -33,6 +33,7 @@ export const ROUTES = {
   contact: to("/contact"),
   enquiry: to("/contact#enquiry"),
   about: to("/about"),
+  buddy: to("/buddy"),
   howWeEvaluate: to("/candidates/how-we-evaluate"),
   privacy: to("/privacy"),
   terms: to("/terms"),

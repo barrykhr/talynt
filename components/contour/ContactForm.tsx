@@ -23,13 +23,14 @@ type Status = "idle" | "sending" | "sent" | "fallback" | "error";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-export function ContactForm({ idPrefix = "enquiry" }: { idPrefix?: string }) {
+export function ContactForm({ idPrefix = "enquiry", initial }: { idPrefix?: string; initial?: Partial<Record<Field, string>> }) {
   const [values, setValues] = useState<Record<Field, string>>({
     name: "",
     email: "",
     company: "",
     hiringFor: "",
     message: "",
+    ...initial,
   });
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [status, setStatus] = useState<Status>("idle");

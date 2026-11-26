@@ -53,3 +53,11 @@ export const TALYN_EDITION = EDITION !== "none";
 export const VOICE_AGENT_ID = /^[A-Za-z0-9_-]{8,80}$/.test(process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID ?? "")
   ? (process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID as string)
   : null;
+
+/**
+ * The Buddy editions are drawn in the bright palette of the Buddy ads: an
+ * off-white page, black type and lime accents (.ct-bright, contour.css, on top
+ * of the mono tokens).
+ */
+export const BRIGHT = TALYN_EDITION;
+export const THEME_COLOR_BRIGHT = "#f4f3ee";

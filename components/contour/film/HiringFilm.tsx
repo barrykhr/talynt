@@ -88,8 +88,8 @@ type FilmScreens = {
   pipeline: { stages: readonly string[]; nudges: readonly string[] };
   decide: { header: string; review: string };
 };
-const Screens = createContext<{ f: FilmScreens; buddy: boolean }>({ f: FILM, buddy: false });
-const useScreens = () => useContext(Screens).f;
+const Screens = createContext<FilmScreens>(FILM);
+const useScreens = () => useContext(Screens);
 
 /* --- The screens on the laptop -------------------------------------------- */
 
@@ -340,7 +340,7 @@ const SCREENS = [ScreenBrief, ScreenSearch, ScreenRelevant, ScreenOutreach, Scre
 /* --- The phone, for WhatsApp and the calendar ------------------------------ */
 
 function Phone({ active }: { active: number }) {
-  const { f, buddy } = useContext(Screens);
+  const f = useScreens();
   const o = f.outreach;
   const n = f.nurture;
   return (
@@ -348,7 +348,7 @@ function Phone({ active }: { active: number }) {
       <div className="ct-phone-screen">
         <div className="fp-head">
           <span className="fp-avatar">
-            {buddy ? <Glyph name="chat" className="h-[1.1em] w-[1.1em]" /> : <WhatsAppIcon className="h-[1.1em] w-[1.1em]" />}
+            <WhatsAppIcon className="h-[1.1em] w-[1.1em]" />
           </span>
           <span>
             <b>{o.chat}</b>
@@ -440,7 +440,7 @@ export function HiringFilm({ talyn = false }: { talyn?: boolean } = {}) {
   );
 
   return (
-    <Screens.Provider value={talyn ? { f: BUDDY_FILM_SCREENS, buddy: true } : { f: FILM, buddy: false }}>
+    <Screens.Provider value={talyn ? BUDDY_FILM_SCREENS : FILM}>
     <section ref={ref} id="film" aria-labelledby="film-heading" className="ct-film" style={{ height: `calc(${N} * 100svh)` }}>
       {FILM.scenes.map((s, i) => (
         <span key={s.id} aria-hidden="true" className="ct-film-snap" style={{ top: `calc(${i} * 100svh)` }} />

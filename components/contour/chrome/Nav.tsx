@@ -20,7 +20,7 @@ import { cx } from "@/lib/utils";
  */
 const LINKS: Record<Audience, Array<{ label: string; href: string }>> = {
   employer: TALYN_EDITION
-    ? TALYN_NAV.map((l) => ({ label: l.label, href: `${ROUTES.employers}#${l.hash}` }))
+    ? TALYN_NAV.map((l) => ({ label: l.label, href: "page" in l ? ROUTES.buddy : `${ROUTES.employers}#${l.hash}` }))
     : [
     { label: "How it works", href: `${ROUTES.employers}#how-we-work` },
     { label: "Evaluation", href: `${ROUTES.employers}#evaluation` },

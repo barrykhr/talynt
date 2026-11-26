@@ -1190,3 +1190,129 @@ html:has(.ct-cream) body {
     text-align: left !important;
   }
 }
+
+/* --- Bright: the Buddy editions (off-white, black type, lime accents) ------ */
+/* Layered on the mono tokens (.ct-mono.ct-bright), in the look of the Buddy
+   ads. Lime fills buttons, chips and highlights; it is never text on white —
+   accent text uses a deep lime that keeps its contrast. */
+
+.ct.ct-mono.ct-bright,
+.ct-mono.ct-bright .ct-tint {
+  --ct-bg: #f4f3ee;
+  --ct-bg-2: #ecebe4;
+  --ct-bg-3: #e3e1d8;
+  --ct-surface: #ffffff;
+
+  --ct-ink: #0d0d0d;
+  --ct-ink-2: #33332f;
+  --ct-mute: #5c5c56;
+  --ct-faint: #85857e;
+
+  --ct-line: #e0ded5;
+  --ct-line-2: #cdcac0;
+
+  --ct-green: #3f5a00;
+  --ct-green-deep: #2f4400;
+  --ct-green-wash: #eef8cf;
+  --ct-violet: #85857e;
+  --ct-violet-ink: #33332f;
+  --ct-violet-wash: #ecebe4;
+  --ct-lime: #c8f04a;
+  --ct-lime-soft: #eef8cf;
+  --ct-signal: #c8f04a;
+
+  --ct-glow: 200 240 74;
+  --ct-texture: rgb(0 0 0 / 0.035);
+  --ct-btn: #c8f04a;
+  --ct-btn-ink: #0d0d0d;
+  --ct-btn-hover: #0d0d0d;
+  --ct-btn-hover-ink: #c8f04a;
+  --ct-lead: #3f5a00;
+  --ct-link: #3f5a00;
+  --ct-card: #ffffff;
+  --ct-card-bar: #f7f6f1;
+  --ct-card-line: #e0ded5;
+  --ct-shadow: 0 30px 70px -38px rgb(0 0 0 / 0.28), 0 2px 0 rgb(0 0 0 / 0.03);
+  --ct-dot: rgb(0 0 0 / 0.08);
+
+  color: var(--ct-ink);
+  color-scheme: light;
+}
+
+.ct-mono.ct-bright .ct-tint {
+  background-color: #ecebe4;
+  --ct-bg: #ecebe4;
+  --ct-surface: #ffffff;
+}
+
+/* The single-colour lockups stay black on the bright page. */
+.ct-mono.ct-bright img[src*="talynt-"] {
+  filter: none;
+}
+
+html:has(.ct-bright),
+html:has(.ct-bright) body {
+  background-color: #f4f3ee;
+  color-scheme: light;
+}
+
+.ct-bright header > .backdrop-blur-md {
+  background-color: rgb(244 243 238 / 0.94);
+}
+
+/* Highlighted words: black on a lime highlighter stroke. */
+.ct-mono.ct-bright .ct-mark {
+  color: var(--ct-ink);
+  background-image: linear-gradient(transparent 58%, #c8f04a 58%, #c8f04a 92%, transparent 92%);
+}
+
+/* Buttons as in the ads: lime pills, outlined in black, with a hard shadow. */
+.ct-bright .ct-btn-primary {
+  --ct-bc: #0d0d0d;
+  border-width: 2px;
+  box-shadow: 3px 3px 0 #0d0d0d;
+}
+
+.ct-bright .ct-btn-primary:hover {
+  box-shadow: 1px 1px 0 #0d0d0d;
+  transform: translate(2px, 2px);
+}
+
+.ct-bright .ct-btn-secondary {
+  --ct-bc: #0d0d0d;
+  background-color: #ffffff;
+}
+
+/* Warnings and errors in shades that read on white. */
+.ct-bright .tw-warn,
+.ct-bright .tw-band.is-watch {
+  color: #9a5400;
+}
+
+.ct-bright .ct-error {
+  color: #b42318;
+}
+
+.ct-bright .ct-input[aria-invalid="true"],
+.ct-bright .ct-textarea[aria-invalid="true"] {
+  --ct-bc: #b42318;
+}
+
+/* Lime used as text or as a thin line elsewhere turns deep lime on white. */
+.ct-bright .tw-ok,
+.ct-bright .tw-ring-in small,
+.ct-bright .tw-gauge .tw-strong,
+.ct-bright .tw-band.is-good,
+.ct-bright .tl-grades b,
+.ct-bright .tl-agent-handoff span,
+.ct-bright .tl-pop-launch b,
+.ct-bright .tl-pop-ask,
+.ct-bright .fs-reason .ct-glyph,
+.ct-bright .fs-step-check {
+  color: var(--ct-green);
+}
+
+.ct-bright .tl-pop-card,
+.ct-bright .tl-pop-launch {
+  border-color: #0d0d0d;
+}

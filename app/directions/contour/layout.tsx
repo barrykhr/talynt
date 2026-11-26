@@ -5,7 +5,7 @@ import "./motion.css";
 import "./film.css";
 import "./talyn.css";
 import { MotionProvider } from "@/components/contour/MotionProvider";
-import { MOTION, THEME_COLOR, VARIANT } from "@/lib/contour/variant";
+import { BRIGHT, MOTION, THEME_COLOR, THEME_COLOR_BRIGHT, VARIANT } from "@/lib/contour/variant";
 
 /**
  * DIRECTION C — "CONTOUR"
@@ -46,12 +46,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: THEME_COLOR,
+  themeColor: BRIGHT ? THEME_COLOR_BRIGHT : THEME_COLOR,
 };
 
 export default function ContourLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className={`ct ${MOTION ? `ct-v ct-${VARIANT} ct-motion ` : ""}${serif.variable}`}>
+    <div className={`ct ${MOTION ? `ct-v ct-${VARIANT} ct-motion ` : ""}${BRIGHT ? "ct-bright " : ""}${serif.variable}`}>
       <MotionProvider>{children}</MotionProvider>
     </div>
   );

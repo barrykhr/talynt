@@ -1,6 +1,6 @@
 import { TAGLINE } from "@/lib/contour/content";
 import { TALYN } from "@/lib/contour/talyn";
-import { EMAIL } from "@/lib/contour/site";
+import { EMAIL, ROUTES } from "@/lib/contour/site";
 import { ButtonLink, Eyebrow, Headline, SectionHead } from "@/components/contour/ui";
 import { ContactForm } from "@/components/contour/ContactForm";
 import { Play } from "./Play";
@@ -99,7 +99,7 @@ export function TalynMeet({ index }: { index: string }) {
             ))}
           </ul>
           <div className="mt-10 flex flex-wrap items-center gap-3">
-            <ButtonLink href="#enquiry">{m.primary}</ButtonLink>
+            <ButtonLink href={ROUTES.buddy}>{m.primary}</ButtonLink>
             <AskTalynButton>{m.secondary}</AskTalynButton>
           </div>
         </div>
@@ -259,6 +259,21 @@ export function TalynCapabilities({ index, tour = false }: { index: string; tour
                               </li>
                             ))}
                         </ul>
+                      )}
+                      {"signals" in m && (
+                        <div className="tl-health mt-5">
+                          <p className="ct-meta ct-mute">Health bands</p>
+                          <ul>
+                            {m.health.bands.map((b) => (
+                              <li key={b.band}>
+                                <b>{b.band}</b> {b.range}
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="ct-small mt-3">
+                            Candidate health: {m.health.candidate.join(" · ")}. Pipeline health: {m.health.pipeline.join(" · ")}.
+                          </p>
+                        </div>
                       )}
                     </div>
                     <Play className={cx("lg:col-span-7", flip && "lg:order-1")}>

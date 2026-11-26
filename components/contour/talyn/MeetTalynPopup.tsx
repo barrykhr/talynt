@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { TALYN } from "@/lib/contour/talyn";
+import { ROUTES } from "@/lib/contour/site";
 import { VOICE_AGENT_ID } from "@/lib/contour/variant";
 import { cx } from "@/lib/utils";
 import { TalynOrb } from "./TalynOrb";
@@ -156,7 +157,7 @@ export function MeetTalynPopup() {
                 →
               </span>
             </a>
-            <a href="#meet-buddy" className="ct-btn ct-btn-secondary" onClick={() => setOpen(false)}>
+            <a href={ROUTES.buddy} className="ct-btn ct-btn-secondary">
               {p.secondary}
             </a>
           </div>
