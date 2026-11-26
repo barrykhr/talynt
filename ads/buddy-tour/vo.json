@@ -1,0 +1,136 @@
+{
+  "voice": "af_heart",
+  "speed": 1.1,
+  "lines": [
+    {
+      "at": 0.3,
+      "text": "Got a hiring problem?",
+      "say": "Got a hiring problem?"
+    },
+    {
+      "at": 2.25,
+      "text": "Meet Buddy, the AI hiring agent by TALYNT LABS.",
+      "say": "Meet Buddy, the A.I. hiring agent by Talent Labs."
+    },
+    {
+      "at": 6.25,
+      "text": "Role insights turn your JD into skills, criteria, and a ready search.",
+      "say": "Role insights turn your J.D. into skills, criteria, and a ready search."
+    },
+    {
+      "at": 11.75,
+      "text": "Mark the must-haves. Nobody is hidden.",
+      "say": "Mark the must-haves. Nobody is hidden."
+    },
+    {
+      "at": 14.75,
+      "text": "Your hiring manager reacts to real profiles, and Buddy sharpens the criteria.",
+      "say": "Your hiring manager reacts to real profiles, and Buddy sharpens the criteria."
+    },
+    {
+      "at": 20.25,
+      "text": "Buddy remembers what each hiring manager wanted.",
+      "say": "Buddy remembers what each hiring manager wanted."
+    },
+    {
+      "at": 23.75,
+      "text": "Search your talent pool in plain English.",
+      "say": "Search your talent pool in plain English."
+    },
+    {
+      "at": 26.75,
+      "text": "Find similar companies to source from.",
+      "say": "Find similar companies to source from."
+    },
+    {
+      "at": 29.75,
+      "text": "Buddy looks for new people every day.",
+      "say": "Buddy looks for new people every day."
+    },
+    {
+      "at": 32.25,
+      "text": "And brings back people who nearly made it.",
+      "say": "And brings back people who nearly made it."
+    },
+    {
+      "at": 35.25,
+      "text": "Hire for timing. Know when it's a good moment to reach out.",
+      "say": "Hire for timing. Know when it's a good moment to reach out."
+    },
+    {
+      "at": 39.25,
+      "text": "Every criterion is checked against the CV, with a quote.",
+      "say": "Every criterion is checked against the C.V., with a quote."
+    },
+    {
+      "at": 43.25,
+      "text": "Review one candidate at a time.",
+      "say": "Review one candidate at a time."
+    },
+    {
+      "at": 45.75,
+      "text": "Personal drafts from real profile facts. You approve every one.",
+      "say": "Personal drafts from real profile facts. You approve every one."
+    },
+    {
+      "at": 50.25,
+      "text": "Candidates say yes in one click.",
+      "say": "Candidates say yes in one click."
+    },
+    {
+      "at": 52.75,
+      "text": "And pick their own interview slot.",
+      "say": "And pick their own interview slot."
+    },
+    {
+      "at": 55.25,
+      "text": "An interview kit, mapped to the JD and each candidate's gaps.",
+      "say": "An interview kit, mapped to the J.D. and each candidate's gaps."
+    },
+    {
+      "at": 59.75,
+      "text": "Behavioural deep-dives, with follow-ups and a benchmark.",
+      "say": "Behavioural deep-dives, with follow-ups and a benchmark."
+    },
+    {
+      "at": 63.75,
+      "text": "Buddy checks every interview call against the JD, both ways.",
+      "say": "Buddy checks every interview call against the J.D., both ways."
+    },
+    {
+      "at": 68.25,
+      "text": "And flags questions that touch protected topics.",
+      "say": "And flags questions that touch protected topics."
+    },
+    {
+      "at": 71.75,
+      "text": "See how each hiring manager really interviews.",
+      "say": "See how each hiring manager really interviews."
+    },
+    {
+      "at": 75.25,
+      "text": "Integrity checks flag what a person should look at.",
+      "say": "Integrity checks flag what a person should look at."
+    },
+    {
+      "at": 78.75,
+      "text": "Hiring managers review the shortlist, with the evidence.",
+      "say": "Hiring managers review the shortlist, with the evidence."
+    },
+    {
+      "at": 82.75,
+      "text": "And one inbox for everything that needs you.",
+      "say": "And one inbox for everything that needs you."
+    },
+    {
+      "at": 85.75,
+      "text": "Buddy finds. Buddy checks. People decide.",
+      "say": "Buddy finds. Buddy checks. People decide."
+    },
+    {
+      "at": 89.25,
+      "text": "TALYNT LABS. Book a demo.",
+      "say": "Talent Labs. Book a demo."
+    }
+  ]
+}
