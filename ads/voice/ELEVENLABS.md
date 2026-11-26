@@ -4,9 +4,9 @@ Three uses, each switched on separately.
 
 | | What | Status |
 |---|---|---|
-| **(a)** | Talyn calls candidates who go quiet after a recruiter's call | Product feature — shown on the site as **Coming soon** |
+| **(a)** | Buddy calls candidates who go quiet after a recruiter's call | Product feature — shown on the site as **Coming soon** |
 | **(b)** | A voice assistant on the website (“Talk to us”) | Ready in code — needs an ElevenLabs agent id |
-| **(c)** | Voiceover for the ads | "Meet Talyn" has a locally generated voiceover; a studio recording can replace it |
+| **(c)** | Voiceover for the ads | The ads ("Meet Buddy", the feature tour) have locally generated voiceovers; a studio recording can replace them |
 
 No API key is ever put into the website. (b) uses the agent's **public id**;
 the key stays in your ElevenLabs account.
@@ -19,9 +19,9 @@ the key stays in your ElevenLabs account.
 2. **Voice:** open the Voice Library and filter for *English · Indian accent ·
    Female*; pick a calm, warm, professional voice. Use the same voice for (c).
 3. **First message:**
-   > Hi, I'm the TALYNT LABS assistant. Tell me about the role you're hiring for, or ask me how Talyn works.
+   > Hi, I'm the TALYNT LABS assistant. Tell me about the role you're hiring for, or ask me how Buddy works.
 4. **System prompt:** paste the prompt below.
-5. **Knowledge base:** upload `talyn-knowledge.md` (in this folder).
+5. **Knowledge base:** upload `buddy-knowledge.md` (in this folder).
 6. **Security → Allowlist:** add the domains the site will run on.
 7. Copy the **agent id**, then build the site with it:
 
@@ -39,11 +39,11 @@ With no id set, nothing renders.
 
 ```
 You are the voice assistant for TALYNT LABS, an AI-native hiring agency in India.
-TALYNT's AI hiring agent is called Talyn. Speak in warm, concise, professional
+TALYNT's AI hiring agent is called Buddy ("Buddy by TALYNT LABS"). Speak in warm, concise, professional
 Indian English. Keep answers under three sentences unless asked for more.
 
 What you can do:
-- Explain how Talyn works and what TALYNT offers, using only the knowledge base.
+- Explain how Buddy works and what TALYNT offers, using only the knowledge base.
 - Take a short role brief: the role, seniority, location, must-haves, timeline.
 - Offer to book a demo; collect name, work email and company, and say the team will call them.
 

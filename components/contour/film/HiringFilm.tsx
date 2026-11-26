@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { EMPLOYER_HERO, FILM } from "@/lib/contour/proposed";
-import { TALYN } from "@/lib/contour/talyn";
+import { BUDDY_FILM_SCREENS, TALYN } from "@/lib/contour/talyn";
 import { HUMAN_AI, PROBLEM } from "@/lib/contour/content";
 import { ROUTES } from "@/lib/contour/site";
 import { useCalm } from "@/lib/contour/motion";
@@ -75,10 +75,26 @@ function Glyph({ name, className }: { name: "mail" | "chat" | "call" | "doc" | "
 const CHANNEL: Record<string, "mail" | "chat" | "call"> = { WhatsApp: "chat", Email: "mail", Call: "call" };
 const v = (o: Record<string, string | number>) => o as CSSProperties;
 
+/**
+ * What the laptop and phone show: the original film's screens (FILM), or the
+ * Buddy edition's (BUDDY_FILM_SCREENS). Same screens, same motion.
+ */
+type FilmScreens = {
+  brief: { app: string; nav: readonly string[]; eyebrow: string; role: string; meta: string; needs: readonly string[]; button: string; busy: string };
+  sources: readonly string[];
+  shortlist: { header: string; people: readonly { initials: string; line: string; reasons: readonly string[] }[] };
+  outreach: { compose: string; to: string; subject: string; lines: readonly string[]; send: string; sent: string; chat: string; channel: string; out: string; reply: string };
+  nurture: { who: string; warmth: string; warm: string; steps: readonly { channel: string; text: string }[]; invite: string; when: string; accepted: string };
+  pipeline: { stages: readonly string[]; nudges: readonly string[] };
+  decide: { header: string; review: string };
+};
+const Screens = createContext<{ f: FilmScreens; buddy: boolean }>({ f: FILM, buddy: false });
+const useScreens = () => useContext(Screens).f;
+
 /* --- The screens on the laptop -------------------------------------------- */
 
 function ScreenBrief() {
-  const b = FILM.brief;
+  const b = useScreens().brief;
   return (
     <div className="fs-app">
       <div className="fs-side">
@@ -124,6 +140,7 @@ const RING = FILM.sources.map((_, i) => {
 });
 
 function ScreenSearch() {
+  const F = useScreens();
   return (
     <div className="fs-search">
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="fs-lines" aria-hidden="true">
@@ -142,7 +159,7 @@ function ScreenSearch() {
           ))}
         </span>
       ))}
-      {FILM.sources.map((s, i) => (
+      {F.sources.map((s, i) => (
         <span key={s} className="fs-source fs-in" style={v({ left: `${RING[i].x}%`, top: `${RING[i].y}%`, "--d": `${0.1 + i * 0.15}s` })}>
           <span className="fs-source-dot" />
           {s}
@@ -163,6 +180,7 @@ function ScreenSearch() {
 }
 
 function ScreenRelevant() {
+  const F = useScreens();
   return (
     <div className="fs-relevant">
       <div className="fs-noise">
@@ -171,10 +189,10 @@ function ScreenRelevant() {
         ))}
       </div>
       <p className="fs-eyebrow fs-in" style={v({ "--d": "0.6s" })}>
-        {FILM.shortlist.header}
+        {F.shortlist.header}
       </p>
       <div className="fs-cards">
-        {FILM.shortlist.people.map((p, i) => (
+        {F.shortlist.people.map((p, i) => (
           <div key={p.initials} className="fs-card fs-rise" style={v({ "--d": `${0.75 + i * 0.15}s` })}>
             <span className="fs-avatar">{p.initials}</span>
             <span className="fs-card-line">{p.line}</span>
@@ -192,7 +210,7 @@ function ScreenRelevant() {
 }
 
 function ScreenOutreach() {
-  const o = FILM.outreach;
+  const o = useScreens().outreach;
   return (
     <div className="fs-mail">
       <p className="fs-eyebrow">
@@ -222,7 +240,7 @@ function ScreenOutreach() {
 }
 
 function ScreenNurture() {
-  const n = FILM.nurture;
+  const n = useScreens().nurture;
   return (
     <div className="fs-nurture">
       <div className="fs-person">
@@ -254,7 +272,7 @@ function ScreenNurture() {
 }
 
 function ScreenFollowUp() {
-  const p = FILM.pipeline;
+  const p = useScreens().pipeline;
   // Three candidates each move one stage on while the screen is watched.
   const cards = [
     { col: 1, initials: "AK", d: "0.7s" },
@@ -297,19 +315,20 @@ function ScreenFollowUp() {
 }
 
 function ScreenDecide() {
+  const F = useScreens();
   return (
     <div className="fs-decide">
       <p className="fs-eyebrow fs-in" style={v({ "--d": "0.1s" })}>
-        <Glyph name="check" /> {FILM.decide.header}
+        <Glyph name="check" /> {F.decide.header}
       </p>
-      {FILM.shortlist.people.map((p, i) => (
+      {F.shortlist.people.map((p, i) => (
         <div key={p.initials} className="fs-row fs-in" style={v({ "--d": `${0.3 + i * 0.18}s` })}>
           <span className="fs-avatar fs-avatar-s">{p.initials}</span>
           <span className="fs-row-text">
             <b>{p.line}</b>
             <span>{p.reasons.join(" · ")}</span>
           </span>
-          <span className="fs-review">{FILM.decide.review}</span>
+          <span className="fs-review">{F.decide.review}</span>
         </div>
       ))}
     </div>
@@ -321,14 +340,15 @@ const SCREENS = [ScreenBrief, ScreenSearch, ScreenRelevant, ScreenOutreach, Scre
 /* --- The phone, for WhatsApp and the calendar ------------------------------ */
 
 function Phone({ active }: { active: number }) {
-  const o = FILM.outreach;
-  const n = FILM.nurture;
+  const { f, buddy } = useContext(Screens);
+  const o = f.outreach;
+  const n = f.nurture;
   return (
     <div className="ct-phone" data-on={active === 3 || active === 4 ? "true" : "false"}>
       <div className="ct-phone-screen">
         <div className="fp-head">
           <span className="fp-avatar">
-            <WhatsAppIcon className="h-[1.1em] w-[1.1em]" />
+            {buddy ? <Glyph name="chat" className="h-[1.1em] w-[1.1em]" /> : <WhatsAppIcon className="h-[1.1em] w-[1.1em]" />}
           </span>
           <span>
             <b>{o.chat}</b>
@@ -368,7 +388,7 @@ function Phone({ active }: { active: number }) {
 
 type Card = { id: string; tag: string; title: string; titleItalic: string; body: string; primary?: string; secondary?: string };
 
-/** The scene cards: the original film's words, or the Talyn edition's. */
+/** The scene cards: the original film's words, or the Buddy edition's. */
 function cardsFor(talyn: boolean): Card[] {
   if (talyn) return FILM.scenes.map((s, i) => ({ id: s.id, ...TALYN.film[i] }));
   return FILM.scenes.map((s, i) => ({
@@ -420,6 +440,7 @@ export function HiringFilm({ talyn = false }: { talyn?: boolean } = {}) {
   );
 
   return (
+    <Screens.Provider value={talyn ? { f: BUDDY_FILM_SCREENS, buddy: true } : { f: FILM, buddy: false }}>
     <section ref={ref} id="film" aria-labelledby="film-heading" className="ct-film" style={{ height: `calc(${N} * 100svh)` }}>
       {FILM.scenes.map((s, i) => (
         <span key={s.id} aria-hidden="true" className="ct-film-snap" style={{ top: `calc(${i} * 100svh)` }} />
@@ -477,7 +498,7 @@ export function HiringFilm({ talyn = false }: { talyn?: boolean } = {}) {
                       <i />
                     </span>
                     <span>
-                      {FILM.brief.app} <span className="fs-illus lg:hidden">· Illustrative</span>
+                      {(talyn ? BUDDY_FILM_SCREENS : FILM).brief.app} <span className="fs-illus lg:hidden">· Illustrative</span>
                     </span>
                     <span className="fs-step">
                       {String(active + 1).padStart(2, "0")} / {String(N).padStart(2, "0")}
@@ -517,5 +538,6 @@ export function HiringFilm({ talyn = false }: { talyn?: boolean } = {}) {
         </p>
       </div>
     </section>
+    </Screens.Provider>
   );
 }

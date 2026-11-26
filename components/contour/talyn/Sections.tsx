@@ -12,9 +12,9 @@ import { AskTalynButton } from "./MeetTalynPopup";
 import { TalynOrb } from "./TalynOrb";
 
 /**
- * The Talyn editions' homepage sections. Both editions use these; the film
+ * The Buddy editions' homepage sections. Both editions use these; the film
  * edition opens with the scroll-flipped film, the product edition with the
- * Talyn console and the seven-step strip.
+ * Buddy console and the seven-step strip.
  */
 
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -79,12 +79,12 @@ export function TalynProblem({ index }: { index: string }) {
   );
 }
 
-/* --- Meet Talyn: the agent that hires for intent ------------------------------------ */
+/* --- Meet Buddy: the AI hiring agent ------------------------------------ */
 
 export function TalynMeet({ index }: { index: string }) {
   const m = TALYN.meet;
   return (
-    <section id="meet-talyn" aria-labelledby="meet-heading" className="ct-section tl-meet">
+    <section id="meet-buddy" aria-labelledby="meet-heading" className="ct-section tl-meet">
       <div className="ct-wrap grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-12">
         <div className="lg:col-span-6">
           <SectionHead index={index} eyebrow={m.eyebrow} id="meet-heading" lead={m.title} turn={m.titleItalic} lede={m.lede} size="l" />
@@ -108,7 +108,7 @@ export function TalynMeet({ index }: { index: string }) {
             <div className="tl-agent">
               <div className="tl-agent-core">
                 <TalynOrb size="lg" />
-                <p className="tl-agent-name">Talyn</p>
+                <p className="tl-agent-name">Buddy</p>
                 <p className="ct-meta">AI hiring agent · TALYNT LABS</p>
               </div>
               <p className="tl-agent-status">
@@ -136,7 +136,7 @@ export function TalynMeet({ index }: { index: string }) {
   );
 }
 
-/* --- How Talyn works: seven steps (product edition) ---------------------------------- */
+/* --- How Buddy works: seven steps (product edition) ---------------------------------- */
 
 export function TalynHow({ index }: { index: string }) {
   const h = TALYN.how;
@@ -160,7 +160,7 @@ export function TalynHow({ index }: { index: string }) {
   );
 }
 
-/* --- Talyn Insights ----------------------------------------------------------------------- */
+/* --- Buddy Insights ----------------------------------------------------------------------- */
 
 export function TalynInsights({ index }: { index: string }) {
   const s = TALYN.insights;
@@ -259,22 +259,6 @@ export function TalynCapabilities({ index, tour = false }: { index: string; tour
                               </li>
                             ))}
                         </ul>
-                      )}
-                      {"signals" in m && (
-                        <div className="tl-health mt-5">
-                          <p className="ct-meta ct-mute">Health bands</p>
-                          <ul>
-                            {m.health.bands.map((b) => (
-                              <li key={b.band}>
-                                <b>{b.band}</b> {b.range}
-                              </li>
-                            ))}
-                          </ul>
-                          <p className="ct-small mt-3">
-                            Candidate health: {m.health.candidate.join(" · ")}. Pipeline health: {m.health.pipeline.join(" · ")}.
-                          </p>
-                          <p className="ct-small mt-2">Salary benchmarks — {TALYN.soon.toLowerCase()}.</p>
-                        </div>
                       )}
                     </div>
                     <Play className={cx("lg:col-span-7", flip && "lg:order-1")}>

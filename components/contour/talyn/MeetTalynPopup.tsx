@@ -9,7 +9,7 @@ import { TalynOrb } from "./TalynOrb";
 /** Fired by any "Ask Talyn" button on the page to open the pop-up. */
 export const OPEN_TALYN = "talyn:open";
 
-const SEEN = "talyn-popup-seen";
+const SEEN = "buddy-popup-seen";
 const noop = () => () => {};
 const AUTO_AFTER_MS = 6000;
 
@@ -29,7 +29,7 @@ const remember = () => {
 };
 
 /**
- * "Got a hiring problem? Talyn is here to help." A small, non-modal card in the
+ * "Got a hiring problem? Buddy is here to help." A small, non-modal card in the
  * corner of the Talyn editions. It opens by itself once per visit — after a few
  * seconds or once the reader starts scrolling — and folds into a launcher when
  * closed. On phones only the launcher shows until it is tapped. It never covers
@@ -156,7 +156,7 @@ export function MeetTalynPopup() {
                 →
               </span>
             </a>
-            <a href="#meet-talyn" className="ct-btn ct-btn-secondary" onClick={() => setOpen(false)}>
+            <a href="#meet-buddy" className="ct-btn ct-btn-secondary" onClick={() => setOpen(false)}>
               {p.secondary}
             </a>
           </div>

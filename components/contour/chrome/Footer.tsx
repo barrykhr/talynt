@@ -45,7 +45,7 @@ const ALL_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: st
 
 /** The employer-only variant leaves out the candidate pages and the candidate-facing "How we evaluate". */
 const TALYN_COLUMNS = [
-  { title: "Talyn", links: TALYN_NAV.slice(0, 4).map((l) => ({ label: l.label, href: `${ROUTES.employers}#${l.hash}` })) },
+  { title: "Buddy", links: TALYN_NAV.slice(0, 4).map((l) => ({ label: l.label, href: `${ROUTES.employers}#${l.hash}` })) },
   {
     title: "Company",
     links: [
